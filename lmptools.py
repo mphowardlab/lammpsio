@@ -264,6 +264,7 @@ class DumpFile:
         self.filename = filename
         self.schema = schema
         self.mass = mass
+        self._frames = None
 
     @property
     def filename(self):
@@ -316,6 +317,22 @@ class DumpFile:
         if require and len(line) == 0:
             raise OSError('Could not read line from file')
         return line
+
+    def _find_frames(self):
+        self._frames = []
+        with self._open() as f:
+            line = self._readline(f)
+            line_num = 0
+            while len(line) > 0:
+                if self._section['step'] in line:
+                    self._frames.append(line_num)
+                line = self._readline(f)
+                line_num += 1
+
+    def __len__(self):
+        if self._frames is None:
+            self._find_frames()
+        return len(self._frames)
 
     def __iter__(self):
         with self._open() as f:
