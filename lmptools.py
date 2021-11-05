@@ -292,20 +292,27 @@ class DataFile:
             low = [None,None,None]
             high = [None,None,None]
             num_types = None
+            # skip first line
+            _readline(f,True)
             line = _readline(f,True)
             while len(line) > 0:
                 # skip blank lines
                 line = line.rstrip()
-                if len(line) > 0:
+
+                if len(line) == 0:
                     line = _readline(f,True)
                     continue
 
                 # warn that unknown header is being skipped
+                skip_line = False
                 for h in unknown_headers:
                     if h in line:
                         print("Cannot process header '{}', skipping this.".format(h))
-                        line = _readline(f,True)
-                        continue
+                        skip_line = True
+                        break
+                if skip_line:
+                    line = _readline(f,True)
+                    continue
 
                 # reached end of line, break and make snapshot
                 if not any(h in line for h in known_headers):
@@ -326,86 +333,90 @@ class DataFile:
             box = Box(low,high)
             snap = Snapshot(N,box)
 
-        type_mass = None
-        while len(line) > 0:
-            if 'Atoms' in line:
-                # extract style
-                row = line.split()
-                style = row[-1]
-                if style == 'full':
-                    style_cols = 7
-                elif style == 'charge':
-                    style_cols = 6
-                elif style == 'molecular':
-                    style_cols = 6
-                elif style == 'atomic':
-                    style_cols = 5
-                else:
-                    raise ValueError('Unknown atom style')
-
-                # skip blank line
-                _readline(f,True)
-                # read atom coordinates
-                for i in range(snap.N):
-                    row = _readline(f,True).split()
-
-                    # strip out comments
-                    try:
-                        comment = row.index('#')
-                        row = row[:comment]
-                    except ValueError:
-                        pass
-
-                    # check that row is correctly sized and process
-                    if not len(row) in (style_cols,style_cols+3):
-                        raise IOError('Expected number of columns not read for atom style')
-                    idx = int(row[0])-1
+            type_mass = None
+            while len(line) > 0:
+                if 'Atoms' in line:
+                    # extract style
+                    row = line.split()
+                    style = row[-1]
                     if style == 'full':
-                        snap.molecule[idx] = int(row[1])
-                        snap.typeid[idx] = int(row[2])
-                        snap.charge[idx] = float(row[3])
-                        snap.position[idx] = [float(x) for x in row[4:7]]
+                        style_cols = 7
                     elif style == 'charge':
-                        snap.typeid[idx] = int(row[1])
-                        snap.charge[idx] = float(row[2])
-                        snap.position[idx] = [float(x) for x in row[3:6]]
+                        style_cols = 6
                     elif style == 'molecular':
-                        snap.molecule[idx] = int(row[1])
-                        snap.typeid[idx] = int(row[2])
-                        snap.position[idx] = [float(x) for x in row[3:6]]
+                        style_cols = 6
                     elif style == 'atomic':
-                        snap.typeid[idx] = int(row[1])
-                        snap.position[idx] = [float(x) for x in row[2:5]]
+                        style_cols = 5
+                    else:
+                        raise ValueError('Unknown atom style')
 
-                    # optionally process image
-                    if len(row) == style_cols+3:
-                        snap.image[idx] = [int(x) for x in row[-3:]]
-            elif 'Velocities' in line:
-                # skip blank line
-                _readline(f,True)
-                # read atom velocities
-                for i in range(snap.N):
-                    row = _readline(f,True).split()
-                    idx = int(row[0])-1
-                    snap.velocity[idx] = [float(x) for x in row[1:4]]
-            elif 'Masses' in line:
-                # skip blank line
-                _readline(f,True)
-                # read type masses
-                type_mass = {}
-                for i in range(num_types):
-                    row = _readline(f,True).split()
-                    type_mass[int(row[0])] = float(row[1])
-            else:
-                # silently ignore unknown sections / lines
-                pass
+                    # skip blank line
+                    _readline(f,True)
+                    # read atom coordinates
+                    for i in range(snap.N):
+                        row = _readline(f,True).split()
 
-            line = _readline(f,True)
+                        # strip out comments
+                        try:
+                            comment = row.index('#')
+                            row = row[:comment]
+                        except ValueError:
+                            pass
 
-        # set mass on particles afterwards, in case sections are out of order in file
-        if type_mass is not None:
-            for typeid,m in type_mass.items():
-                snap.mass[snap.typeid == typeid] = m
+                        # check that row is correctly sized and process
+                        if not len(row) in (style_cols,style_cols+3):
+                            raise IOError('Expected number of columns not read for atom style')
+                        idx = int(row[0])-1
+                        if style == 'full':
+                            snap.molecule[idx] = int(row[1])
+                            snap.typeid[idx] = int(row[2])
+                            snap.charge[idx] = float(row[3])
+                            snap.position[idx] = [float(x) for x in row[4:7]]
+                        elif style == 'charge':
+                            snap.typeid[idx] = int(row[1])
+                            snap.charge[idx] = float(row[2])
+                            snap.position[idx] = [float(x) for x in row[3:6]]
+                        elif style == 'molecular':
+                            snap.molecule[idx] = int(row[1])
+                            snap.typeid[idx] = int(row[2])
+                            snap.position[idx] = [float(x) for x in row[3:6]]
+                        elif style == 'atomic':
+                            snap.typeid[idx] = int(row[1])
+                            snap.position[idx] = [float(x) for x in row[2:5]]
+
+                        # optionally process image
+                        if len(row) == style_cols+3:
+                            snap.image[idx] = [int(x) for x in row[-3:]]
+
+                    # sanity check types
+                    if any(np.logical_or(snap.typeid < 1, snap.typeid > num_types)):
+                        raise ValueError('Invalid type id')
+                elif 'Velocities' in line:
+                    # skip blank line
+                    _readline(f,True)
+                    # read atom velocities
+                    for i in range(snap.N):
+                        row = _readline(f,True).split()
+                        idx = int(row[0])-1
+                        snap.velocity[idx] = [float(x) for x in row[1:4]]
+                elif 'Masses' in line:
+                    # skip blank line
+                    _readline(f,True)
+                    # read type masses
+                    type_mass = {}
+                    for i in range(num_types):
+                        row = _readline(f,True).split()
+                        type_mass[int(row[0])] = float(row[1])
+                else:
+                    # silently ignore unknown sections / lines
+                    pass
+
+                line = _readline(f)
+
+            # set mass on particles afterwards, in case sections are out of order in file
+            if type_mass is not None:
+                for typeid,m in type_mass.items():
+                    snap.mass[snap.typeid == typeid] = m
 
         return snap
 
