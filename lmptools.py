@@ -174,8 +174,8 @@ class Snapshot:
     def has_mass(self):
         return self._mass is not None
 
-def _readline(f,require=False):
-    line = f.readline()
+def readline_(file_,require=False):
+    line = file_.readline()
     if require and len(line) == 0:
         raise OSError('Could not read line from file')
     return line
@@ -268,7 +268,7 @@ class DataFile:
                 for i,mi in enumerate(masses):
                     f.write("{typeid:4d}{m:12}\n".format(typeid=i+1,m=mi))
 
-        return cls(filename)
+        return DataFile(filename)
 
     def read(self):
         known_headers = ('atoms','atom types','xlo xhi','ylo yhi','zlo zhi')
@@ -289,21 +289,20 @@ class DataFile:
         with open(self.filename) as f:
             # initialize snapshot from header
             N = None
-            low = [None,None,None]
-            high = [None,None,None]
+            box_bounds = [None,None,None,None,None,None]
             num_types = None
             # skip first line
-            _readline(f,True)
-            line = _readline(f,True)
+            readline_(f,True)
+            line = readline_(f)
             while len(line) > 0:
-                # skip blank lines
                 line = line.rstrip()
 
+                # skip blank and go to next line
                 if len(line) == 0:
-                    line = _readline(f,True)
+                    line = readline_(f)
                     continue
 
-                # warn that unknown header is being skipped
+                # check for unknown headers and go to next line
                 skip_line = False
                 for h in unknown_headers:
                     if h in line:
@@ -311,11 +310,17 @@ class DataFile:
                         skip_line = True
                         break
                 if skip_line:
-                    line = _readline(f,True)
+                    line = readline_(f)
                     continue
 
-                # reached end of line, break and make snapshot
-                if not any(h in line for h in known_headers):
+                # line is not empty but it is not a header, so break and try to make snapshot
+                # keep the line so that it can be processed in next step
+                done_header = True
+                for h in known_headers:
+                    if h in line:
+                        done_header = False
+                        break
+                if done_header:
                     break
 
                 # process useful header info
@@ -324,39 +329,51 @@ class DataFile:
                 elif 'atom types' in line:
                     num_types = int(line.split()[0])
                 elif 'xlo xhi' in line:
-                    low[0],high[0] = [float(x) for x in line.split()[:2]]
+                    box_bounds[0],box_bounds[3] = [float(x) for x in line.split()[:2]]
                 elif 'ylo yhi' in line:
-                    low[1],high[1] = [float(x) for x in line.split()[:2]]
+                    box_bounds[1],box_bounds[4] = [float(x) for x in line.split()[:2]]
                 elif 'zlo zhi' in line:
-                    low[2],high[2] = [float(x) for x in line.split()[:2]]
-                line = _readline(f)
-            box = Box(low,high)
+                    box_bounds[2],box_bounds[5] = [float(x) for x in line.split()[:2]]
+                else:
+                    raise RuntimeError('Uncaught header line! Check programming')
+
+                # done here, read next line
+                line = readline_(f)
+
+            if N is None:
+                raise IOError('Number of particles not read')
+            elif num_types is None:
+                raise IOError('Number of types not read')
+            elif None in box_bounds:
+                raise IOError('Box bounds not read')
+            box = Box.cast(box_bounds)
             snap = Snapshot(N,box)
 
-            type_mass = None
+            # now that snapshot is made, file it in with body sections
+            masses = None
             while len(line) > 0:
                 if 'Atoms' in line:
                     # extract style
                     row = line.split()
+                    if len(row) != 3:
+                        raise IOError('Need the atom style in Atoms')
                     style = row[-1]
                     if style == 'full':
-                        style_cols = 7
+                        style_cols = 3
                     elif style == 'charge':
-                        style_cols = 6
+                        style_cols = 2
                     elif style == 'molecular':
-                        style_cols = 6
+                        style_cols = 2
                     elif style == 'atomic':
-                        style_cols = 5
+                        style_cols = 1
                     else:
                         raise ValueError('Unknown atom style')
 
-                    # skip blank line
-                    _readline(f,True)
                     # read atom coordinates
+                    readline_(f,True) # blank line
                     for i in range(snap.N):
-                        row = _readline(f,True).split()
-
                         # strip out comments
+                        row = readline_(f,True).split()
                         try:
                             comment = row.index('#')
                             row = row[:comment]
@@ -364,58 +381,53 @@ class DataFile:
                             pass
 
                         # check that row is correctly sized and process
-                        if not len(row) in (style_cols,style_cols+3):
+                        if not (len(row) == style_cols+4 or len(row) == style_cols+7):
                             raise IOError('Expected number of columns not read for atom style')
                         idx = int(row[0])-1
                         if style == 'full':
                             snap.molecule[idx] = int(row[1])
                             snap.typeid[idx] = int(row[2])
                             snap.charge[idx] = float(row[3])
-                            snap.position[idx] = [float(x) for x in row[4:7]]
                         elif style == 'charge':
                             snap.typeid[idx] = int(row[1])
                             snap.charge[idx] = float(row[2])
-                            snap.position[idx] = [float(x) for x in row[3:6]]
                         elif style == 'molecular':
                             snap.molecule[idx] = int(row[1])
                             snap.typeid[idx] = int(row[2])
-                            snap.position[idx] = [float(x) for x in row[3:6]]
                         elif style == 'atomic':
                             snap.typeid[idx] = int(row[1])
-                            snap.position[idx] = [float(x) for x in row[2:5]]
-
-                        # optionally process image
-                        if len(row) == style_cols+3:
-                            snap.image[idx] = [int(x) for x in row[-3:]]
+                        snap.position[idx] = [float(x) for x in row[style_cols+1:style_cols+4]]
+                        if len(row) == style_cols+7:
+                            snap.image[idx] = [int(x) for x in row[style_cols+4:style_cols+7]]
 
                     # sanity check types
                     if any(np.logical_or(snap.typeid < 1, snap.typeid > num_types)):
                         raise ValueError('Invalid type id')
                 elif 'Velocities' in line:
-                    # skip blank line
-                    _readline(f,True)
-                    # read atom velocities
+                    readline_(f,True) # blank line
                     for i in range(snap.N):
-                        row = _readline(f,True).split()
+                        row = readline_(f,True).split()
+                        if len(row) < 4:
+                            raise IOError('Expected number of columns not read for velocity')
                         idx = int(row[0])-1
                         snap.velocity[idx] = [float(x) for x in row[1:4]]
                 elif 'Masses' in line:
-                    # skip blank line
-                    _readline(f,True)
-                    # read type masses
-                    type_mass = {}
+                    masses = {}
+                    readline_(f,True) # blank line
                     for i in range(num_types):
-                        row = _readline(f,True).split()
-                        type_mass[int(row[0])] = float(row[1])
+                        row = readline_(f,True).split()
+                        if len(row) < 2:
+                            raise IOError('Expected number of columns not read for mass')
+                        masses[int(row[0])] = float(row[1])
                 else:
                     # silently ignore unknown sections / lines
                     pass
 
-                line = _readline(f)
+                line = readline_(f)
 
-            # set mass on particles afterwards, in case sections are out of order in file
-            if type_mass is not None:
-                for typeid,m in type_mass.items():
+            # set mass on particles at end, in case sections were out of order in file
+            if masses is not None:
+                for typeid,m in masses.items():
                     snap.mass[snap.typeid == typeid] = m
 
         return snap
@@ -456,7 +468,7 @@ class DumpFile:
     def schema(self, value):
         # validate schema
         if 'id' not in value:
-            raise KeyError('Scheme must include the particle id')
+            raise KeyError('Schema must include the particle id')
         if 'position' in value and len(value['position']) != 3:
             raise ValueError('Position must be a 3-tuple')
         if 'velocity' in value and len(value['velocity']) != 3:
@@ -475,12 +487,12 @@ class DumpFile:
     def _find_frames(self):
         self._frames = []
         with self._open() as f:
-            line = _readline(f)
+            line = readline_(f)
             line_num = 0
             while len(line) > 0:
                 if self._section['step'] in line:
                     self._frames.append(line_num)
-                line = _readline(f)
+                line = readline_(f)
                 line_num += 1
 
     def __len__(self):
@@ -491,24 +503,24 @@ class DumpFile:
     def __iter__(self):
         with self._open() as f:
             state = 0
-            line = _readline(f)
+            line = readline_(f)
             while len(line) > 0:
                 # timestep line first
                 if state == 0 and self._section['step'] in line:
                     state += 1
-                    step = int(_readline(f,True))
+                    step = int(readline_(f,True))
 
                 # number of particles second
                 if state == 1 and self._section['natoms'] in line:
                     state += 1
-                    N = int(_readline(f,True))
+                    N = int(readline_(f,True))
 
                 # box size third
                 if state == 2 and self._section['box'] in line:
                     state += 1
-                    box_x = _readline(f,True)
-                    box_y = _readline(f,True)
-                    box_z = _readline(f,True)
+                    box_x = readline_(f,True)
+                    box_y = readline_(f,True)
+                    box_z = readline_(f,True)
                     x_lo, x_hi = [float(x) for x in box_x.split()]
                     y_lo, y_hi = [float(y) for y in box_y.split()]
                     z_lo, z_hi = [float(z) for z in box_z.split()]
@@ -519,7 +531,7 @@ class DumpFile:
                     state += 1
                     snap = Snapshot(N,box,step)
                     for i in range(snap.N):
-                        atom = _readline(f,True)
+                        atom = readline_(f,True)
                         atom = atom.split()
 
                         tag = int(atom[self.schema['id']]) - 1
@@ -545,4 +557,4 @@ class DumpFile:
                     del snap,N,box,step
                     state = 0
 
-                line = _readline(f)
+                line = readline_(f)
