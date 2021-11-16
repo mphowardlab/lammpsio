@@ -181,8 +181,9 @@ def readline_(file_,require=False):
     return line
 
 class DataFile:
-    def __init__(self, filename):
+    def __init__(self, filename, atom_style=None):
         self.filename = filename
+        self.atom_style = atom_style
 
     @classmethod
     def create(cls, filename, snapshot):
@@ -218,20 +219,32 @@ class DataFile:
             f.write("{} {} zlo zhi\n".format(snapshot.box.low[2],snapshot.box.high[2]))
 
             # Atoms section
-            if snapshot.has_charge() and snapshot.has_molecule():
-                style = 'full'
-                style_fmt = '{atomid:8d}{molid:8d}{typeid:4d}{q:8.5f}{x:16.8f}{y:16.8f}{z:16.8f}'
-            elif snapshot.has_charge():
-                style = 'charge'
-                style_fmt = '{atomid:8d}{typeid:4d}{q:8.5f}{x:16.8f}{y:16.8f}{z:16.8f}'
-            elif snapshot.has_molecule():
-                style = 'molecular'
-                style_fmt = '{atomid:8d}{molid:8d}{typeid:4d}{x:16.8f}{y:16.8f}{z:16.8f}'
+            # determine style if it is not given
+            if self.atom_style is None:
+                if snapshot.has_charge() and snapshot.has_molecule():
+                    style = 'full'
+                elif snapshot.has_charge():
+                    style = 'charge'
+                elif snapshot.has_molecule():
+                    style = 'molecular'
+                else:
+                    style = 'atomic'
             else:
-                style = 'atomic'
+                style = self.atom_style
+            # set format string based on style
+            if style == 'full':
+                style_fmt = '{atomid:8d}{molid:8d}{typeid:4d}{q:8.5f}{x:16.8f}{y:16.8f}{z:16.8f}'
+            elif style == 'charge':
+                style_fmt = '{atomid:8d}{typeid:4d}{q:8.5f}{x:16.8f}{y:16.8f}{z:16.8f}'
+            elif style == 'molecular':
+                style_fmt = '{atomid:8d}{molid:8d}{typeid:4d}{x:16.8f}{y:16.8f}{z:16.8f}'
+            elif style == 'atomic':
                 style_fmt = '{atomid:8d}{typeid:4d}{x:16.8f}{y:16.8f}{z:16.8f}'
+            else:
+                raise ValueError('Unknown atom style')
             if snapshot.has_image():
                 style_fmt += '{ix:8d}{iy:8d}{iz:8d}'
+            # write section
             f.write("\nAtoms # {}\n\n".format(style))
             for i in range(snapshot.N):
                 style_args = dict(
@@ -239,11 +252,10 @@ class DataFile:
                     typeid=snapshot.typeid[i],
                     x=snapshot.position[i][0],
                     y=snapshot.position[i][1],
-                    z=snapshot.position[i][2])
-                if snapshot.has_charge():
-                    style_args.update(q=snapshot.charge[i])
-                if snapshot.has_molecule():
-                    style_args.update(molid=snapshot.molecule[i])
+                    z=snapshot.position[i][2],
+                    q=snapshot.charge[i] if snapshot.has_charge() else 0.,
+                    molid=snapshot.molecule[i] if snapshot.has_molecule() else 0
+                    )
                 if snapshot.has_image():
                     style_args.update(ix=snapshot.image[i][0],
                                       iy=snapshot.image[i][1],
@@ -353,11 +365,17 @@ class DataFile:
             masses = None
             while len(line) > 0:
                 if 'Atoms' in line:
-                    # extract style
+                    # use or extract style
                     row = line.split()
-                    if len(row) != 3:
-                        raise IOError('Need the atom style in Atoms')
-                    style = row[-1]
+                    if len(row) == 3:
+                        style = row[-1]
+                        if self.atom_style is not None and style != self.atom_style:
+                            raise ValueError('Specified style does not match style in file')
+                    else:
+                        style = self.atom_style
+                    if style is None:
+                        raise IOError('Atom style not found, specify.')
+                    # number of columns to read for style
                     if style == 'full':
                         style_cols = 3
                     elif style == 'charge':
