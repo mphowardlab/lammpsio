@@ -186,7 +186,7 @@ class DataFile:
         self.atom_style = atom_style
 
     @classmethod
-    def create(cls, filename, snapshot):
+    def create(cls, filename, snapshot, atom_style=None):
         # validate snapshot
         if not snapshot.has_position():
             raise ValueError('Snapshot does not have positions')
@@ -220,7 +220,7 @@ class DataFile:
 
             # Atoms section
             # determine style if it is not given
-            if self.atom_style is None:
+            if atom_style is None:
                 if snapshot.has_charge() and snapshot.has_molecule():
                     style = 'full'
                 elif snapshot.has_charge():
@@ -230,7 +230,7 @@ class DataFile:
                 else:
                     style = 'atomic'
             else:
-                style = self.atom_style
+                style = atom_style
             # set format string based on style
             if style == 'full':
                 style_fmt = '{atomid:8d}{molid:8d}{typeid:4d}{q:8.5f}{x:16.8f}{y:16.8f}{z:16.8f}'
