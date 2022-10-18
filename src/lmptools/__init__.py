@@ -1,5 +1,3 @@
-# Copyright (c) 2021, Auburn University
-# This file is part of the lmptools project, released under the Modified BSD License.
 import gzip
 import numpy
 
@@ -79,22 +77,6 @@ class Snapshot:
         return self._position is not None
 
     @property
-    def velocity(self):
-        if not self.has_velocity():
-            self._velocity = numpy.zeros((self.N,3),dtype=numpy.float64)
-        return self._velocity
-
-    @velocity.setter
-    def velocity(self, value):
-        v = numpy.array(value, ndmin=2, copy=False, dtype=numpy.float64)
-        if v.shape != (self.N,3):
-            raise TypeError('Velocities must be an Nx3 array')
-        self._velocity = v
-
-    def has_velocity(self):
-        return self._velocity is not None
-
-    @property
     def image(self):
         if not self.has_image():
             self._image = numpy.zeros((self.N,3),dtype=numpy.int32)
@@ -109,6 +91,22 @@ class Snapshot:
 
     def has_image(self):
         return self._image is not None
+
+    @property
+    def velocity(self):
+        if not self.has_velocity():
+            self._velocity = numpy.zeros((self.N,3),dtype=numpy.float64)
+        return self._velocity
+
+    @velocity.setter
+    def velocity(self, value):
+        v = numpy.array(value, ndmin=2, copy=False, dtype=numpy.float64)
+        if v.shape != (self.N,3):
+            raise TypeError('Velocities must be an Nx3 array')
+        self._velocity = v
+
+    def has_velocity(self):
+        return self._velocity is not None
 
     @property
     def molecule(self):
@@ -129,7 +127,7 @@ class Snapshot:
     @property
     def typeid(self):
         if not self.has_typeid():
-            self._typeid = numpy.zeros(self.N,dtype=numpy.int32)
+            self._typeid = numpy.ones(self.N,dtype=numpy.int32)
         return self._typeid
 
     @typeid.setter
@@ -161,7 +159,7 @@ class Snapshot:
     @property
     def mass(self):
         if not self.has_mass():
-            self._mass = numpy.zeros(self.N,dtype=numpy.float64)
+            self._mass = numpy.ones(self.N,dtype=numpy.float64)
         return self._mass
 
     @mass.setter
@@ -184,6 +182,21 @@ class DataFile:
     def __init__(self, filename, atom_style=None):
         self.filename = filename
         self.atom_style = atom_style
+
+    known_headers = ('atoms','atom types','xlo xhi','ylo yhi','zlo zhi')
+    unknown_headers = (
+        'bonds','angles','dihedrals','impropers',
+        'bond types','angle types','dihedral types','improper types',
+        'extra bond per atom','extra angle per atom','extra dihedral per atom',
+        'extra improper per atom',
+        'ellipsoids','lines','triangles','bodies',
+        'xy xz yz'
+        )
+    known_bodies = ('Atoms','Velocities','Masses')
+    unknown_bodies = (
+        'Ellipsoids','Lines','Triangles','Bodies',
+        'Bonds','Angles','Dihedrals','Impropers'
+        )
 
     @classmethod
     def create(cls, filename, snapshot, atom_style=None):
@@ -283,21 +296,6 @@ class DataFile:
         return DataFile(filename)
 
     def read(self):
-        known_headers = ('atoms','atom types','xlo xhi','ylo yhi','zlo zhi')
-        unknown_headers = (
-            'bonds','angles','dihedrals','impropers',
-            'bond types','angle types','dihedral types','improper types',
-            'extra bond per atom','extra angle per atom','extra dihedral per atom',
-            'extra improper per atom',
-            'ellipsoids','lines','triangles','bodies',
-            'xy xz yz'
-            )
-        known_bodies = ('Atoms','Velocities','Masses')
-        unknown_bodies = (
-            'Ellipsoids','Lines','Triangles','Bodies',
-            'Bonds','Angles','Dihedrals','Impropers'
-            )
-
         with open(self.filename) as f:
             # initialize snapshot from header
             N = None
@@ -316,9 +314,8 @@ class DataFile:
 
                 # check for unknown headers and go to next line
                 skip_line = False
-                for h in unknown_headers:
+                for h in self.unknown_headers:
                     if h in line:
-                        print("Cannot process header '{}', skipping this.".format(h))
                         skip_line = True
                         break
                 if skip_line:
@@ -328,7 +325,7 @@ class DataFile:
                 # line is not empty but it is not a header, so break and try to make snapshot
                 # keep the line so that it can be processed in next step
                 done_header = True
-                for h in known_headers:
+                for h in self.known_headers:
                     if h in line:
                         done_header = False
                         break
@@ -560,7 +557,10 @@ class DumpFile:
                             snap.velocity[tag] = [float(atom[j]) for j in self.schema['velocity']]
                         if 'image' in self.schema:
                             snap.image[tag] = [int(atom[j]) for j in self.schema['image']]
-                        if 'mol' in self.schema:
+                        if 'molecule' in self.schema:
+                            snap.molecule[tag] = int(atom[self.schema['molecule']])
+                        elif 'mol' in self.schema:
+                            # allow both mol and molecule for backwards compatibility
                             snap.molecule[tag] = int(atom[self.schema['mol']])
                         if 'typeid' in self.schema:
                             snap.typeid[tag] = int(atom[self.schema['typeid']])
