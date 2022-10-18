@@ -1,7 +1,5 @@
-# Copyright (c) 2021, Auburn University
-# This file is part of the lmptools project, released under the Modified BSD License.
 import gzip
-import numpy as np
+import numpy
 
 class Box:
     def __init__(self, low, high):
@@ -12,7 +10,7 @@ class Box:
     def cast(cls, value):
         if isinstance(value,Box):
             return value
-        v = np.array(value, ndmin=1, copy=False, dtype=np.float64)
+        v = numpy.array(value, ndmin=1, copy=False, dtype=numpy.float64)
         if v.shape == (6,):
             return Box(v[:3],v[3:])
         else:
@@ -24,7 +22,7 @@ class Box:
 
     @low.setter
     def low(self, value):
-        v = np.array(value, ndmin=1, copy=False, dtype=np.float64)
+        v = numpy.array(value, ndmin=1, copy=False, dtype=numpy.float64)
         if v.shape != (3,):
             raise TypeError('Low must be a 3-tuple')
         self._low = v
@@ -35,7 +33,7 @@ class Box:
 
     @high.setter
     def high(self, value):
-        v = np.array(value, ndmin=1, copy=False, dtype=np.float64)
+        v = numpy.array(value, ndmin=1, copy=False, dtype=numpy.float64)
         if v.shape != (3,):
             raise TypeError('High must be a 3-tuple')
         self._high = v
@@ -65,12 +63,12 @@ class Snapshot:
     @property
     def position(self):
         if not self.has_position():
-            self._position = np.zeros((self.N,3),dtype=np.float64)
+            self._position = numpy.zeros((self.N,3),dtype=numpy.float64)
         return self._position
 
     @position.setter
     def position(self, value):
-        v = np.array(value, ndmin=2, copy=False, dtype=np.float64)
+        v = numpy.array(value, ndmin=2, copy=False, dtype=numpy.float64)
         if v.shape != (self.N,3):
             raise TypeError('Positions must be an Nx3 array')
         self._position = v
@@ -79,30 +77,14 @@ class Snapshot:
         return self._position is not None
 
     @property
-    def velocity(self):
-        if not self.has_velocity():
-            self._velocity = np.zeros((self.N,3),dtype=np.float64)
-        return self._velocity
-
-    @velocity.setter
-    def velocity(self, value):
-        v = np.array(value, ndmin=2, copy=False, dtype=np.float64)
-        if v.shape != (self.N,3):
-            raise TypeError('Velocities must be an Nx3 array')
-        self._velocity = v
-
-    def has_velocity(self):
-        return self._velocity is not None
-
-    @property
     def image(self):
         if not self.has_image():
-            self._image = np.zeros((self.N,3),dtype=np.int32)
+            self._image = numpy.zeros((self.N,3),dtype=numpy.int32)
         return self._image
 
     @image.setter
     def image(self, value):
-        v = np.array(value, ndmin=2, copy=False, dtype=np.int32)
+        v = numpy.array(value, ndmin=2, copy=False, dtype=numpy.int32)
         if v.shape != (self.N,3):
             raise TypeError('Images must be an Nx3 array')
         self._image = v
@@ -111,14 +93,30 @@ class Snapshot:
         return self._image is not None
 
     @property
+    def velocity(self):
+        if not self.has_velocity():
+            self._velocity = numpy.zeros((self.N,3),dtype=numpy.float64)
+        return self._velocity
+
+    @velocity.setter
+    def velocity(self, value):
+        v = numpy.array(value, ndmin=2, copy=False, dtype=numpy.float64)
+        if v.shape != (self.N,3):
+            raise TypeError('Velocities must be an Nx3 array')
+        self._velocity = v
+
+    def has_velocity(self):
+        return self._velocity is not None
+
+    @property
     def molecule(self):
         if not self.has_molecule():
-            self._molecule = np.zeros(self.N,dtype=np.int32)
+            self._molecule = numpy.zeros(self.N,dtype=numpy.int32)
         return self._molecule
 
     @molecule.setter
     def molecule(self, value):
-        v = np.array(value, ndmin=1, copy=False, dtype=np.int32)
+        v = numpy.array(value, ndmin=1, copy=False, dtype=numpy.int32)
         if v.shape != (self.N,):
             raise TypeError('Molecules must be a size N array')
         self._molecule = v
@@ -129,12 +127,12 @@ class Snapshot:
     @property
     def typeid(self):
         if not self.has_typeid():
-            self._typeid = np.zeros(self.N,dtype=np.int32)
+            self._typeid = numpy.ones(self.N,dtype=numpy.int32)
         return self._typeid
 
     @typeid.setter
     def typeid(self, value):
-        v = np.array(value, ndmin=1, copy=False, dtype=np.int32)
+        v = numpy.array(value, ndmin=1, copy=False, dtype=numpy.int32)
         if v.shape != (self.N,):
             raise TypeError('Type must be a size N array')
         self._typeid = v
@@ -145,12 +143,12 @@ class Snapshot:
     @property
     def charge(self):
         if not self.has_charge():
-            self._charge = np.zeros(self.N,dtype=np.float64)
+            self._charge = numpy.zeros(self.N,dtype=numpy.float64)
         return self._charge
 
     @charge.setter
     def charge(self, value):
-        v = np.array(value, ndmin=1, copy=False, dtype=np.float64)
+        v = numpy.array(value, ndmin=1, copy=False, dtype=numpy.float64)
         if v.shape != (self.N,):
             raise TypeError('Charge must be a size N array')
         self._charge = v
@@ -161,12 +159,12 @@ class Snapshot:
     @property
     def mass(self):
         if not self.has_mass():
-            self._mass = np.zeros(self.N,dtype=np.float64)
+            self._mass = numpy.ones(self.N,dtype=numpy.float64)
         return self._mass
 
     @mass.setter
     def mass(self, value):
-        v = np.array(value, ndmin=1, copy=False, dtype=np.float64)
+        v = numpy.array(value, ndmin=1, copy=False, dtype=numpy.float64)
         if v.shape != (self.N,):
             raise TypeError('Mass must be a size N array')
         self._mass = v
@@ -185,6 +183,21 @@ class DataFile:
         self.filename = filename
         self.atom_style = atom_style
 
+    known_headers = ('atoms','atom types','xlo xhi','ylo yhi','zlo zhi')
+    unknown_headers = (
+        'bonds','angles','dihedrals','impropers',
+        'bond types','angle types','dihedral types','improper types',
+        'extra bond per atom','extra angle per atom','extra dihedral per atom',
+        'extra improper per atom',
+        'ellipsoids','lines','triangles','bodies',
+        'xy xz yz'
+        )
+    known_bodies = ('Atoms','Velocities','Masses')
+    unknown_bodies = (
+        'Ellipsoids','Lines','Triangles','Bodies',
+        'Bonds','Angles','Dihedrals','Impropers'
+        )
+
     @classmethod
     def create(cls, filename, snapshot, atom_style=None):
         # validate snapshot
@@ -194,14 +207,14 @@ class DataFile:
             raise ValueError('Snapshot does not have typeids')
 
         # extract number of types
-        num_types = np.amax(np.unique(snapshot.typeid))
+        num_types = numpy.amax(numpy.unique(snapshot.typeid))
 
         # extract mass by type
         if snapshot.has_mass():
-            masses = np.empty(num_types)
+            masses = numpy.empty(num_types)
             for i in range(num_types):
                 mi = snapshot.mass[snapshot.typeid == i+1]
-                if not np.all(mi == mi[0]):
+                if not numpy.all(mi == mi[0]):
                     raise ValueError('All masses for a type must be equal')
                 elif mi[0] <= 0.:
                     raise ValueError('Type mass must be positive value')
@@ -283,21 +296,6 @@ class DataFile:
         return DataFile(filename)
 
     def read(self):
-        known_headers = ('atoms','atom types','xlo xhi','ylo yhi','zlo zhi')
-        unknown_headers = (
-            'bonds','angles','dihedrals','impropers',
-            'bond types','angle types','dihedral types','improper types',
-            'extra bond per atom','extra angle per atom','extra dihedral per atom',
-            'extra improper per atom',
-            'ellipsoids','lines','triangles','bodies',
-            'xy xz yz'
-            )
-        known_bodies = ('Atoms','Velocities','Masses')
-        unknown_bodies = (
-            'Ellipsoids','Lines','Triangles','Bodies',
-            'Bonds','Angles','Dihedrals','Impropers'
-            )
-
         with open(self.filename) as f:
             # initialize snapshot from header
             N = None
@@ -316,9 +314,8 @@ class DataFile:
 
                 # check for unknown headers and go to next line
                 skip_line = False
-                for h in unknown_headers:
+                for h in self.unknown_headers:
                     if h in line:
-                        print("Cannot process header '{}', skipping this.".format(h))
                         skip_line = True
                         break
                 if skip_line:
@@ -328,7 +325,7 @@ class DataFile:
                 # line is not empty but it is not a header, so break and try to make snapshot
                 # keep the line so that it can be processed in next step
                 done_header = True
-                for h in known_headers:
+                for h in self.known_headers:
                     if h in line:
                         done_header = False
                         break
@@ -419,7 +416,7 @@ class DataFile:
                             snap.image[idx] = [int(x) for x in row[style_cols+4:style_cols+7]]
 
                     # sanity check types
-                    if any(np.logical_or(snap.typeid < 1, snap.typeid > num_types)):
+                    if numpy.any(numpy.logical_or(snap.typeid < 1, snap.typeid > num_types)):
                         raise ValueError('Invalid type id')
                 elif 'Velocities' in line:
                     readline_(f,True) # blank line
@@ -560,7 +557,10 @@ class DumpFile:
                             snap.velocity[tag] = [float(atom[j]) for j in self.schema['velocity']]
                         if 'image' in self.schema:
                             snap.image[tag] = [int(atom[j]) for j in self.schema['image']]
-                        if 'mol' in self.schema:
+                        if 'molecule' in self.schema:
+                            snap.molecule[tag] = int(atom[self.schema['molecule']])
+                        elif 'mol' in self.schema:
+                            # allow both mol and molecule for backwards compatibility
                             snap.molecule[tag] = int(atom[self.schema['mol']])
                         if 'typeid' in self.schema:
                             snap.typeid[tag] = int(atom[self.schema['typeid']])
