@@ -1,16 +1,13 @@
-name: test_deploy
+name: Test and deploy
 
 on:
-  # ci
   pull_request:
 
   push:
     branches:
       - main
-
-  # cd
-  tags:
-    - v*
+    tags:
+      - "v*"
 
   release:
     types: [published]
@@ -21,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11']
+        python-version: ['3.7', '3.8', '3.9', '3.10']
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -58,14 +55,12 @@ jobs:
           python -m build --sdist --wheel --outdir dist/ .
       - name: Publish to TestPyPI
         if: github.event_name != 'release'
-        run: echo "publish to testpypi"
-        # uses: pypa/gh-action-pypi-publish@v1.5.1
-        # with:
-        #   password: ${{ secrets.TEST_PYPI_API_TOKEN }}
-        #   repository_url: https://test.pypi.org/legacy/
+        uses: pypa/gh-action-pypi-publish@v1.5.1
+        with:
+          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+          repository_url: https://test.pypi.org/legacy/
       - name: Publish to PyPI
         if: github.event_name == 'release' && github.event.action == 'published'
-        run: echo "publish to pypi"
-        # uses: pypa/gh-action-pypi-publish@v1.5.1
-        # with:
-        #   password: ${{ secrets.PYPI_API_TOKEN }}
+        uses: pypa/gh-action-pypi-publish@v1.5.1
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
