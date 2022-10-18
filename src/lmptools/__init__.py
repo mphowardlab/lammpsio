@@ -2,16 +2,19 @@ import gzip
 import numpy
 
 class Box:
-    def __init__(self, low, high):
+    def __init__(self, low, high, tilt=None):
         self.low = low
         self.high = high
+        self.tilt = tilt
 
     @classmethod
     def cast(cls, value):
         if isinstance(value,Box):
             return value
         v = numpy.array(value, ndmin=1, copy=False, dtype=numpy.float64)
-        if v.shape == (6,):
+        if v.shape == (9,):
+            return Box(v[:3],v[3:6],v[6:])
+        elif v.shape == (6,):
             return Box(v[:3],v[3:])
         else:
             raise TypeError('Unable to cast boxlike object with shape {}'.format(v.shape))
@@ -37,6 +40,19 @@ class Box:
         if v.shape != (3,):
             raise TypeError('High must be a 3-tuple')
         self._high = v
+
+    @property
+    def tilt(self):
+        return self._tilt
+
+    @tilt.setter
+    def tilt(self, value):
+        v = value
+        if v is not None:
+            v = numpy.array(v, ndmin=1, copy=False, dtype=numpy.float64)
+            if v.shape != (3,):
+                raise TypeError('Tilt must be a 3-tuple')
+        self._tilt = v
 
 class Snapshot:
     def __init__(self, N, box, step=None):
@@ -183,14 +199,13 @@ class DataFile:
         self.filename = filename
         self.atom_style = atom_style
 
-    known_headers = ('atoms','atom types','xlo xhi','ylo yhi','zlo zhi')
+    known_headers = ('atoms','atom types','xlo xhi','ylo yhi','zlo zhi','xy xz yz')
     unknown_headers = (
         'bonds','angles','dihedrals','impropers',
         'bond types','angle types','dihedral types','improper types',
         'extra bond per atom','extra angle per atom','extra dihedral per atom',
         'extra improper per atom',
-        'ellipsoids','lines','triangles','bodies',
-        'xy xz yz'
+        'ellipsoids','lines','triangles','bodies'
         )
     known_bodies = ('Atoms','Velocities','Masses')
     unknown_bodies = (
@@ -230,6 +245,8 @@ class DataFile:
             f.write("{} {} xlo xhi\n".format(snapshot.box.low[0],snapshot.box.high[0]))
             f.write("{} {} ylo yhi\n".format(snapshot.box.low[1],snapshot.box.high[1]))
             f.write("{} {} zlo zhi\n".format(snapshot.box.low[2],snapshot.box.high[2]))
+            if snapshot.box.tilt is not None:
+                f.write("{} {} {} xy xz yz\n".format(*snapshot.box.tilt))
 
             # Atoms section
             # determine style if it is not given
@@ -300,6 +317,7 @@ class DataFile:
             # initialize snapshot from header
             N = None
             box_bounds = [None,None,None,None,None,None]
+            box_tilt = None
             num_types = None
             # skip first line
             readline_(f,True)
@@ -343,6 +361,8 @@ class DataFile:
                     box_bounds[1],box_bounds[4] = [float(x) for x in line.split()[:2]]
                 elif 'zlo zhi' in line:
                     box_bounds[2],box_bounds[5] = [float(x) for x in line.split()[:2]]
+                elif 'xy xz yz' in line:
+                    box_tilt = [float(x) for x in line.split()[:3]]
                 else:
                     raise RuntimeError('Uncaught header line! Check programming')
 
@@ -355,7 +375,7 @@ class DataFile:
                 raise IOError('Number of types not read')
             elif None in box_bounds:
                 raise IOError('Box bounds not read')
-            box = Box.cast(box_bounds)
+            box = Box(box_bounds[:3], box_bounds[3:], box_tilt)
             snap = Snapshot(N,box)
 
             # now that snapshot is made, file it in with body sections
@@ -533,13 +553,33 @@ class DumpFile:
                 # box size third
                 if state == 2 and self._section['box'] in line:
                     state += 1
+                    # check for triclinic
+                    box_header = line.split()
+                    if len(box_header) >= 5:
+                        box_tilt = [xy, xz, yz]
+                    else:
+                        box_tilt = None
                     box_x = readline_(f,True)
                     box_y = readline_(f,True)
                     box_z = readline_(f,True)
                     x_lo, x_hi = [float(x) for x in box_x.split()]
                     y_lo, y_hi = [float(y) for y in box_y.split()]
                     z_lo, z_hi = [float(z) for z in box_z.split()]
-                    box = Box([x_lo,y_lo,z_lo],[x_hi,y_hi,z_hi])
+                    if box_tilt is not None:
+                        xy, xz, yz = box_tilt
+                        lo = [
+                            x_lo - min([0.0, xy, xz, xy+xz]),
+                            y_lo - min([0.0, yz]),
+                            z_lo
+                            ]
+                        hi = [
+                            x_hi - max([0.0, xy, xz, xy+xz]),
+                            y_hi - max([0.0, yz]),
+                            z_hi
+                            ]
+                        box = Box(lo, hi, box_tilt)
+                    else:
+                        box = Box([x_lo, y_lo, z_lo], [x_hi, y_hi, z_hi])
 
                 # atoms come fourth
                 if state == 3 and self._section['atoms'] in line:
