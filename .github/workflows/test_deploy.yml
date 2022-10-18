@@ -1,0 +1,71 @@
+name: test_deploy
+
+on:
+  # ci
+  pull_request:
+
+  push:
+    branches:
+      - main
+
+  # cd
+  tags:
+    - v*
+
+  release:
+    types: [published]
+
+jobs:
+  test:
+    name: unit test [python-${{ matrix.python-version }}]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11']
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Setup Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install
+        run: |
+          python -m pip install pip --upgrade pip
+          pip install .
+      - name: Test
+        run: |
+          python -c "import lmptools"
+
+  deploy:
+    name: deploy
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.7'
+      - name: Install dependencies
+        run: |
+          python -m pip install pip --upgrade pip
+          pip install build
+      - name: Build
+        run: |
+          python -m build --sdist --wheel --outdir dist/ .
+      - name: Publish to TestPyPI
+        if: github.event_name != 'release'
+        run: echo "publish to testpypi"
+        # uses: pypa/gh-action-pypi-publish@v1.5.1
+        # with:
+        #   password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+        #   repository_url: https://test.pypi.org/legacy/
+      - name: Publish to PyPI
+        if: github.event_name == 'release' && github.event.action == 'published'
+        run: echo "publish to pypi"
+        # uses: pypa/gh-action-pypi-publish@v1.5.1
+        # with:
+        #   password: ${{ secrets.PYPI_API_TOKEN }}
