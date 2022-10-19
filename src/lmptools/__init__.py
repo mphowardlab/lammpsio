@@ -13,9 +13,9 @@ class Box:
             return value
         v = numpy.array(value, ndmin=1, copy=False, dtype=numpy.float64)
         if v.shape == (9,):
-            return Box(v[:3],v[3:6],v[6:])
+            return Box(v[:3], v[3:6], v[6:])
         elif v.shape == (6,):
-            return Box(v[:3],v[3:])
+            return Box(v[:3], v[3:])
         else:
             raise TypeError('Unable to cast boxlike object with shape {}'.format(v.shape))
 
@@ -79,7 +79,7 @@ class Snapshot:
     @property
     def position(self):
         if not self.has_position():
-            self._position = numpy.zeros((self.N,3),dtype=numpy.float64)
+            self._position = numpy.zeros((self.N, 3), dtype=numpy.float64)
         return self._position
 
     @position.setter
@@ -95,7 +95,7 @@ class Snapshot:
     @property
     def image(self):
         if not self.has_image():
-            self._image = numpy.zeros((self.N,3),dtype=numpy.int32)
+            self._image = numpy.zeros((self.N, 3), dtype=numpy.int32)
         return self._image
 
     @image.setter
@@ -111,7 +111,7 @@ class Snapshot:
     @property
     def velocity(self):
         if not self.has_velocity():
-            self._velocity = numpy.zeros((self.N,3),dtype=numpy.float64)
+            self._velocity = numpy.zeros((self.N, 3), dtype=numpy.float64)
         return self._velocity
 
     @velocity.setter
@@ -127,7 +127,7 @@ class Snapshot:
     @property
     def molecule(self):
         if not self.has_molecule():
-            self._molecule = numpy.zeros(self.N,dtype=numpy.int32)
+            self._molecule = numpy.zeros(self.N, dtype=numpy.int32)
         return self._molecule
 
     @molecule.setter
@@ -143,7 +143,7 @@ class Snapshot:
     @property
     def typeid(self):
         if not self.has_typeid():
-            self._typeid = numpy.ones(self.N,dtype=numpy.int32)
+            self._typeid = numpy.ones(self.N, dtype=numpy.int32)
         return self._typeid
 
     @typeid.setter
@@ -159,7 +159,7 @@ class Snapshot:
     @property
     def charge(self):
         if not self.has_charge():
-            self._charge = numpy.zeros(self.N,dtype=numpy.float64)
+            self._charge = numpy.zeros(self.N, dtype=numpy.float64)
         return self._charge
 
     @charge.setter
@@ -175,7 +175,7 @@ class Snapshot:
     @property
     def mass(self):
         if not self.has_mass():
-            self._mass = numpy.ones(self.N,dtype=numpy.float64)
+            self._mass = numpy.ones(self.N, dtype=numpy.float64)
         return self._mass
 
     @mass.setter
@@ -218,8 +218,6 @@ class DataFile:
         # validate snapshot
         if not snapshot.has_position():
             raise ValueError('Snapshot does not have positions')
-        elif not snapshot.has_typeid():
-            raise ValueError('Snapshot does not have typeids')
 
         # extract number of types
         num_types = numpy.amax(numpy.unique(snapshot.typeid))
@@ -263,17 +261,17 @@ class DataFile:
                 style = atom_style
             # set format string based on style
             if style == 'full':
-                style_fmt = '{atomid:8d}{molid:8d}{typeid:4d}{q:8.5f}{x:16.8f}{y:16.8f}{z:16.8f}'
+                style_fmt = '{atomid:d} {molid:d} {typeid:d} {q:.5f} {x:.8f} {y:.8f} {z:.8f}'
             elif style == 'charge':
-                style_fmt = '{atomid:8d}{typeid:4d}{q:8.5f}{x:16.8f}{y:16.8f}{z:16.8f}'
+                style_fmt = '{atomid:d} {typeid:d} {q:.5f} {x:.8f} {y:.8f} {z:.8f}'
             elif style == 'molecular':
-                style_fmt = '{atomid:8d}{molid:8d}{typeid:4d}{x:16.8f}{y:16.8f}{z:16.8f}'
+                style_fmt = '{atomid:d} {molid:d} {typeid:d} {x:.8f} {y:.8f} {z:.8f}'
             elif style == 'atomic':
-                style_fmt = '{atomid:8d}{typeid:4d}{x:16.8f}{y:16.8f}{z:16.8f}'
+                style_fmt = '{atomid:d} {typeid:d} {x:.8f} {y:.8f} {z:.8f}'
             else:
                 raise ValueError('Unknown atom style')
             if snapshot.has_image():
-                style_fmt += '{ix:8d}{iy:8d}{iz:8d}'
+                style_fmt += ' {ix:d} {iy:d} {iz:d}'
             # write section
             f.write("\nAtoms # {}\n\n".format(style))
             for i in range(snapshot.N):

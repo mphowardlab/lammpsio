@@ -1,22 +1,13 @@
 import numpy
 import pytest
-from pytest_lazyfixture import lazy_fixture
 
 import lmptools
 
-all_boxes = pytest.mark.parametrize('box', [lazy_fixture('orthorhombic'), lazy_fixture('triclinic')])
-
-@pytest.fixture
-def snap(box):
-    return lmptools.Snapshot(3, box, 10)
-
-@all_boxes
-def test_create(box, snap):
+def test_create(snap):
     assert snap.N == 3
-    assert snap.box is box
+    assert isinstance(snap.box, lmptools.Box)
     assert snap.step == 10
 
-@all_boxes
 def test_position(snap):
     assert not snap.has_position()
     assert numpy.allclose(snap.position, 0.)
@@ -28,7 +19,6 @@ def test_position(snap):
     with pytest.raises(TypeError):
         snap.position = [0,0,0]
 
-@all_boxes
 def test_image(snap):
     assert not snap.has_image()
     assert numpy.allclose(snap.image, 0)
@@ -40,7 +30,6 @@ def test_image(snap):
     with pytest.raises(TypeError):
         snap.image = [0,0,0]
 
-@all_boxes
 def test_velocity(snap):
     assert not snap.has_velocity()
     assert numpy.allclose(snap.velocity, 0.)
@@ -52,7 +41,6 @@ def test_velocity(snap):
     with pytest.raises(TypeError):
         snap.velocity = [0,0,0]
 
-@all_boxes
 def test_typeid(snap):
     assert not snap.has_typeid()
     assert numpy.allclose(snap.typeid, 1)
@@ -62,7 +50,6 @@ def test_typeid(snap):
     with pytest.raises(TypeError):
         snap.typeid = [1,1]
 
-@all_boxes
 def test_molecule(snap):
     assert not snap.has_molecule()
     assert numpy.allclose(snap.molecule, 0)
@@ -72,7 +59,6 @@ def test_molecule(snap):
     with pytest.raises(TypeError):
         snap.molecule = [0,0]
 
-@all_boxes
 def test_mass(snap):
     assert not snap.has_mass()
     assert numpy.allclose(snap.mass, 1)
@@ -85,7 +71,6 @@ def test_mass(snap):
     with pytest.raises(TypeError):
         snap.mass = [1,1]
 
-@all_boxes
 def test_charge(snap):
     assert not snap.has_charge()
     assert numpy.allclose(snap.charge, 0)
