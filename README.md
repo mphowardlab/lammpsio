@@ -50,7 +50,7 @@ and data type:
 ## Data files
 
 A LAMMPS data file is represented by a `DataFile`. The file must be explicitly
-`read()` to get a `Snapshot:
+`read()` to get a `Snapshot`:
 
     f = lmptools.DataFile("config.data")
     snapshot = f.read()
@@ -77,7 +77,7 @@ A LAMMPS dump file is represented by a `DumpFile`. The actual file format is
 very flexible, so a schema needs to be specified to parse it.
 
     traj = lmptools.DumpFile(
-            filename="particles.lammpstrj",
+            filename="atoms.lammpstrj",
             schema={"id": 0, "typeid": 1, "position": (2, 3, 4)}
             )
 
@@ -85,3 +85,29 @@ Valid keys for the schema match the names and shapes in the `Snapshot`. The
 keys requiring only 1 column index are: `id`, `typeid`, `molecule`, `charge`,
 and `mass`. The keys requiring 3 column indexes are `position`, `velocity`,
 and `image`.
+
+A `DumpFile` is iterable, so you can use it to go through all the snapshots
+of a trajectory:
+
+    for snap in traj:
+        print(snap.step)
+
+You can also get the number of snapshots in the `DumpFile`, but this does
+require reading the entire file: so use with caution!
+
+    num_frames = len(traj)
+
+Random access to snapshots is not currently implemented, but it may be added
+in future. If you want to randomly access snapshots, you should load the
+whole file into a list:
+
+    snaps = [snap for snap in traj]
+    print(snaps[3].step)
+
+Keep in the mind that the memory requirements for this can be huge!
+
+A `DumpFile` can be created from a list of snapshots:
+
+    t = lmptools.DumpFile.create("atoms.lammpstrj", schema)
+
+The object representing the new file is returned and can be used.
