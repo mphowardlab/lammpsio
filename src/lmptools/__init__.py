@@ -4,7 +4,32 @@ import pathlib
 
 import numpy
 
+def _readline(file_,require=False):
+    """Read and require a line."""
+    line = file_.readline()
+    if require and len(line) == 0:
+        raise OSError('Could not read line from file')
+    return line
+
 class Box:
+    """Triclinic simulation box.
+
+    The convention for defining the bounds of the box is based on
+    `LAMMPS <https://docs.lammps.org/Howto_triclinic.html>`_. This
+    means that the lower corner of the box is placed at ``low``, and
+    the size and shape of the box is determined by ``high`` and ``tilt``.
+
+    Parameters
+    ----------
+    low : list
+        Origin of the box
+    high : list
+        "High" of the box, used to compute edge lengths.
+    tilt : list
+        Tilt factors ``xy``, ``xz``, and ``yz`` for a triclinic box.
+        Default of ``None`` is a strictly orthorhombic box.
+
+    """
     def __init__(self, low, high, tilt=None):
         self.low = low
         self.high = high
@@ -12,7 +37,28 @@ class Box:
 
     @classmethod
     def cast(cls, value):
-        if isinstance(value,Box):
+        """Cast an array to a :class:`Box`.
+
+        If ``value`` has 6 elements, it is unpacked as an orthorhombic box::
+
+            x_lo, y_lo, z_lo, x_hi, y_hi, z_hi = value
+
+        If ``value`` has 9 elements, it is unpacked as a triclinic box::
+
+            x_lo, y_lo, z_lo, x_hi, y_hi, z_hi, xy, xz, yz = value
+
+        Parameters
+        ----------
+        value : list
+            6-element or 9-element array representing the box.
+
+        Returns
+        -------
+        :class:`Box`
+            A simulation box matching the array.
+
+        """
+        if isinstance(value, Box):
             return value
         v = numpy.array(value, ndmin=1, copy=False, dtype=numpy.float64)
         if v.shape == (9,):
@@ -24,6 +70,7 @@ class Box:
 
     @property
     def low(self):
+        """:class:`numpy.ndarray`: Box low."""
         return self._low
 
     @low.setter
@@ -35,6 +82,7 @@ class Box:
 
     @property
     def high(self):
+        """:class:`numpy.ndarray`: Box high."""
         return self._high
 
     @high.setter
@@ -46,6 +94,7 @@ class Box:
 
     @property
     def tilt(self):
+        """:class:`numpy.ndarray`: Box tilt factors."""
         return self._tilt
 
     @tilt.setter
@@ -58,6 +107,24 @@ class Box:
         self._tilt = v
 
 class Snapshot:
+    """Particle configuration.
+
+    Parameters
+    ----------
+    N : int
+        Number of particles in configuration.
+    box : :class:`Box`
+        Simulation box.
+    step : int
+        Simulation time step counter. Default of ``None`` means
+        time step is not specified.
+
+    Attributes
+    ----------
+    step : int
+        Simulation time step counter.
+
+    """
     def __init__(self, N, box, step=None):
         self._N = N
         self._box = Box.cast(box)
@@ -73,14 +140,17 @@ class Snapshot:
 
     @property
     def N(self):
+        """int: Number of particles."""
         return self._N
 
     @property
     def box(self):
+        """:class:`Box`: Simulation box."""
         return self._box
 
     @property
     def position(self):
+        """:class:`numpy.ndarray`: Positions."""
         if not self.has_position():
             self._position = numpy.zeros((self.N, 3), dtype=numpy.float64)
         return self._position
@@ -95,10 +165,19 @@ class Snapshot:
         numpy.copyto(self._position, v)
 
     def has_position(self):
+        """Check if configuration has positions.
+
+        Returns
+        -------
+        bool
+            True if positions have been initialized.
+
+        """
         return self._position is not None
 
     @property
     def image(self):
+        """:class:`numpy.ndarray`: Images."""
         if not self.has_image():
             self._image = numpy.zeros((self.N, 3), dtype=numpy.int32)
         return self._image
@@ -113,10 +192,19 @@ class Snapshot:
         numpy.copyto(self._image, v)
 
     def has_image(self):
+        """Check if configuration has images.
+
+        Returns
+        -------
+        bool
+            True if images have been initialized.
+
+        """
         return self._image is not None
 
     @property
     def velocity(self):
+        """:class:`numpy.ndarray`: Velocities."""
         if not self.has_velocity():
             self._velocity = numpy.zeros((self.N, 3), dtype=numpy.float64)
         return self._velocity
@@ -131,10 +219,19 @@ class Snapshot:
         numpy.copyto(self._velocity, v)
 
     def has_velocity(self):
+        """Check if configuration has velocities.
+
+        Returns
+        -------
+        bool
+            True if velocities have been initialized.
+
+        """
         return self._velocity is not None
 
     @property
     def molecule(self):
+        """:class:`numpy.ndarray`: Molecule tags."""
         if not self.has_molecule():
             self._molecule = numpy.zeros(self.N, dtype=numpy.int32)
         return self._molecule
@@ -149,10 +246,19 @@ class Snapshot:
         numpy.copyto(self._molecule, v)
 
     def has_molecule(self):
+        """Check if configuration has molecule tags.
+
+        Returns
+        -------
+        bool
+            True if molecule tags have been initialized.
+
+        """
         return self._molecule is not None
 
     @property
     def typeid(self):
+        """:class:`numpy.ndarray`: Types."""
         if not self.has_typeid():
             self._typeid = numpy.ones(self.N, dtype=numpy.int32)
         return self._typeid
@@ -167,10 +273,19 @@ class Snapshot:
         numpy.copyto(self._typeid, v)
 
     def has_typeid(self):
+        """Check if configuration has types.
+
+        Returns
+        -------
+        bool
+            True if types have been initialized.
+
+        """
         return self._typeid is not None
 
     @property
     def charge(self):
+        """:class:`numpy.ndarray`: Charges."""
         if not self.has_charge():
             self._charge = numpy.zeros(self.N, dtype=numpy.float64)
         return self._charge
@@ -185,10 +300,19 @@ class Snapshot:
         numpy.copyto(self._charge, v)
 
     def has_charge(self):
+        """Check if configuration has charges.
+
+        Returns
+        -------
+        bool
+            True if charges have been initialized.
+
+        """
         return self._charge is not None
 
     @property
     def mass(self):
+        """:class:`numpy.ndarray`: Masses."""
         if not self.has_mass():
             self._mass = numpy.ones(self.N, dtype=numpy.float64)
         return self._mass
@@ -203,15 +327,43 @@ class Snapshot:
         numpy.copyto(self._mass, v)
 
     def has_mass(self):
+        """Check if configuration has masses.
+
+        Returns
+        -------
+        bool
+            True if masses have been initialized.
+
+        """
         return self._mass is not None
 
-def readline_(file_,require=False):
-    line = file_.readline()
-    if require and len(line) == 0:
-        raise OSError('Could not read line from file')
-    return line
-
 class DataFile:
+    """LAMMPS data file.
+
+    Parameters
+    ----------
+    filename : str
+        Path to data file.
+    atom_style : str
+        Atom style to use for data file. Defaults to ``None``, which means the
+        style should be read from the file.
+
+    Attributes
+    ----------
+    filename : str
+        Path to the file.
+    atom_style : str
+        Atom style for the file.
+    known_headers : list
+        Data file headers that can be processed.
+    unknown_headers : list
+        Data file headers that will be ignored.
+    known_bodies : list
+        Data file body sections that can be processed.
+    unknown_bodies : list
+        Data file body sections that will be ignored.
+
+    """
     def __init__(self, filename, atom_style=None):
         self.filename = filename
         self.atom_style = atom_style
@@ -232,6 +384,29 @@ class DataFile:
 
     @classmethod
     def create(cls, filename, snapshot, atom_style=None):
+        """Create a LAMMPS data file from a snapshot.
+
+        Parameters
+        ----------
+        filename : str
+            Path to data file.
+        snapshot : :class:`Snapshot`
+            Snapshot to write to file.
+        atom_style : str
+            Atom style to use for data file. Defaults to ``None``, which means the
+            style should be inferred from the contents of ``snapshot``.
+
+        Returns
+        -------
+        :class:`DataFile`
+            The object representing the new data file.
+
+        Raises
+        ------
+        ValueError
+            If all masses are not the same for a given type.
+
+        """
         # extract number of types
         num_types = numpy.amax(numpy.unique(snapshot.typeid))
 
@@ -324,6 +499,21 @@ class DataFile:
         return DataFile(filename)
 
     def read(self):
+        """Read the file.
+
+        Returns
+        -------
+        :class:`Snapshot`
+            Snapshot from the data file.
+
+        Raises
+        ------
+        ValueError
+            If :attr:`atom_style` is set but does not match file contents.
+        ValueError
+            If :attr:`atom_style` is not specified and not set in file.
+
+        """
         with open(self.filename) as f:
             # initialize snapshot from header
             N = None
@@ -331,14 +521,14 @@ class DataFile:
             box_tilt = None
             num_types = None
             # skip first line
-            readline_(f,True)
-            line = readline_(f)
+            _readline(f,True)
+            line = _readline(f)
             while len(line) > 0:
                 line = line.rstrip()
 
                 # skip blank and go to next line
                 if len(line) == 0:
-                    line = readline_(f)
+                    line = _readline(f)
                     continue
 
                 # check for unknown headers and go to next line
@@ -348,7 +538,7 @@ class DataFile:
                         skip_line = True
                         break
                 if skip_line:
-                    line = readline_(f)
+                    line = _readline(f)
                     continue
 
                 # line is not empty but it is not a header, so break and try to make snapshot
@@ -378,7 +568,7 @@ class DataFile:
                     raise RuntimeError('Uncaught header line! Check programming')
 
                 # done here, read next line
-                line = readline_(f)
+                line = _readline(f)
 
             if N is None:
                 raise IOError('Number of particles not read')
@@ -416,10 +606,10 @@ class DataFile:
                         raise ValueError('Unknown atom style')
 
                     # read atom coordinates
-                    readline_(f,True) # blank line
+                    _readline(f,True) # blank line
                     for i in range(snap.N):
                         # strip out comments
-                        row = readline_(f,True).split()
+                        row = _readline(f,True).split()
                         try:
                             comment = row.index('#')
                             row = row[:comment]
@@ -450,18 +640,18 @@ class DataFile:
                     if numpy.any(numpy.logical_or(snap.typeid < 1, snap.typeid > num_types)):
                         raise ValueError('Invalid type id')
                 elif 'Velocities' in line:
-                    readline_(f,True) # blank line
+                    _readline(f,True) # blank line
                     for i in range(snap.N):
-                        row = readline_(f,True).split()
+                        row = _readline(f,True).split()
                         if len(row) < 4:
                             raise IOError('Expected number of columns not read for velocity')
                         idx = int(row[0])-1
                         snap.velocity[idx] = [float(x) for x in row[1:4]]
                 elif 'Masses' in line:
                     masses = {}
-                    readline_(f,True) # blank line
+                    _readline(f,True) # blank line
                     for i in range(num_types):
-                        row = readline_(f,True).split()
+                        row = _readline(f,True).split()
                         if len(row) < 2:
                             raise IOError('Expected number of columns not read for mass')
                         masses[int(row[0])] = float(row[1])
@@ -469,7 +659,7 @@ class DataFile:
                     # silently ignore unknown sections / lines
                     pass
 
-                line = readline_(f)
+                line = _readline(f)
 
             # set mass on particles at end, in case sections were out of order in file
             if masses is not None:
@@ -479,6 +669,24 @@ class DataFile:
         return snap
 
 class DumpFile:
+    """LAMMPS dump file.
+
+    The dump file is a flexible file format, so a ``schema`` needs to be given
+    to parse the atom data. The ``schema`` is given as a dictionary of column
+    indexes. Valid keys for the schema match the names and shapes in the `Snapshot`.
+    The keys requiring only 1 column index are: `id`, `typeid`, `molecule`, `charge`,
+    and `mass`. The keys requiring 3 column indexes are `position`, `velocity`,
+    and `image`.
+
+    Parameters
+    ----------
+    filename : str
+        Path to dump file.
+    schema : dict
+        Schema for the contents of the file.
+
+    """
+
     def __init__(self, filename, schema):
         self.filename = filename
         self.schema = schema
@@ -486,6 +694,23 @@ class DumpFile:
 
     @classmethod
     def create(cls, filename, schema, snapshots):
+        """Create a LAMMPS dump file.
+
+        Parameters
+        ----------
+        filename : str
+            Path to dump file.
+        schema : dict
+            Schema for the contents of the file.
+        snapshots : :class:`Snapshot` or list
+            One or more snapshots to write to the dump file.
+
+        Returns
+        -------
+        :class:`DumpFile`
+            The object representing the new dump file.
+
+        """
         # map out the schema into a dump row
         # each entry is a tuple: (column, (attribute, index))
         # the index is None for scalars, otherwise it is the component of the vector
@@ -569,6 +794,7 @@ class DumpFile:
 
     @property
     def filename(self):
+        """str: Path to the file."""
         return self._filename
 
     @filename.setter
@@ -589,13 +815,12 @@ class DumpFile:
 
     @property
     def schema(self):
+        """dict: Data schema."""
         return self._schema
 
     @schema.setter
     def schema(self, value):
         # validate schema
-        if 'id' not in value:
-            raise KeyError('Schema must include the particle id')
         if 'position' in value and len(value['position']) != 3:
             raise ValueError('Position must be a 3-tuple')
         if 'velocity' in value and len(value['velocity']) != 3:
@@ -605,6 +830,7 @@ class DumpFile:
         self._schema = value
 
     def _open(self):
+        """Open the file handle for reading."""
         if self._gzip:
             f = gzip.open(self.filename, 'rb')
         else:
@@ -612,14 +838,15 @@ class DumpFile:
         return f
 
     def _find_frames(self):
+        """Seek line numbers for each frame."""
         self._frames = []
         with self._open() as f:
-            line = readline_(f)
+            line = _readline(f)
             line_num = 0
             while len(line) > 0:
                 if self._section['step'] in line:
                     self._frames.append(line_num)
-                line = readline_(f)
+                line = _readline(f)
                 line_num += 1
 
     def __len__(self):
@@ -630,17 +857,17 @@ class DumpFile:
     def __iter__(self):
         with self._open() as f:
             state = 0
-            line = readline_(f)
+            line = _readline(f)
             while len(line) > 0:
                 # timestep line first
                 if state == 0 and self._section['step'] in line:
                     state += 1
-                    step = int(readline_(f,True))
+                    step = int(_readline(f,True))
 
                 # number of particles second
                 if state == 1 and self._section['natoms'] in line:
                     state += 1
-                    N = int(readline_(f,True))
+                    N = int(_readline(f,True))
 
                 # box size third
                 if state == 2 and self._section['box'] in line:
@@ -651,9 +878,9 @@ class DumpFile:
                         box_tilt = [float(x) for x in box_header[3:6]]
                     else:
                         box_tilt = None
-                    box_x = readline_(f,True)
-                    box_y = readline_(f,True)
-                    box_z = readline_(f,True)
+                    box_x = _readline(f,True)
+                    box_y = _readline(f,True)
+                    box_z = _readline(f,True)
                     x_lo, x_hi = [float(x) for x in box_x.split()]
                     y_lo, y_hi = [float(y) for y in box_y.split()]
                     z_lo, z_hi = [float(z) for z in box_z.split()]
@@ -678,10 +905,13 @@ class DumpFile:
                     state += 1
                     snap = Snapshot(N,box,step)
                     for i in range(snap.N):
-                        atom = readline_(f,True)
+                        atom = _readline(f,True)
                         atom = atom.split()
 
-                        tag = int(atom[self.schema['id']]) - 1
+                        if 'id' in self.schema:
+                            tag = int(atom[self.schema['id']]) - 1
+                        else:
+                            tag = i
 
                         if 'position' in self.schema:
                             snap.position[tag] = [float(atom[j]) for j in self.schema['position']]
@@ -704,4 +934,4 @@ class DumpFile:
                     del snap,N,box,step
                     state = 0
 
-                line = readline_(f)
+                line = _readline(f)
