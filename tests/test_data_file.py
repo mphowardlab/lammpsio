@@ -1,13 +1,13 @@
 import numpy
 import pytest
 
-import lmptools
+import lammpsio
 
 @pytest.mark.parametrize("atom_style", ["atomic", "molecular", "charge", "full"])
 def test_data_file_min(snap, atom_style, tmp_path):
     # write the data file with default values
     filename = tmp_path / "atoms.data"
-    data = lmptools.DataFile.create(filename, snap, atom_style)
+    data = lammpsio.DataFile.create(filename, snap, atom_style)
     assert filename.exists
 
     # read it back in and check
@@ -52,7 +52,7 @@ def test_data_file_all(snap, atom_style, set_style, tmp_path):
     if atom_style in ("charge", "full"):
         snap.charge = [-1,0,1]
     filename = tmp_path / "atoms.data"
-    data = lmptools.DataFile.create(filename, snap, atom_style if set_style else None)
+    data = lammpsio.DataFile.create(filename, snap, atom_style if set_style else None)
     assert filename.exists
 
     # read it back in and check

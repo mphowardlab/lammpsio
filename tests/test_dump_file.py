@@ -1,19 +1,19 @@
 import numpy
 import pytest
 
-import lmptools
+import lammpsio
 
 @pytest.mark.parametrize('use_gzip', [False, True])
 def test_dump_file_min(snap, use_gzip, tmp_path):
     # create file with 2 snapshots with defaults, changing N & step
-    snap_2 = lmptools.Snapshot(snap.N+2, snap.box, snap.step+1)
+    snap_2 = lammpsio.Snapshot(snap.N+2, snap.box, snap.step+1)
     snaps = [snap, snap_2]
     if use_gzip:
         filename = tmp_path / "atoms.lammpstrj.gz"
     else:
         filename = tmp_path / "atoms.lammpstrj"
     schema = {'id': 0, 'position': (1, 2, 3)}
-    f = lmptools.DumpFile.create(filename, schema, snaps)
+    f = lammpsio.DumpFile.create(filename, schema, snaps)
     assert filename.exists
     assert len(f) == 2
 
@@ -47,7 +47,7 @@ def test_dump_file_all(snap, use_gzip, tmp_path):
     snap.molecule = [2,0,1]
     snap.charge = [-1,0,1]
 
-    snap_2 = lmptools.Snapshot(snap.N, snap.box, snap.step+1)
+    snap_2 = lammpsio.Snapshot(snap.N, snap.box, snap.step+1)
     snap_2.position = snap.position[::-1]
     snap_2.image = snap.image[::-1]
     snap_2.velocity = snap.velocity[::-1]
@@ -72,7 +72,7 @@ def test_dump_file_all(snap, use_gzip, tmp_path):
         filename = tmp_path / "atoms.lammpstrj.gz"
     else:
         filename = tmp_path / "atoms.lammpstrj"
-    f = lmptools.DumpFile.create(filename, schema, snaps)
+    f = lammpsio.DumpFile.create(filename, schema, snaps)
     assert filename.exists
     assert len(f) == 2
 

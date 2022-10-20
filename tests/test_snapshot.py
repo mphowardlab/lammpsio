@@ -1,11 +1,11 @@
 import numpy
 import pytest
 
-import lmptools
+import lammpsio
 
 def test_create(snap):
     assert snap.N == 3
-    assert isinstance(snap.box, lmptools.Box)
+    assert isinstance(snap.box, lammpsio.Box)
     assert snap.step == 10
 
 def test_position(snap):

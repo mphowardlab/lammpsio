@@ -1,10 +1,10 @@
-# lmptools
+# lammpsio
 
 Tools for working with LAMMPS data and dump files.
 
-`lmptools` is a pure Python package that can be installed using `pip`:
+`lammpsio` is a pure Python package that can be installed using `pip`:
 
-    pip install lmptools
+    pip install lammpsio
 
 ## Snapshot
 
@@ -13,8 +13,8 @@ data for *N* particles, the simulation `Box`, and the timestep. The `Box` follow
 the LAMMPS conventions for its shape and bounds. Here is a 3-particle
 configuration in an orthorhombic box centered at the origin at step 100:
 
-    box = lmptools.Box((-2,-3,-4), (2,3,4))
-    snapshot = lmptools.Snapshot(3, box, step=100)
+    box = lammpsio.Box((-2,-3,-4), (2,3,4))
+    snapshot = lammpsio.Snapshot(3, box, step=100)
 
 These constructor arguments are available as attributes:
 
@@ -52,7 +52,7 @@ and data type:
 A LAMMPS data file is represented by a `DataFile`. The file must be explicitly
 `read()` to get a `Snapshot`:
 
-    f = lmptools.DataFile("config.data")
+    f = lammpsio.DataFile("config.data")
     snapshot = f.read()
 
 The `atom_style` will be read from the comment in the Atoms section
@@ -60,14 +60,14 @@ of the file. If it is not present, it must be specified in the `DataFile`.
 If `atom_style` is specified and also present in the file, the two must match
 or an error will be raised.
 
-There are many sections that can be stored in a data file, but `lmptools` does
+There are many sections that can be stored in a data file, but `lammpsio` does
 not currently understand all of them. You can check `DataFile.known_headers`,
 `DataFile.unknown_headers`, `DataFile.known_bodies` and `DataFile.unknown_bodies`
 for lists of what is currently supported.
 
 A `Snapshot` can be written using the `create()` method:
 
-    f = lmptools.DataFile.create("config2.data", snapshot)
+    f = lammpsio.DataFile.create("config2.data", snapshot)
 
 A `DataFile` corresponding to the new file is returned by `create()`.
 
@@ -76,7 +76,7 @@ A `DataFile` corresponding to the new file is returned by `create()`.
 A LAMMPS dump file is represented by a `DumpFile`. The actual file format is
 very flexible, so a schema needs to be specified to parse it.
 
-    traj = lmptools.DumpFile(
+    traj = lammpsio.DumpFile(
             filename="atoms.lammpstrj",
             schema={"id": 0, "typeid": 1, "position": (2, 3, 4)}
             )
@@ -108,6 +108,6 @@ Keep in the mind that the memory requirements for this can be huge!
 
 A `DumpFile` can be created from a list of snapshots:
 
-    t = lmptools.DumpFile.create("atoms.lammpstrj", schema)
+    t = lammpsio.DumpFile.create("atoms.lammpstrj", schema)
 
 The object representing the new file is returned and can be used.
