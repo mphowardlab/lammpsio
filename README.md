@@ -24,13 +24,13 @@ These constructor arguments are available as attributes:
 
 The data contained in a `Snapshot` per particle is:
 
-- `position`: (*N*,3) array of coordinates (dtype: `numpy.float64`)
-- `image`: (*N*,3) array of periodic image indexes (dtype: `numpy.int32`)
-- `velocity`: (*N*,3) array of velocities (dtype: `numpy.float64`)
-- `molecule`: (*N*,) array of molecule indexes (dtype: `numpy.int32`)
-- `typeid`: (*N*,) array of type indexes (dtype: `numpy.int32`)
-- `mass`: (*N*,) array of masses (dtype: `numpy.float64`)
-- `charge`: (*N*,) array of charges (dtype: `numpy.float64`)
+- `position`: (*N*,3) array of coordinates (dtype: `numpy.float64`, default: `(0,0,0)`)
+- `image`: (*N*,3) array of periodic image indexes (dtype: `numpy.int32`, default: `(0,0,0)`)
+- `velocity`: (*N*,3) array of velocities (dtype: `numpy.float64`, default: `(0,0,0)`)
+- `molecule`: (*N*,) array of molecule indexes (dtype: `numpy.int32`, default: `0`)
+- `typeid`: (*N*,) array of type indexes (dtype: `numpy.int32`, default: `1`)
+- `mass`: (*N*,) array of masses (dtype: `numpy.float64`, default: `1`)
+- `charge`: (*N*,) array of charges (dtype: `numpy.float64`, default: `0`)
 
 All values of indexes will follow the LAMMPS 1-indexed convention, but the
 arrays themselves are 0-indexed.
