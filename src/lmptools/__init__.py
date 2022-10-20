@@ -691,9 +691,6 @@ class DumpFile:
                             snap.image[tag] = [int(atom[j]) for j in self.schema['image']]
                         if 'molecule' in self.schema:
                             snap.molecule[tag] = int(atom[self.schema['molecule']])
-                        elif 'mol' in self.schema:
-                            # allow both mol and molecule for backwards compatibility
-                            snap.molecule[tag] = int(atom[self.schema['mol']])
                         if 'typeid' in self.schema:
                             snap.typeid[tag] = int(atom[self.schema['typeid']])
                         if 'charge' in self.schema:
