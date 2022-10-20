@@ -1,4 +1,3 @@
-import gzip
 import numpy
 import pytest
 
@@ -6,24 +5,21 @@ import lmptools
 
 @pytest.mark.parametrize('use_gzip', [False, True])
 def test_dump_file_min(snap, use_gzip, tmp_path):
-    # minimum file info
-    snap.position = [[0.1,0.2,0.3],[-0.4,-0.5,-0.6],[0.7,0.8,0.9]]
-    snap_2 = lmptools.Snapshot(snap.N, snap.box, snap.step+1)
-    snap_2.position = snap.position[::-1]
+    # create file with 2 snapshots with defaults, changing N & step
+    snap_2 = lmptools.Snapshot(snap.N+2, snap.box, snap.step+1)
     snaps = [snap, snap_2]
-
-    # create file with 2 snapshots
     if use_gzip:
         filename = tmp_path / "atoms.lammpstrj.gz"
     else:
         filename = tmp_path / "atoms.lammpstrj"
     schema = {'id': 0, 'position': (1, 2, 3)}
     f = lmptools.DumpFile.create(filename, schema, snaps)
+    assert filename.exists
     assert len(f) == 2
 
     # read it back in and check snapshots
     read_snaps = [s for s in f]
-    for i,s in enumerate(f):
+    for i in range(2):
         assert read_snaps[i].N == snaps[i].N
         assert read_snaps[i].step == snaps[i].step
         assert numpy.allclose(read_snaps[i].box.low, snaps[i].box.low)
@@ -33,7 +29,7 @@ def test_dump_file_min(snap, use_gzip, tmp_path):
         else:
             assert read_snaps[i].box.tilt is None
         assert snaps[i].has_position()
-        assert numpy.allclose(read_snaps[i].position, snaps[i].position)
+        assert numpy.allclose(read_snaps[i].position, 0)
         assert not snaps[i].has_image()
         assert not snaps[i].has_velocity()
         assert not snaps[i].has_typeid()
@@ -77,7 +73,7 @@ def test_dump_file_all(snap, use_gzip, tmp_path):
     else:
         filename = tmp_path / "atoms.lammpstrj"
     f = lmptools.DumpFile.create(filename, schema, snaps)
-
+    assert filename.exists
     assert len(f) == 2
 
     # read it back in and check snapshots

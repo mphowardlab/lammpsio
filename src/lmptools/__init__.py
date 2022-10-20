@@ -232,10 +232,6 @@ class DataFile:
 
     @classmethod
     def create(cls, filename, snapshot, atom_style=None):
-        # validate snapshot
-        if not snapshot.has_position():
-            raise ValueError('Snapshot does not have positions')
-
         # extract number of types
         num_types = numpy.amax(numpy.unique(snapshot.typeid))
 
