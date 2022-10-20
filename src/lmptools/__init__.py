@@ -1,4 +1,7 @@
 import gzip
+import os
+import pathlib
+
 import numpy
 
 class Box:
@@ -84,10 +87,12 @@ class Snapshot:
 
     @position.setter
     def position(self, value):
+        if not self.has_position():
+            self._position = numpy.zeros((self.N, 3), dtype=numpy.float64)
         v = numpy.array(value, ndmin=2, copy=False, dtype=numpy.float64)
-        if v.shape != (self.N,3):
+        if v.shape != (self.N, 3):
             raise TypeError('Positions must be an Nx3 array')
-        self._position = v
+        numpy.copyto(self._position, v)
 
     def has_position(self):
         return self._position is not None
@@ -100,10 +105,12 @@ class Snapshot:
 
     @image.setter
     def image(self, value):
+        if not self.has_image():
+            self._image = numpy.zeros((self.N, 3), dtype=numpy.int32)
         v = numpy.array(value, ndmin=2, copy=False, dtype=numpy.int32)
-        if v.shape != (self.N,3):
+        if v.shape != (self.N, 3):
             raise TypeError('Images must be an Nx3 array')
-        self._image = v
+        numpy.copyto(self._image, v)
 
     def has_image(self):
         return self._image is not None
@@ -116,10 +123,12 @@ class Snapshot:
 
     @velocity.setter
     def velocity(self, value):
+        if not self.has_velocity():
+            self._velocity = numpy.zeros((self.N, 3), dtype=numpy.float64)
         v = numpy.array(value, ndmin=2, copy=False, dtype=numpy.float64)
-        if v.shape != (self.N,3):
+        if v.shape != (self.N, 3):
             raise TypeError('Velocities must be an Nx3 array')
-        self._velocity = v
+        numpy.copyto(self._velocity, v)
 
     def has_velocity(self):
         return self._velocity is not None
@@ -132,10 +141,12 @@ class Snapshot:
 
     @molecule.setter
     def molecule(self, value):
+        if not self.has_molecule():
+            self._molecule = numpy.zeros(self.N, dtype=numpy.int32)
         v = numpy.array(value, ndmin=1, copy=False, dtype=numpy.int32)
         if v.shape != (self.N,):
             raise TypeError('Molecules must be a size N array')
-        self._molecule = v
+        numpy.copyto(self._molecule, v)
 
     def has_molecule(self):
         return self._molecule is not None
@@ -148,10 +159,12 @@ class Snapshot:
 
     @typeid.setter
     def typeid(self, value):
+        if not self.has_typeid():
+            self._typeid = numpy.ones(self.N, dtype=numpy.int32)
         v = numpy.array(value, ndmin=1, copy=False, dtype=numpy.int32)
         if v.shape != (self.N,):
             raise TypeError('Type must be a size N array')
-        self._typeid = v
+        numpy.copyto(self._typeid, v)
 
     def has_typeid(self):
         return self._typeid is not None
@@ -164,10 +177,12 @@ class Snapshot:
 
     @charge.setter
     def charge(self, value):
+        if not self.has_charge():
+            self._charge = numpy.zeros(self.N, dtype=numpy.float64)
         v = numpy.array(value, ndmin=1, copy=False, dtype=numpy.float64)
         if v.shape != (self.N,):
             raise TypeError('Charge must be a size N array')
-        self._charge = v
+        numpy.copyto(self._charge, v)
 
     def has_charge(self):
         return self._charge is not None
@@ -180,10 +195,12 @@ class Snapshot:
 
     @mass.setter
     def mass(self, value):
+        if not self.has_mass():
+            self._mass = numpy.ones(self.N, dtype=numpy.float64)
         v = numpy.array(value, ndmin=1, copy=False, dtype=numpy.float64)
         if v.shape != (self.N,):
             raise TypeError('Mass must be a size N array')
-        self._mass = v
+        numpy.copyto(self._mass, v)
 
     def has_mass(self):
         return self._mass is not None
@@ -466,11 +483,93 @@ class DataFile:
         return snap
 
 class DumpFile:
-    def __init__(self, filename, schema, mass=None):
+    def __init__(self, filename, schema):
         self.filename = filename
         self.schema = schema
-        self.mass = mass
         self._frames = None
+
+    @classmethod
+    def create(cls, filename, schema, snapshots):
+        # map out the schema into a dump row
+        # each entry is a tuple: (column, (attribute, index))
+        # the index is None for scalars, otherwise it is the component of the vector
+        dump_row = []
+        for k, v in schema.items():
+            try:
+                cols = iter(v)
+                for i,col in enumerate(cols):
+                    dump_row.append((col, (k, i)))
+            except TypeError:
+                dump_row.append((v, (k, None)))
+        dump_row.sort(key=lambda x : x[0])
+
+        # make snapshots iterable
+        try:
+            snapshots = iter(snapshots)
+        except TypeError:
+            snapshots = [snapshots]
+
+        with open(filename, 'w') as f:
+            for snap in snapshots:
+                f.write('ITEM: TIMESTEP\n')
+                f.write('{}\n'.format(snap.step))
+
+                f.write('ITEM: NUMBER OF ATOMS\n')
+                f.write('{}\n'.format(snap.N))
+
+                box_header = 'ITEM: BOX BOUNDS'
+                if snap.box.tilt is not None:
+                    xy, xz, yz = snap.box.tilt
+                    box_header += ' {xy:f} {xz:f} {yz:f}'.format(xy=xy, xz=xz, yz=yz)
+                    lo = [
+                        snap.box.low[0] + min([0.0, xy, xz, xy+xz]),
+                        snap.box.low[1] + min([0.0, yz]),
+                        snap.box.low[2]
+                        ]
+                    hi = [
+                        snap.box.high[0] + max([0.0, xy, xz, xy+xz]),
+                        snap.box.high[1] + max([0.0, yz]),
+                        snap.box.high[2]
+                        ]
+                else:
+                    lo = snap.box.low
+                    hi = snap.box.high
+                f.write(box_header + '\n')
+                for i in range(3):
+                    f.write('{lo:f} {hi:f}\n'.format(lo=lo[i], hi=hi[i]))
+
+                f.write('ITEM: ATOMS\n')
+                for i in range(snap.N):
+                    line = ''
+                    for col, (key, key_idx) in dump_row:
+                        if key == 'id':
+                            val = i + 1
+                        else:
+                            val = getattr(snap, key)[i]
+                            if key_idx is not None:
+                                val = val[key_idx]
+
+                        if key in ('id', 'typeid', 'molecule', 'image'):
+                            fmt = '{:d}'
+                        elif key in ('position', 'velocity'):
+                            fmt = '{:.8f}'
+                        else:
+                            fmt = '{:f}'
+
+                        if col > 0:
+                            fmt = ' ' + fmt
+                        line += fmt.format(val)
+                    line = line.strip()
+                    f.write(line + '\n')
+
+        filename_path = pathlib.Path(filename)
+        if filename_path.suffix == '.gz':
+            tmp = pathlib.Path(filename).with_suffix(filename_path.suffix + '.tmp')
+            with open(filename, 'rb') as src, gzip.open(tmp, 'wb') as dest:
+                dest.writelines(src)
+            os.replace(tmp, filename)
+
+        return DumpFile(filename, schema)
 
     @property
     def filename(self):
@@ -479,8 +578,7 @@ class DumpFile:
     @filename.setter
     def filename(self, value):
         self._filename = value
-        with open(self._filename,'rb') as f:
-            self._gzip = f.read(2) == b'\x1f\x8b'
+        self._gzip = pathlib.Path(value).suffix == '.gz'
 
         # configure section labels of dump file
         self._section= {
@@ -512,9 +610,9 @@ class DumpFile:
 
     def _open(self):
         if self._gzip:
-            f = gzip.open(self.filename,'r')
+            f = gzip.open(self.filename, 'rb')
         else:
-            f = open(self.filename,'r')
+            f = open(self.filename, 'r')
         return f
 
     def _find_frames(self):
@@ -553,8 +651,8 @@ class DumpFile:
                     state += 1
                     # check for triclinic
                     box_header = line.split()
-                    if len(box_header) >= 5:
-                        box_tilt = [xy, xz, yz]
+                    if len(box_header) >= 6:
+                        box_tilt = [float(x) for x in box_header[3:6]]
                     else:
                         box_tilt = None
                     box_x = readline_(f,True)
@@ -604,8 +702,8 @@ class DumpFile:
                             snap.typeid[tag] = int(atom[self.schema['typeid']])
                         if 'charge' in self.schema:
                             snap.charge[tag] = float(atom[self.schema['charge']])
-                        if self.mass is not None:
-                            snap.mass[tag] = self.mass[snap.typeid[tag]]
+                        if 'mass' in self.schema:
+                            snap.mass[tag] = float(atom[self.schema['mass']])
 
                 # final processing stage for the frame
                 if state == 4:

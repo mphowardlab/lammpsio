@@ -9,8 +9,7 @@ def test_data_file_min(snap, atom_style, tmp_path):
     snap.position = [[0.1,0.2,0.3],[-0.4,-0.5,-0.6],[0.7,0.8,0.9]]
 
     # write the data file
-    filename = tmp_path / "config.data"
-    data = lmptools.DataFile.create(filename, snap, atom_style)
+    data = lmptools.DataFile.create(tmp_path / "atoms.data", snap, atom_style)
     # images should not have been created if not specified
     assert not snap.has_image()
 
@@ -52,8 +51,7 @@ def test_data_file_all(snap, atom_style, set_style, tmp_path):
         snap.charge = [-1,0,1]
 
     # write the data file
-    filename = tmp_path / "config.data"
-    data = lmptools.DataFile.create(filename, snap, atom_style if set_style else None)
+    data = lmptools.DataFile.create(tmp_path / "atoms.data", snap, atom_style if set_style else None)
 
     # read it back in and check
     snap_2 = data.read()
