@@ -130,6 +130,7 @@ class Snapshot:
         self._box = Box.cast(box)
         self.step = step
 
+        self._id = None
         self._position = None
         self._velocity = None
         self._image = None
@@ -147,6 +148,33 @@ class Snapshot:
     def box(self):
         """:class:`Box`: Simulation box."""
         return self._box
+
+    @property
+    def id(self):
+        """:class:`numpy.ndarray`: Particle IDs."""
+        if not self.has_id():
+            self._id = numpy.arange(1, self.N+1)
+        return self._id
+
+    @id.setter
+    def id(self, value):
+        if not self.has_id():
+            self._id = numpy.arange(1, self.N+1)
+        v = numpy.array(value, ndmin=1, copy=False, dtype=numpy.int32)
+        if v.shape != (self.N,):
+            raise TypeError('Ids must be a size N array')
+        numpy.copyto(self._id, v)
+
+    def has_id(self):
+        """Check if configuration has particle IDs.
+
+        Returns
+        -------
+        bool
+            True if particle IDs have been initialized.
+
+        """
+        return self._id is not None
 
     @property
     def position(self):
@@ -337,6 +365,41 @@ class Snapshot:
         """
         return self._mass is not None
 
+    def reorder(self, order, check_order=True):
+        """Reorder the particles in place.
+
+        Parameters
+        ----------
+        order : list
+            New order of indexes.
+        check_order : bool
+            If true, validate the new ``order`` before applying it.
+
+        """
+        # sanity check the sorting order before applying it
+        if check_order and self.N > 1:
+            sorted_order = numpy.sort(order)
+            if (sorted_order[0] != 0 or sorted_order[-1] != self.N-1
+                or not numpy.all(sorted_order[1:] == sorted_order[:-1]+1)):
+                raise ValueError('New order must be an array from 0 to N-1')
+
+        if self.has_id():
+            self._id = self._id[order]
+        if self.has_position():
+            self._position = self._position[order]
+        if self.has_velocity():
+            self._velocity = self._velocity[order]
+        if self.has_image():
+            self._image = self._image[order]
+        if self.has_molecule():
+            self._molecule = self._molecule[order]
+        if self.has_typeid():
+            self._typeid = self._typeid[order]
+        if self.has_charge():
+            self._charge = self._charge[order]
+        if self.has_mass():
+            self._mass = self._mass[order]
+
 class DataFile:
     """LAMMPS data file.
 
@@ -464,7 +527,7 @@ class DataFile:
             f.write("\nAtoms # {}\n\n".format(style))
             for i in range(snapshot.N):
                 style_args = dict(
-                    atomid=i+1,
+                    atomid=snapshot.id[i] if snapshot.has_id() else i+1,
                     typeid=snapshot.typeid[i],
                     x=snapshot.position[i][0],
                     y=snapshot.position[i][1],
@@ -485,7 +548,7 @@ class DataFile:
                 for i in range(snapshot.N):
                     vel_fmt="{atomid:8d}{vx:16.8f}{vy:16.8f}{vz:16.8f}\n"
                     f.write(vel_fmt.format(
-                        atomid=i+1,
+                        atomid=snapshot.id[i] if snapshot.has_id() else i+1,
                         vx=snapshot.velocity[i][0],
                         vy=snapshot.velocity[i][1],
                         vz=snapshot.velocity[i][2]))
@@ -494,7 +557,7 @@ class DataFile:
             if masses is not None:
                 f.write("\nMasses\n\n")
                 for i,mi in enumerate(masses):
-                    f.write("{typeid:4d}{m:12}\n".format(typeid=i+1,m=mi))
+                    f.write("{typeid:4d}{m:12}\n".format(typeid=i+1, m=mi))
 
         return DataFile(filename)
 
@@ -578,6 +641,7 @@ class DataFile:
                 raise IOError('Box bounds not read')
             box = Box(box_bounds[:3], box_bounds[3:], box_tilt)
             snap = Snapshot(N,box)
+            id_map = {}
 
             # now that snapshot is made, file it in with body sections
             masses = None
@@ -619,7 +683,17 @@ class DataFile:
                         # check that row is correctly sized and process
                         if not (len(row) == style_cols+4 or len(row) == style_cols+7):
                             raise IOError('Expected number of columns not read for atom style')
-                        idx = int(row[0])-1
+
+                        # only save the atom id if it is not in standard order
+                        id_ = int(row[0])
+                        if id_ != i+1:
+                            if id_ not in id_map:
+                                id_map[id_] = i
+                            idx = id_map[id_]
+                            snap.id[idx] = id_
+                        else:
+                            idx = i
+
                         if style == 'full':
                             snap.molecule[idx] = int(row[1])
                             snap.typeid[idx] = int(row[2])
@@ -645,7 +719,15 @@ class DataFile:
                         row = _readline(f,True).split()
                         if len(row) < 4:
                             raise IOError('Expected number of columns not read for velocity')
-                        idx = int(row[0])-1
+                        # parse atom id: need to repeat mapping in case Velocity comes before Atoms
+                        id_ = int(row[0])
+                        if id_ != i+1:
+                            if id_ not in id_map:
+                                id_map[id_] = i
+                            idx = id_map[id_]
+                            snap.id[idx] = id_
+                        else:
+                            idx = i
                         snap.velocity[idx] = [float(x) for x in row[1:4]]
                 elif 'Masses' in line:
                     masses = {}
@@ -684,13 +766,16 @@ class DumpFile:
         Path to dump file.
     schema : dict
         Schema for the contents of the file.
+    sort_ids : bool
+        If true, sort the particles by ID in each snapshot.
 
     """
 
-    def __init__(self, filename, schema):
+    def __init__(self, filename, schema, sort_ids=True):
         self.filename = filename
         self.schema = schema
         self._frames = None
+        self.sort_ids = sort_ids
 
     @classmethod
     def create(cls, filename, schema, snapshots):
@@ -764,7 +849,7 @@ class DumpFile:
                     line = ''
                     for col, (key, key_idx) in dump_row:
                         if key == 'id':
-                            val = i + 1
+                            val = snap.id[i] if snap.has_id() else i+1
                         else:
                             val = getattr(snap, key)[i]
                             if key_idx is not None:
@@ -909,27 +994,28 @@ class DumpFile:
                         atom = atom.split()
 
                         if 'id' in self.schema:
-                            tag = int(atom[self.schema['id']]) - 1
-                        else:
-                            tag = i
-
+                            id_ = int(atom[self.schema['id']])
+                            if id_ != i+1:
+                                snap.id[i] = id_
                         if 'position' in self.schema:
-                            snap.position[tag] = [float(atom[j]) for j in self.schema['position']]
+                            snap.position[i] = [float(atom[j]) for j in self.schema['position']]
                         if 'velocity' in self.schema:
-                            snap.velocity[tag] = [float(atom[j]) for j in self.schema['velocity']]
+                            snap.velocity[i] = [float(atom[j]) for j in self.schema['velocity']]
                         if 'image' in self.schema:
-                            snap.image[tag] = [int(atom[j]) for j in self.schema['image']]
+                            snap.image[i] = [int(atom[j]) for j in self.schema['image']]
                         if 'molecule' in self.schema:
-                            snap.molecule[tag] = int(atom[self.schema['molecule']])
+                            snap.molecule[i] = int(atom[self.schema['molecule']])
                         if 'typeid' in self.schema:
-                            snap.typeid[tag] = int(atom[self.schema['typeid']])
+                            snap.typeid[i] = int(atom[self.schema['typeid']])
                         if 'charge' in self.schema:
-                            snap.charge[tag] = float(atom[self.schema['charge']])
+                            snap.charge[i] = float(atom[self.schema['charge']])
                         if 'mass' in self.schema:
-                            snap.mass[tag] = float(atom[self.schema['mass']])
+                            snap.mass[i] = float(atom[self.schema['mass']])
 
                 # final processing stage for the frame
                 if state == 4:
+                    if self.sort_ids and snap.has_id():
+                        snap.reorder(numpy.argsort(snap.id), check_order=False)
                     yield snap
                     del snap,N,box,step
                     state = 0

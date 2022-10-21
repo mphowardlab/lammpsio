@@ -26,6 +26,7 @@ These constructor arguments are available as attributes:
 
 The data contained in a `Snapshot` per particle is:
 
+- `id`: (*N*,) array atom IDs (dtype: `numpy.float32`, default: runs from 1 to *N*)
 - `position`: (*N*,3) array of coordinates (dtype: `numpy.float64`, default: `(0,0,0)`)
 - `image`: (*N*,3) array of periodic image indexes (dtype: `numpy.int32`, default: `(0,0,0)`)
 - `velocity`: (*N*,3) array of velocities (dtype: `numpy.float64`, default: `(0,0,0)`)
@@ -85,6 +86,10 @@ Valid keys for the schema match the names and shapes in the `Snapshot`. The
 keys requiring only 1 column index are: `id`, `typeid`, `molecule`, `charge`,
 and `mass`. The keys requiring 3 column indexes are `position`, `velocity`,
 and `image`.
+
+LAMMPS will dump particles in an unknown order unless you have used the
+`dump_modify sort` option. If you want particles to be ordered by `id` in the
+`Snapshot`, use `sort_ids=True` (default).
 
 A `DumpFile` is iterable, so you can use it to go through all the snapshots
 of a trajectory:
