@@ -1,5 +1,7 @@
 # lammpsio
 
+[![PyPI version](https://img.shields.io/pypi/v/lammpsio.svg)](https://pypi.org/project/lammpsio)
+
 Tools for working with LAMMPS data and dump files.
 
 `lammpsio` is a pure Python package that can be installed using `pip`:
@@ -38,9 +40,7 @@ arrays themselves are 0-indexed.
 The `Snapshot` will lazily initialize these per-particle arrays as they are
 accessed to save memory. Hence, accessing a per-particle property will allocate
 it to default values. If you want to check if an attribute has been set, use the
-corresponding `has_` method instead (e.g., `has_position()`). The setters are
-zero-copy if the assigned values are already NumPy arrays with the proper shape
-and data type:
+corresponding `has_` method instead (e.g., `has_position()`):
 
     snapshot.position = [[0,0,0],[1,-1,1],[1.5,2.5,-3.5]]
     snapshot.typeid[2] = 2
@@ -108,6 +108,6 @@ Keep in the mind that the memory requirements for this can be huge!
 
 A `DumpFile` can be created from a list of snapshots:
 
-    t = lammpsio.DumpFile.create("atoms.lammpstrj", schema)
+    t = lammpsio.DumpFile.create("atoms.lammpstrj", schema, snaps)
 
 The object representing the new file is returned and can be used.
