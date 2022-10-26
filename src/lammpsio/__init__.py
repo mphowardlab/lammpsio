@@ -75,7 +75,7 @@ class Box:
 
     @low.setter
     def low(self, value):
-        v = numpy.array(value, ndmin=1, copy=False, dtype=numpy.float64)
+        v = numpy.array(value, ndmin=1, copy=True, dtype=numpy.float64)
         if v.shape != (3,):
             raise TypeError('Low must be a 3-tuple')
         self._low = v
@@ -87,7 +87,7 @@ class Box:
 
     @high.setter
     def high(self, value):
-        v = numpy.array(value, ndmin=1, copy=False, dtype=numpy.float64)
+        v = numpy.array(value, ndmin=1, copy=True, dtype=numpy.float64)
         if v.shape != (3,):
             raise TypeError('High must be a 3-tuple')
         self._high = v
@@ -101,7 +101,7 @@ class Box:
     def tilt(self, value):
         v = value
         if v is not None:
-            v = numpy.array(v, ndmin=1, copy=False, dtype=numpy.float64)
+            v = numpy.array(v, ndmin=1, copy=True, dtype=numpy.float64)
             if v.shape != (3,):
                 raise TypeError('Tilt must be a 3-tuple')
         self._tilt = v
@@ -768,14 +768,18 @@ class DumpFile:
         Schema for the contents of the file.
     sort_ids : bool
         If true, sort the particles by ID in each snapshot.
+    copy_from : :class:`Snapshot`
+        If specified, copy fields that are missing in the dump file but are set in
+        a reference :class:`Snapshot`.
 
     """
 
-    def __init__(self, filename, schema, sort_ids=True):
+    def __init__(self, filename, schema, sort_ids=True, copy_from=None):
         self.filename = filename
         self.schema = schema
         self._frames = None
         self.sort_ids = sort_ids
+        self.copy_from = copy_from
 
     @classmethod
     def create(cls, filename, schema, snapshots):
@@ -876,6 +880,16 @@ class DumpFile:
             os.replace(tmp, filename)
 
         return DumpFile(filename, schema)
+
+    @property
+    def copy_from(self):
+        return self._copy_from
+
+    @copy_from.setter
+    def copy_from(self, value):
+        if value is not None and not isinstance(value, Snapshot):
+            raise TypeError('Dump file can only copy from Snapshot')
+        self._copy_from = value
 
     @property
     def filename(self):
@@ -1014,8 +1028,34 @@ class DumpFile:
 
                 # final processing stage for the frame
                 if state == 4:
+                    # optionally sort the particles by ID
                     if self.sort_ids and snap.has_id():
                         snap.reorder(numpy.argsort(snap.id), check_order=False)
+
+                    # optionally copy reference data by ID / index
+                    if self._copy_from is not None:
+                        if snap.N != self._copy_from.N:
+                            raise ValueError('Cannot copy from a Snapshot with a different size')
+
+                        if self._copy_from.has_id():
+                            copy_id_map = {id_: i for i, id_ in enumerate(self._copy_from.id)}
+                        else:
+                            copy_id_map = {i+1: i for i in range(self._copy_from.N)}
+
+                        if snap.has_id():
+                            copy_id = [copy_id_map[id_] for id_ in snap.id]
+                        else:
+                            copy_id = [copy_id_map[id_] for id_ in range(1, snap.N+1)]
+
+                        if not snap.has_molecule() and self._copy_from.has_molecule():
+                            snap.molecule = self._copy_from.molecule[copy_id]
+                        if not snap.has_typeid() and self._copy_from.has_typeid():
+                            snap.typeid = self._copy_from.typeid[copy_id]
+                        if not snap.has_charge() and self._copy_from.has_charge():
+                            snap.charge = self._copy_from.charge[copy_id]
+                        if not snap.has_mass() and self._copy_from.has_mass():
+                            snap.mass = self._copy_from.mass[copy_id]
+
                     yield snap
                     del snap,N,box,step
                     state = 0
