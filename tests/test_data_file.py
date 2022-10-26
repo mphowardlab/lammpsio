@@ -3,8 +3,11 @@ import pytest
 
 import lammpsio
 
+@pytest.mark.parametrize("shuffle_ids", [False, True])
 @pytest.mark.parametrize("atom_style", ["atomic", "molecular", "charge", "full"])
-def test_data_file_min(snap, atom_style, tmp_path):
+def test_data_file_min(snap, atom_style, shuffle_ids, tmp_path):
+    if shuffle_ids:
+        snap.id = [2, 0, 1]
     # write the data file with default values
     filename = tmp_path / "atoms.data"
     data = lammpsio.DataFile.create(filename, snap, atom_style)
@@ -20,6 +23,11 @@ def test_data_file_min(snap, atom_style, tmp_path):
         assert numpy.allclose(snap_2.box.tilt, snap.box.tilt)
     else:
         assert snap_2.box.tilt is None
+    if shuffle_ids:
+        assert snap_2.has_id()
+        assert numpy.allclose(snap_2.id, snap.id)
+    else:
+        assert not snap_2.has_id()
     assert snap_2.has_position()
     assert numpy.allclose(snap_2.position, 0)
     assert not snap_2.has_image()
@@ -38,9 +46,12 @@ def test_data_file_min(snap, atom_style, tmp_path):
     else:
         assert not snap_2.has_charge()
 
+@pytest.mark.parametrize("shuffle_ids", [False, True])
 @pytest.mark.parametrize("set_style", [True, False])
 @pytest.mark.parametrize("atom_style", ["atomic", "molecular", "charge", "full"])
-def test_data_file_all(snap, atom_style, set_style, tmp_path):
+def test_data_file_all(snap, atom_style, set_style, shuffle_ids, tmp_path):
+    if shuffle_ids:
+        snap.id = [2, 0, 1]
     # write the data file with nondefault values
     snap.position = [[0.1,0.2,0.3],[-0.4,-0.5,-0.6],[0.7,0.8,0.9]]
     snap.image = [[1,2,3],[-4,-5,-6],[7,8,9]]
@@ -65,6 +76,11 @@ def test_data_file_all(snap, atom_style, set_style, tmp_path):
         assert numpy.allclose(snap_2.box.tilt, snap.box.tilt)
     else:
         assert snap_2.box.tilt is None
+    if shuffle_ids:
+        assert snap_2.has_id()
+        assert numpy.allclose(snap_2.id, snap.id)
+    else:
+        assert not snap_2.has_id()
     assert snap_2.has_position()
     assert numpy.allclose(snap_2.position, snap.position)
     assert snap_2.has_velocity()
