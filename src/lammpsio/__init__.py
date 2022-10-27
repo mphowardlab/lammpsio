@@ -159,11 +159,11 @@ class Snapshot:
     @id.setter
     def id(self, value):
         if value is not None:
-            if not self.has_id():
-                self._id = numpy.arange(1, self.N+1)
             v = numpy.array(value, ndmin=1, copy=False, dtype=numpy.int32)
             if v.shape != (self.N,):
                 raise TypeError('Ids must be a size N array')
+            if not self.has_id():
+                self._id = numpy.arange(1, self.N+1)
             numpy.copyto(self._id, v)
         else:
             self._id = None
@@ -189,11 +189,11 @@ class Snapshot:
     @position.setter
     def position(self, value):
         if value is not None:
-            if not self.has_position():
-                self._position = numpy.zeros((self.N, 3), dtype=numpy.float64)
             v = numpy.array(value, ndmin=2, copy=False, dtype=numpy.float64)
             if v.shape != (self.N, 3):
                 raise TypeError('Positions must be an Nx3 array')
+            if not self.has_position():
+                self._position = numpy.zeros((self.N, 3), dtype=numpy.float64)
             numpy.copyto(self._position, v)
         else:
             self._position = None
@@ -219,11 +219,11 @@ class Snapshot:
     @image.setter
     def image(self, value):
         if value is not None:
-            if not self.has_image():
-                self._image = numpy.zeros((self.N, 3), dtype=numpy.int32)
             v = numpy.array(value, ndmin=2, copy=False, dtype=numpy.int32)
             if v.shape != (self.N, 3):
                 raise TypeError('Images must be an Nx3 array')
+            if not self.has_image():
+                self._image = numpy.zeros((self.N, 3), dtype=numpy.int32)
             numpy.copyto(self._image, v)
         else:
             self._image = None
@@ -249,11 +249,11 @@ class Snapshot:
     @velocity.setter
     def velocity(self, value):
         if value is not None:
-            if not self.has_velocity():
-                self._velocity = numpy.zeros((self.N, 3), dtype=numpy.float64)
             v = numpy.array(value, ndmin=2, copy=False, dtype=numpy.float64)
             if v.shape != (self.N, 3):
                 raise TypeError('Velocities must be an Nx3 array')
+            if not self.has_velocity():
+                self._velocity = numpy.zeros((self.N, 3), dtype=numpy.float64)
             numpy.copyto(self._velocity, v)
         else:
             self._velocity = None
@@ -279,11 +279,11 @@ class Snapshot:
     @molecule.setter
     def molecule(self, value):
         if value is not None:
-            if not self.has_molecule():
-                self._molecule = numpy.zeros(self.N, dtype=numpy.int32)
             v = numpy.array(value, ndmin=1, copy=False, dtype=numpy.int32)
             if v.shape != (self.N,):
                 raise TypeError('Molecules must be a size N array')
+            if not self.has_molecule():
+                self._molecule = numpy.zeros(self.N, dtype=numpy.int32)
             numpy.copyto(self._molecule, v)
         else:
             self._molecule = None
@@ -309,11 +309,11 @@ class Snapshot:
     @typeid.setter
     def typeid(self, value):
         if value is not None:
-            if not self.has_typeid():
-                self._typeid = numpy.ones(self.N, dtype=numpy.int32)
             v = numpy.array(value, ndmin=1, copy=False, dtype=numpy.int32)
             if v.shape != (self.N,):
                 raise TypeError('Type must be a size N array')
+            if not self.has_typeid():
+                self._typeid = numpy.ones(self.N, dtype=numpy.int32)
             numpy.copyto(self._typeid, v)
         else:
             self._typeid = None
@@ -339,11 +339,11 @@ class Snapshot:
     @charge.setter
     def charge(self, value):
         if value is not None:
-            if not self.has_charge():
-                self._charge = numpy.zeros(self.N, dtype=numpy.float64)
             v = numpy.array(value, ndmin=1, copy=False, dtype=numpy.float64)
             if v.shape != (self.N,):
                 raise TypeError('Charge must be a size N array')
+            if not self.has_charge():
+                self._charge = numpy.zeros(self.N, dtype=numpy.float64)
             numpy.copyto(self._charge, v)
         else:
             self._charge = None
@@ -369,11 +369,11 @@ class Snapshot:
     @mass.setter
     def mass(self, value):
         if value is not None:
-            if not self.has_mass():
-                self._mass = numpy.ones(self.N, dtype=numpy.float64)
             v = numpy.array(value, ndmin=1, copy=False, dtype=numpy.float64)
             if v.shape != (self.N,):
                 raise TypeError('Mass must be a size N array')
+            if not self.has_mass():
+                self._mass = numpy.ones(self.N, dtype=numpy.float64)
             numpy.copyto(self._mass, v)
         else:
             self._mass = None
