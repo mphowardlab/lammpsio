@@ -780,9 +780,9 @@ class DumpFile:
     The dump file is a flexible file format, so a ``schema`` needs to be given
     to parse the atom data. The ``schema`` is given as a dictionary of column
     indexes. Valid keys for the schema match the names and shapes in the `Snapshot`.
-    The keys requiring only 1 column index are: `id`, `typeid`, `molecule`, `charge`,
-    and `mass`. The keys requiring 3 column indexes are `position`, `velocity`,
-    and `image`.
+    The keys requiring only 1 column index are: ``id``, ``typeid``, ``molecule``,
+    ``charge``, and ``mass``. The keys requiring 3 column indexes are ``position``,
+    ``velocity``, and ``image``.
 
     Parameters
     ----------
@@ -794,7 +794,8 @@ class DumpFile:
         If true, sort the particles by ID in each snapshot.
     copy_from : :class:`Snapshot`
         If specified, copy fields that are missing in the dump file but are set in
-        a reference :class:`Snapshot`.
+        a reference :class:`Snapshot`. The fields that can be copied are ``typeid``,
+        ``molecule``, ``charge``, and ``mass``.
 
     """
 
@@ -1071,10 +1072,10 @@ class DumpFile:
                         else:
                             copy_id = [copy_id_map[id_] for id_ in range(1, snap.N+1)]
 
-                        if not snap.has_molecule() and self._copy_from.has_molecule():
-                            snap.molecule = self._copy_from.molecule[copy_id]
                         if not snap.has_typeid() and self._copy_from.has_typeid():
                             snap.typeid = self._copy_from.typeid[copy_id]
+                        if not snap.has_molecule() and self._copy_from.has_molecule():
+                            snap.molecule = self._copy_from.molecule[copy_id]
                         if not snap.has_charge() and self._copy_from.has_charge():
                             snap.charge = self._copy_from.charge[copy_id]
                         if not snap.has_mass() and self._copy_from.has_mass():
