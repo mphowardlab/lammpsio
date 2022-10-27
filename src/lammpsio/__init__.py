@@ -75,7 +75,7 @@ class Box:
 
     @low.setter
     def low(self, value):
-        v = numpy.array(value, ndmin=1, copy=False, dtype=numpy.float64)
+        v = numpy.array(value, ndmin=1, copy=True, dtype=numpy.float64)
         if v.shape != (3,):
             raise TypeError('Low must be a 3-tuple')
         self._low = v
@@ -87,7 +87,7 @@ class Box:
 
     @high.setter
     def high(self, value):
-        v = numpy.array(value, ndmin=1, copy=False, dtype=numpy.float64)
+        v = numpy.array(value, ndmin=1, copy=True, dtype=numpy.float64)
         if v.shape != (3,):
             raise TypeError('High must be a 3-tuple')
         self._high = v
@@ -101,7 +101,7 @@ class Box:
     def tilt(self, value):
         v = value
         if v is not None:
-            v = numpy.array(v, ndmin=1, copy=False, dtype=numpy.float64)
+            v = numpy.array(v, ndmin=1, copy=True, dtype=numpy.float64)
             if v.shape != (3,):
                 raise TypeError('Tilt must be a 3-tuple')
         self._tilt = v
@@ -158,12 +158,15 @@ class Snapshot:
 
     @id.setter
     def id(self, value):
-        if not self.has_id():
-            self._id = numpy.arange(1, self.N+1)
-        v = numpy.array(value, ndmin=1, copy=False, dtype=numpy.int32)
-        if v.shape != (self.N,):
-            raise TypeError('Ids must be a size N array')
-        numpy.copyto(self._id, v)
+        if value is not None:
+            v = numpy.array(value, ndmin=1, copy=False, dtype=numpy.int32)
+            if v.shape != (self.N,):
+                raise TypeError('Ids must be a size N array')
+            if not self.has_id():
+                self._id = numpy.arange(1, self.N+1)
+            numpy.copyto(self._id, v)
+        else:
+            self._id = None
 
     def has_id(self):
         """Check if configuration has particle IDs.
@@ -185,12 +188,15 @@ class Snapshot:
 
     @position.setter
     def position(self, value):
-        if not self.has_position():
-            self._position = numpy.zeros((self.N, 3), dtype=numpy.float64)
-        v = numpy.array(value, ndmin=2, copy=False, dtype=numpy.float64)
-        if v.shape != (self.N, 3):
-            raise TypeError('Positions must be an Nx3 array')
-        numpy.copyto(self._position, v)
+        if value is not None:
+            v = numpy.array(value, ndmin=2, copy=False, dtype=numpy.float64)
+            if v.shape != (self.N, 3):
+                raise TypeError('Positions must be an Nx3 array')
+            if not self.has_position():
+                self._position = numpy.zeros((self.N, 3), dtype=numpy.float64)
+            numpy.copyto(self._position, v)
+        else:
+            self._position = None
 
     def has_position(self):
         """Check if configuration has positions.
@@ -212,12 +218,15 @@ class Snapshot:
 
     @image.setter
     def image(self, value):
-        if not self.has_image():
-            self._image = numpy.zeros((self.N, 3), dtype=numpy.int32)
-        v = numpy.array(value, ndmin=2, copy=False, dtype=numpy.int32)
-        if v.shape != (self.N, 3):
-            raise TypeError('Images must be an Nx3 array')
-        numpy.copyto(self._image, v)
+        if value is not None:
+            v = numpy.array(value, ndmin=2, copy=False, dtype=numpy.int32)
+            if v.shape != (self.N, 3):
+                raise TypeError('Images must be an Nx3 array')
+            if not self.has_image():
+                self._image = numpy.zeros((self.N, 3), dtype=numpy.int32)
+            numpy.copyto(self._image, v)
+        else:
+            self._image = None
 
     def has_image(self):
         """Check if configuration has images.
@@ -239,12 +248,15 @@ class Snapshot:
 
     @velocity.setter
     def velocity(self, value):
-        if not self.has_velocity():
-            self._velocity = numpy.zeros((self.N, 3), dtype=numpy.float64)
-        v = numpy.array(value, ndmin=2, copy=False, dtype=numpy.float64)
-        if v.shape != (self.N, 3):
-            raise TypeError('Velocities must be an Nx3 array')
-        numpy.copyto(self._velocity, v)
+        if value is not None:
+            v = numpy.array(value, ndmin=2, copy=False, dtype=numpy.float64)
+            if v.shape != (self.N, 3):
+                raise TypeError('Velocities must be an Nx3 array')
+            if not self.has_velocity():
+                self._velocity = numpy.zeros((self.N, 3), dtype=numpy.float64)
+            numpy.copyto(self._velocity, v)
+        else:
+            self._velocity = None
 
     def has_velocity(self):
         """Check if configuration has velocities.
@@ -266,12 +278,15 @@ class Snapshot:
 
     @molecule.setter
     def molecule(self, value):
-        if not self.has_molecule():
-            self._molecule = numpy.zeros(self.N, dtype=numpy.int32)
-        v = numpy.array(value, ndmin=1, copy=False, dtype=numpy.int32)
-        if v.shape != (self.N,):
-            raise TypeError('Molecules must be a size N array')
-        numpy.copyto(self._molecule, v)
+        if value is not None:
+            v = numpy.array(value, ndmin=1, copy=False, dtype=numpy.int32)
+            if v.shape != (self.N,):
+                raise TypeError('Molecules must be a size N array')
+            if not self.has_molecule():
+                self._molecule = numpy.zeros(self.N, dtype=numpy.int32)
+            numpy.copyto(self._molecule, v)
+        else:
+            self._molecule = None
 
     def has_molecule(self):
         """Check if configuration has molecule tags.
@@ -293,12 +308,15 @@ class Snapshot:
 
     @typeid.setter
     def typeid(self, value):
-        if not self.has_typeid():
-            self._typeid = numpy.ones(self.N, dtype=numpy.int32)
-        v = numpy.array(value, ndmin=1, copy=False, dtype=numpy.int32)
-        if v.shape != (self.N,):
-            raise TypeError('Type must be a size N array')
-        numpy.copyto(self._typeid, v)
+        if value is not None:
+            v = numpy.array(value, ndmin=1, copy=False, dtype=numpy.int32)
+            if v.shape != (self.N,):
+                raise TypeError('Type must be a size N array')
+            if not self.has_typeid():
+                self._typeid = numpy.ones(self.N, dtype=numpy.int32)
+            numpy.copyto(self._typeid, v)
+        else:
+            self._typeid = None
 
     def has_typeid(self):
         """Check if configuration has types.
@@ -320,12 +338,15 @@ class Snapshot:
 
     @charge.setter
     def charge(self, value):
-        if not self.has_charge():
-            self._charge = numpy.zeros(self.N, dtype=numpy.float64)
-        v = numpy.array(value, ndmin=1, copy=False, dtype=numpy.float64)
-        if v.shape != (self.N,):
-            raise TypeError('Charge must be a size N array')
-        numpy.copyto(self._charge, v)
+        if value is not None:
+            v = numpy.array(value, ndmin=1, copy=False, dtype=numpy.float64)
+            if v.shape != (self.N,):
+                raise TypeError('Charge must be a size N array')
+            if not self.has_charge():
+                self._charge = numpy.zeros(self.N, dtype=numpy.float64)
+            numpy.copyto(self._charge, v)
+        else:
+            self._charge = None
 
     def has_charge(self):
         """Check if configuration has charges.
@@ -347,12 +368,15 @@ class Snapshot:
 
     @mass.setter
     def mass(self, value):
-        if not self.has_mass():
-            self._mass = numpy.ones(self.N, dtype=numpy.float64)
-        v = numpy.array(value, ndmin=1, copy=False, dtype=numpy.float64)
-        if v.shape != (self.N,):
-            raise TypeError('Mass must be a size N array')
-        numpy.copyto(self._mass, v)
+        if value is not None:
+            v = numpy.array(value, ndmin=1, copy=False, dtype=numpy.float64)
+            if v.shape != (self.N,):
+                raise TypeError('Mass must be a size N array')
+            if not self.has_mass():
+                self._mass = numpy.ones(self.N, dtype=numpy.float64)
+            numpy.copyto(self._mass, v)
+        else:
+            self._mass = None
 
     def has_mass(self):
         """Check if configuration has masses.
@@ -756,9 +780,9 @@ class DumpFile:
     The dump file is a flexible file format, so a ``schema`` needs to be given
     to parse the atom data. The ``schema`` is given as a dictionary of column
     indexes. Valid keys for the schema match the names and shapes in the `Snapshot`.
-    The keys requiring only 1 column index are: `id`, `typeid`, `molecule`, `charge`,
-    and `mass`. The keys requiring 3 column indexes are `position`, `velocity`,
-    and `image`.
+    The keys requiring only 1 column index are: ``id``, ``typeid``, ``molecule``,
+    ``charge``, and ``mass``. The keys requiring 3 column indexes are ``position``,
+    ``velocity``, and ``image``.
 
     Parameters
     ----------
@@ -768,14 +792,19 @@ class DumpFile:
         Schema for the contents of the file.
     sort_ids : bool
         If true, sort the particles by ID in each snapshot.
+    copy_from : :class:`Snapshot`
+        If specified, copy fields that are missing in the dump file but are set in
+        a reference :class:`Snapshot`. The fields that can be copied are ``typeid``,
+        ``molecule``, ``charge``, and ``mass``.
 
     """
 
-    def __init__(self, filename, schema, sort_ids=True):
+    def __init__(self, filename, schema, sort_ids=True, copy_from=None):
         self.filename = filename
         self.schema = schema
         self._frames = None
         self.sort_ids = sort_ids
+        self.copy_from = copy_from
 
     @classmethod
     def create(cls, filename, schema, snapshots):
@@ -876,6 +905,16 @@ class DumpFile:
             os.replace(tmp, filename)
 
         return DumpFile(filename, schema)
+
+    @property
+    def copy_from(self):
+        return self._copy_from
+
+    @copy_from.setter
+    def copy_from(self, value):
+        if value is not None and not isinstance(value, Snapshot):
+            raise TypeError('Dump file can only copy from Snapshot')
+        self._copy_from = value
 
     @property
     def filename(self):
@@ -1014,8 +1053,34 @@ class DumpFile:
 
                 # final processing stage for the frame
                 if state == 4:
+                    # optionally sort the particles by ID
                     if self.sort_ids and snap.has_id():
                         snap.reorder(numpy.argsort(snap.id), check_order=False)
+
+                    # optionally copy reference data by ID / index
+                    if self._copy_from is not None:
+                        if snap.N != self._copy_from.N:
+                            raise ValueError('Cannot copy from a Snapshot with a different size')
+
+                        if self._copy_from.has_id():
+                            copy_id_map = {id_: i for i, id_ in enumerate(self._copy_from.id)}
+                        else:
+                            copy_id_map = {i+1: i for i in range(self._copy_from.N)}
+
+                        if snap.has_id():
+                            copy_id = [copy_id_map[id_] for id_ in snap.id]
+                        else:
+                            copy_id = [copy_id_map[id_] for id_ in range(1, snap.N+1)]
+
+                        if not snap.has_typeid() and self._copy_from.has_typeid():
+                            snap.typeid = self._copy_from.typeid[copy_id]
+                        if not snap.has_molecule() and self._copy_from.has_molecule():
+                            snap.molecule = self._copy_from.molecule[copy_id]
+                        if not snap.has_charge() and self._copy_from.has_charge():
+                            snap.charge = self._copy_from.charge[copy_id]
+                        if not snap.has_mass() and self._copy_from.has_mass():
+                            snap.mass = self._copy_from.mass[copy_id]
+
                     yield snap
                     del snap,N,box,step
                     state = 0

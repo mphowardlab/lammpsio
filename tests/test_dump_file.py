@@ -1,3 +1,5 @@
+import copy
+
 import numpy
 import pytest
 
@@ -42,14 +44,14 @@ def test_dump_file_min(snap, use_gzip, shuffle_ids, sort_ids, tmp_path):
                 assert numpy.allclose(read_snaps[i].id, numpy.arange(1,snaps[i].N+1)[::-1])
         else:
             assert not read_snaps[i].has_id()
-        assert snaps[i].has_position()
+        assert read_snaps[i].has_position()
         assert numpy.allclose(read_snaps[i].position, 0)
-        assert not snaps[i].has_image()
-        assert not snaps[i].has_velocity()
-        assert not snaps[i].has_typeid()
-        assert not snaps[i].has_mass()
-        assert not snaps[i].has_molecule()
-        assert not snaps[i].has_charge()
+        assert not read_snaps[i].has_image()
+        assert not read_snaps[i].has_velocity()
+        assert not read_snaps[i].has_typeid()
+        assert not read_snaps[i].has_mass()
+        assert not read_snaps[i].has_molecule()
+        assert not read_snaps[i].has_charge()
 
 @pytest.mark.parametrize("sort_ids", [False, True])
 @pytest.mark.parametrize("shuffle_ids", [False, True])
@@ -121,18 +123,60 @@ def test_dump_file_all(snap, use_gzip, shuffle_ids, sort_ids, tmp_path):
             else:
                 assert numpy.allclose(read_snaps[i].id, numpy.arange(1,snaps[i].N+1)[::-1])
         else:
-            assert not snaps[i].has_id()
-        assert snaps[i].has_position()
+            assert not read_snaps[i].has_id()
+        assert read_snaps[i].has_position()
         assert numpy.allclose(read_snaps[i].position, snaps[i].position[order])
-        assert snaps[i].has_image()
+        assert read_snaps[i].has_image()
         assert numpy.allclose(read_snaps[i].image, snaps[i].image[order])
-        assert snaps[i].has_velocity()
+        assert read_snaps[i].has_velocity()
         assert numpy.allclose(read_snaps[i].velocity, snaps[i].velocity[order])
-        assert snaps[i].has_typeid()
+        assert read_snaps[i].has_typeid()
         assert numpy.allclose(read_snaps[i].typeid, snaps[i].typeid[order])
-        assert snaps[i].has_mass()
+        assert read_snaps[i].has_mass()
         assert numpy.allclose(read_snaps[i].mass, snaps[i].mass[order])
-        assert snaps[i].has_molecule()
+        assert read_snaps[i].has_molecule()
         assert numpy.allclose(read_snaps[i].molecule, snaps[i].molecule[order])
-        assert snaps[i].has_charge()
+        assert read_snaps[i].has_charge()
         assert numpy.allclose(read_snaps[i].charge, snaps[i].charge[order])
+
+def test_copy_from(snap, tmp_path):
+    ref_snap = copy.deepcopy(snap)
+    ref_snap.id = [12,0,1]
+    ref_snap.typeid = [2,1,2]
+    ref_snap.mass = [3,2,3]
+    ref_snap.molecule = [2,0,1]
+    ref_snap.charge = [-1,0,1]
+
+    snap.id = [0, 1, 12]
+    snap.position = [[0.1,0.2,0.3],[-0.4,-0.5,-0.6],[0.7,0.8,0.9]]
+
+    filename = tmp_path / "atoms.lammpstrj"
+    schema = {'id': 0, 'position': (1, 2, 3)}
+    lammpsio.DumpFile.create(filename, schema, snap)
+    assert filename.exists
+
+    f = lammpsio.DumpFile(filename, schema, copy_from=ref_snap)
+    read_snap = [s for s in f][0]
+
+    assert read_snap.N == snap.N
+    assert read_snap.step == snap.step
+    assert numpy.allclose(read_snap.box.low, snap.box.low)
+    assert numpy.allclose(read_snap.box.high, snap.box.high)
+    if snap.box.tilt is not None:
+        assert numpy.allclose(read_snap.box.tilt, snap.box.tilt)
+    else:
+        assert read_snap.box.tilt is None
+    assert read_snap.has_id()
+    assert numpy.allclose(read_snap.id, snap.id)
+    assert read_snap.has_position()
+    assert numpy.allclose(read_snap.position, snap.position)
+    assert not read_snap.has_image()
+    assert not read_snap.has_velocity()
+    assert read_snap.has_typeid()
+    assert numpy.all(read_snap.typeid == [1, 2, 2])
+    assert read_snap.has_mass()
+    assert numpy.allclose(read_snap.mass, [2, 3, 3])
+    assert read_snap.has_molecule()
+    assert numpy.all(read_snap.molecule == [0, 1, 2])
+    assert read_snap.has_charge()
+    assert numpy.allclose(read_snap.charge, [0, 1, -1])
