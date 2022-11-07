@@ -21,12 +21,12 @@ def test_dump_file_min(snap, use_gzip, shuffle_ids, sort_ids, tmp_path):
         filename = tmp_path / "atoms.lammpstrj"
     schema = {'id': 0, 'position': (1, 2, 3)}
     f = lammpsio.DumpFile.create(filename, schema, snaps)
-    f.sort_ids = sort_ids
     assert filename.exists
     assert len(f) == 2
 
     # read it back in and check snapshots
-    read_snaps = [s for s in f]
+    f2 = lammpsio.DumpFile(filename, sort_ids=sort_ids)
+    read_snaps = [s for s in f2]
     for i in range(2):
         assert read_snaps[i].N == snaps[i].N
         assert read_snaps[i].step == snaps[i].step
@@ -101,12 +101,12 @@ def test_dump_file_all(snap, use_gzip, shuffle_ids, sort_ids, tmp_path):
     else:
         filename = tmp_path / "atoms.lammpstrj"
     f = lammpsio.DumpFile.create(filename, schema, snaps)
-    f.sort_ids = sort_ids
     assert filename.exists
     assert len(f) == 2
 
     # read it back in and check snapshots
-    read_snaps = [s for s in f]
+    f2 = lammpsio.DumpFile(filename, sort_ids=sort_ids)
+    read_snaps = [s for s in f2]
     for i,s in enumerate(f):
         assert read_snaps[i].N == snaps[i].N
         assert read_snaps[i].step == snaps[i].step
