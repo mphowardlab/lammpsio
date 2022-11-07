@@ -777,19 +777,24 @@ class DataFile:
 class DumpFile:
     """LAMMPS dump file.
 
-    The dump file is a flexible file format, so a ``schema`` needs to be given
+    The dump file is a flexible file format, so a ``schema`` can be given
     to parse the atom data. The ``schema`` is given as a dictionary of column
     indexes. Valid keys for the schema match the names and shapes in the `Snapshot`.
     The keys requiring only 1 column index are: ``id``, ``typeid``, ``molecule``,
     ``charge``, and ``mass``. The keys requiring 3 column indexes are ``position``,
-    ``velocity``, and ``image``.
+    ``velocity``, and ``image``. If a ``schema`` is not specified, it will be deduced
+    from the ``ITEM: ATOMS`` header.
+
+    The vector-valued fields (``position``, ``velocity``, ``image``) must contain all
+    three elements.
 
     Parameters
     ----------
     filename : str
         Path to dump file.
     schema : dict
-        Schema for the contents of the file.
+        Schema for the contents of the file. Defaults to ``None``, which means to read
+        it from the file.
     sort_ids : bool
         If true, sort the particles by ID in each snapshot.
     copy_from : :class:`Snapshot`
@@ -798,8 +803,7 @@ class DumpFile:
         ``molecule``, ``charge``, and ``mass``.
 
     """
-
-    def __init__(self, filename, schema, sort_ids=True, copy_from=None):
+    def __init__(self, filename, schema=None, sort_ids=True, copy_from=None):
         self.filename = filename
         self.schema = schema
         self._frames = None
@@ -874,7 +878,25 @@ class DumpFile:
                 for i in range(3):
                     f.write('{lo:f} {hi:f}\n'.format(lo=lo[i], hi=hi[i]))
 
-                f.write('ITEM: ATOMS\n')
+                # mapping from lammpsio to LAMMPS dump keys
+                lammps_fields = {
+                    'id': 'id',
+                    'molecule': 'mol',
+                    'typeid': 'type',
+                    'mass': 'mass',
+                    'position': ('x', 'y', 'z'),
+                    'image': ('ix', 'iy', 'iz'),
+                    'velocity': ('vx', 'vy', 'vz'),
+                    'charge': 'q'}
+                schema_header = []
+                for _, (key, key_idx) in dump_row:
+                    field = lammps_fields[key]
+                    if key_idx is not None:
+                        field = field[key_idx]
+                    schema_header.append(field)
+                schema_header = ' '.join(schema_header)
+
+                f.write('ITEM: ATOMS ' + schema_header + '\n')
                 for i in range(snap.N):
                     line = ''
                     for col, (key, key_idx) in dump_row:
@@ -945,13 +967,14 @@ class DumpFile:
 
     @schema.setter
     def schema(self, value):
-        # validate schema
-        if 'position' in value and len(value['position']) != 3:
-            raise ValueError('Position must be a 3-tuple')
-        if 'velocity' in value and len(value['velocity']) != 3:
-            raise ValueError('Velocity must be a 3-tuple')
-        if 'image' in value and len(value['image']) != 3:
-            raise ValueError('Image must be a 3-tuple')
+        if value is not None:
+            # validate schema
+            if 'position' in value and len(value['position']) != 3:
+                raise ValueError('Position must be a 3-tuple')
+            if 'velocity' in value and len(value['velocity']) != 3:
+                raise ValueError('Velocity must be a 3-tuple')
+            if 'image' in value and len(value['image']) != 3:
+                raise ValueError('Image must be a 3-tuple')
         self._schema = value
 
     def _open(self):
@@ -1030,6 +1053,44 @@ class DumpFile:
                 # atoms come fourth
                 if state == 3 and self._section['atoms'] in line:
                     state += 1
+
+                    # extract the scehma
+                    if self.schema is None:
+                        # mapping from LAMMPS dump keys to lammpsio
+                        lammps_fields = {
+                            'id': ('id', None),
+                            'mol': ('molecule', None),
+                            'type': ('typeid', None),
+                            'mass': ('mass', None),
+                            'x': ('position', 0),
+                            'y': ('position', 1),
+                            'z': ('position', 2),
+                            'ix': ('image', 0),
+                            'iy': ('image', 1),
+                            'iz': ('image', 2),
+                            'vx': ('velocity', 0),
+                            'vy': ('velocity', 1),
+                            'vz': ('velocity', 2),
+                            'q': ('charge', None)}
+                        schema = {}
+                        schema_header = line.split()[2:]
+                        for i, field in enumerate(schema_header):
+                            if self._gzip:
+                                field = field.decode()
+                            if field in lammps_fields:
+                                key, key_idx = lammps_fields[field]
+                                if key_idx is not None:
+                                    if key not in schema:
+                                        schema[key] = [None, None, None]
+                                    schema[key][key_idx] = i
+                                else:
+                                    schema[key] = i
+                        # validate tuple
+                        for key in ('position', 'velocity',' image'):
+                            if key in schema and any(x is None for x in schema[key]):
+                                raise IOError('lammpsio requires 3-element vectors')
+                        self.schema = schema
+
                     snap = Snapshot(N,box,step)
                     for i in range(snap.N):
                         atom = _readline(f,True)
