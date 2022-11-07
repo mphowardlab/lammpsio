@@ -852,7 +852,8 @@ class DumpFile:
                 f.write('ITEM: NUMBER OF ATOMS\n')
                 f.write('{}\n'.format(snap.N))
 
-                box_header = 'ITEM: BOX BOUNDS'
+                # always assume periodic in all directions
+                box_header = 'ITEM: BOX BOUNDS pp pp pp'
                 if snap.box.tilt is not None:
                     xy, xz, yz = snap.box.tilt
                     box_header += ' {xy:f} {xz:f} {yz:f}'.format(xy=xy, xz=xz, yz=yz)
@@ -996,12 +997,14 @@ class DumpFile:
                 # box size third
                 if state == 2 and self._section['box'] in line:
                     state += 1
-                    # check for triclinic
                     box_header = line.split()
-                    if len(box_header) >= 6:
-                        box_tilt = [float(x) for x in box_header[3:6]]
-                    else:
+                    # check for triclinic
+                    if len(box_header) == 9:
+                        box_tilt = [float(x) for x in box_header[6:9]]
+                    elif len(box_header) == 6:
                         box_tilt = None
+                    else:
+                        raise IOError('Incorrectly formed box bound header')
                     box_x = _readline(f,True)
                     box_y = _readline(f,True)
                     box_z = _readline(f,True)
