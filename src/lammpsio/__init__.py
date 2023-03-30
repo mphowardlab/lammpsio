@@ -69,9 +69,7 @@ class Box:
         elif v.shape == (6,):
             return Box(v[:3], v[3:])
         else:
-            raise TypeError(
-                "Unable to cast boxlike object with shape {}".format(v.shape)
-            )
+            raise TypeError(f"Unable to cast boxlike object with shape {v.shape}")
 
     @property
     def low(self):
@@ -541,12 +539,14 @@ class DataFile:
 
         with open(filename, "w") as f:
             # LAMMPS header
-            f.write("LAMMPS {}\n\n".format(filename))
-            f.write("{} atoms\n".format(snapshot.N))
-            f.write("{} atom types\n".format(num_types))
-            f.write("{} {} xlo xhi\n".format(snapshot.box.low[0], snapshot.box.high[0]))
-            f.write("{} {} ylo yhi\n".format(snapshot.box.low[1], snapshot.box.high[1]))
-            f.write("{} {} zlo zhi\n".format(snapshot.box.low[2], snapshot.box.high[2]))
+            f.write(
+                f"LAMMPS {filename}\n\n"
+                f"{snapshot.N} atoms\n"
+                f"{num_types} atom types\n"
+                f"{snapshot.box.low[0]} {snapshot.box.high[0]} xlo xhi\n"
+                f"{snapshot.box.low[1]} {snapshot.box.high[1]} ylo yhi\n"
+                f"{snapshot.box.low[2]} {snapshot.box.high[2]} zlo zhi\n"
+            )
             if snapshot.box.tilt is not None:
                 f.write("{} {} {} xy xz yz\n".format(*snapshot.box.tilt))
 
@@ -579,7 +579,7 @@ class DataFile:
             if snapshot.has_image():
                 style_fmt += " {ix:d} {iy:d} {iz:d}"
             # write section
-            f.write("\nAtoms # {}\n\n".format(style))
+            f.write(f"\nAtoms # {style}\n\n")
             for i in range(snapshot.N):
                 style_args = dict(
                     atomid=snapshot.id[i] if snapshot.has_id() else i + 1,
@@ -906,17 +906,16 @@ class DumpFile:
 
         with open(filename, "w") as f:
             for snap in snapshots:
-                f.write("ITEM: TIMESTEP\n")
-                f.write("{}\n".format(snap.step))
+                f.write("ITEM: TIMESTEP\n" f"{snap.step}\n")
 
                 f.write("ITEM: NUMBER OF ATOMS\n")
-                f.write("{}\n".format(snap.N))
+                f.write(f"{snap.N}\n")
 
                 # always assume periodic in all directions
                 box_header = "ITEM: BOX BOUNDS pp pp pp"
                 if snap.box.tilt is not None:
                     xy, xz, yz = snap.box.tilt
-                    box_header += " {xy:f} {xz:f} {yz:f}".format(xy=xy, xz=xz, yz=yz)
+                    box_header += f" {xy:f} {xz:f} {yz:f}"
                     lo = [
                         snap.box.low[0] + min([0.0, xy, xz, xy + xz]),
                         snap.box.low[1] + min([0.0, yz]),
@@ -932,7 +931,7 @@ class DumpFile:
                     hi = snap.box.high
                 f.write(box_header + "\n")
                 for i in range(3):
-                    f.write("{lo:f} {hi:f}\n".format(lo=lo[i], hi=hi[i]))
+                    f.write(f"{lo[i]:f} {hi[i]:f}\n")
 
                 # mapping from lammpsio to LAMMPS dump keys
                 lammps_fields = {
