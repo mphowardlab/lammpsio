@@ -3,6 +3,25 @@ import os
 import pathlib
 
 import numpy
+from packaging import version
+
+try:
+    import gsd
+    import gsd.hoomd
+
+    _gsd_found = True
+    _gsd_version = version.Version(gsd.__version__)
+    if _gsd_version.major >= 3:
+        _GSDFrame = gsd.hoomd.Frame
+        _gsd_valid_types = (gsd.hoomd.Frame,)
+    elif _gsd_version >= version.Version("2.8.0"):
+        _GSDFrame = gsd.hoomd.Frame
+        _gsd_valid_types = (gsd.hoomd.Frame, gsd.hoomd.Snapshot)
+    else:
+        _GSDFrame = gsd.hoomd.Snapshot
+        _gsd_valid_types = (gsd.hoomd.Snapshot,)
+except ImportError:
+    _gsd_found = False
 
 
 def _readline(file_, require=False):
@@ -143,6 +162,42 @@ class Snapshot:
         self._typeid = None
         self._charge = None
         self._mass = None
+
+    @classmethod
+    def cast(cls, value):
+        """Cast a snapshot-like object.
+
+        Parameters
+        ----------
+        value : :class:`gsd.hoomd.Frame` or `gsd.hoomd.Snapshot`
+            Snapshot-like value to cast. Only HOOMD GSD types are currently
+            supported.
+
+        """
+        if _gsd_found and isinstance(value, _gsd_valid_types):
+            # process HOOMD box to LAMMPS box
+            L = numpy.asarray(value.configuration.box[:3], dtype=float)
+            tilt = numpy.asarray(value.configuration.box[3:], dtype=float)
+            tilt[0] *= L[1]
+            tilt[1:] *= L[2]
+            box = Box.cast(numpy.concatenate((-0.5 * L, 0.5 * L, tilt)))
+
+            snap = Snapshot(
+                N=value.particles.N,
+                box=box,
+                step=value.configuration.step,
+            )
+
+            snap.position = value.particles.position
+            snap.velocity = value.particles.velocity
+            snap.image = value.particles.image
+            snap.typeid = numpy.asarray(value.particles.typeid, dtype=int) + 1
+            snap.charge = value.particles.charge
+            snap.mass = value.particles.mass
+        else:
+            raise TypeError("Cannot cast snapshot, type unknown")
+
+        return snap
 
     @property
     def N(self):

@@ -1,5 +1,6 @@
 import copy
 
+import gsd.hoomd
 import numpy
 import pytest
 
@@ -10,6 +11,35 @@ def test_create(snap):
     assert snap.N == 3
     assert isinstance(snap.box, lammpsio.Box)
     assert snap.step == 10
+
+
+def test_cast_gsd():
+    gsd_snap = gsd.hoomd.Frame()
+    gsd_snap.configuration.step = 3
+    gsd_snap.configuration.box = [4, 5, 6, 0.1, 0.2, 0.3]
+    gsd_snap.particles.N = 2
+    gsd_snap.particles.position = [[0.1, 0.2, 0.3], [-0.1, -0.2, -0.3]]
+    gsd_snap.particles.image = [[1, -1, 0], [0, 2, -2]]
+    gsd_snap.particles.velocity = [[1, 2, 3], [-4, -5, -6]]
+    gsd_snap.particles.types = ["A", "B"]
+    gsd_snap.particles.typeid = [1, 0]
+    gsd_snap.particles.mass = [3, 2]
+    gsd_snap.particles.charge = [-1, 1]
+
+    snap = lammpsio.Snapshot.cast(gsd_snap)
+    assert snap.step == 3
+
+    assert numpy.allclose(snap.box.low, [-2, -2.5, -3])
+    assert numpy.allclose(snap.box.high, [2, 2.5, 3])
+    assert numpy.allclose(snap.box.tilt, [0.5, 1.2, 1.8])
+
+    assert snap.N == 2
+    assert numpy.all(snap.position == [[0.1, 0.2, 0.3], [-0.1, -0.2, -0.3]])
+    assert numpy.all(snap.image == [[1, -1, 0], [0, 2, -2]])
+    assert numpy.all(snap.velocity == [[1, 2, 3], [-4, -5, -6]])
+    assert numpy.all(snap.typeid == [2, 1])
+    assert numpy.all(snap.mass == [3, 2])
+    assert numpy.all(snap.charge == [-1, 1])
 
 
 def test_position(snap):
