@@ -25,8 +25,9 @@ def test_cast_gsd():
     gsd_snap.particles.typeid = [1, 0]
     gsd_snap.particles.mass = [3, 2]
     gsd_snap.particles.charge = [-1, 1]
+    gsd_snap.particles.body = [0, -1]
 
-    snap = lammpsio.Snapshot.cast(gsd_snap)
+    snap = lammpsio.Snapshot.from_hoomd_gsd(gsd_snap)
     assert snap.step == 3
 
     assert numpy.allclose(snap.box.low, [-2, -2.5, -3])
@@ -37,9 +38,15 @@ def test_cast_gsd():
     assert numpy.all(snap.position == [[0.1, 0.2, 0.3], [-0.1, -0.2, -0.3]])
     assert numpy.all(snap.image == [[1, -1, 0], [0, 2, -2]])
     assert numpy.all(snap.velocity == [[1, 2, 3], [-4, -5, -6]])
+    assert numpy.all(snap.molecule == [1, 0])
     assert numpy.all(snap.typeid == [2, 1])
     assert numpy.all(snap.mass == [3, 2])
     assert numpy.all(snap.charge == [-1, 1])
+
+    # check for warning on floppy molecules
+    gsd_snap.particles.body = [-2, -1]
+    with pytest.warns():
+        lammpsio.Snapshot.from_hoomd_gsd(gsd_snap)
 
 
 def test_position(snap):
