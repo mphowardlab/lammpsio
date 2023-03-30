@@ -5,12 +5,13 @@ import pytest
 
 import lammpsio
 
+
 @pytest.mark.parametrize("sort_ids", [False, True])
 @pytest.mark.parametrize("shuffle_ids", [False, True])
-@pytest.mark.parametrize('use_gzip', [False, True])
+@pytest.mark.parametrize("use_gzip", [False, True])
 def test_dump_file_min(snap, use_gzip, shuffle_ids, sort_ids, tmp_path):
     # create file with 2 snapshots with defaults, changing N & step
-    snap_2 = lammpsio.Snapshot(snap.N+2, snap.box, snap.step+1)
+    snap_2 = lammpsio.Snapshot(snap.N + 2, snap.box, snap.step + 1)
     snaps = [snap, snap_2]
     if shuffle_ids:
         for s in snaps:
@@ -19,7 +20,7 @@ def test_dump_file_min(snap, use_gzip, shuffle_ids, sort_ids, tmp_path):
         filename = tmp_path / "atoms.lammpstrj.gz"
     else:
         filename = tmp_path / "atoms.lammpstrj"
-    schema = {'id': 0, 'position': (1, 2, 3)}
+    schema = {"id": 0, "position": (1, 2, 3)}
     f = lammpsio.DumpFile.create(filename, schema, snaps)
     assert filename.exists
     assert len(f) == 2
@@ -39,9 +40,11 @@ def test_dump_file_min(snap, use_gzip, shuffle_ids, sort_ids, tmp_path):
         if shuffle_ids:
             assert read_snaps[i].has_id()
             if sort_ids:
-                assert numpy.allclose(read_snaps[i].id, numpy.arange(1,snaps[i].N+1))
+                assert numpy.allclose(read_snaps[i].id, numpy.arange(1, snaps[i].N + 1))
             else:
-                assert numpy.allclose(read_snaps[i].id, numpy.arange(1,snaps[i].N+1)[::-1])
+                assert numpy.allclose(
+                    read_snaps[i].id, numpy.arange(1, snaps[i].N + 1)[::-1]
+                )
         else:
             assert not read_snaps[i].has_id()
         assert read_snaps[i].has_position()
@@ -53,19 +56,20 @@ def test_dump_file_min(snap, use_gzip, shuffle_ids, sort_ids, tmp_path):
         assert not read_snaps[i].has_molecule()
         assert not read_snaps[i].has_charge()
 
+
 @pytest.mark.parametrize("sort_ids", [False, True])
 @pytest.mark.parametrize("shuffle_ids", [False, True])
-@pytest.mark.parametrize('use_gzip', [False, True])
+@pytest.mark.parametrize("use_gzip", [False, True])
 def test_dump_file_all(snap, use_gzip, shuffle_ids, sort_ids, tmp_path):
-    snap.position = [[0.1,0.2,0.3],[-0.4,-0.5,-0.6],[0.7,0.8,0.9]]
-    snap.image = [[1,2,3],[-4,-5,-6],[7,8,9]]
-    snap.velocity = [[-3,-2,-1],[6,5,4],[9,8,7]]
-    snap.typeid = [2,1,2]
-    snap.mass = [3,2,3]
-    snap.molecule = [2,0,1]
-    snap.charge = [-1,0,1]
+    snap.position = [[0.1, 0.2, 0.3], [-0.4, -0.5, -0.6], [0.7, 0.8, 0.9]]
+    snap.image = [[1, 2, 3], [-4, -5, -6], [7, 8, 9]]
+    snap.velocity = [[-3, -2, -1], [6, 5, 4], [9, 8, 7]]
+    snap.typeid = [2, 1, 2]
+    snap.mass = [3, 2, 3]
+    snap.molecule = [2, 0, 1]
+    snap.charge = [-1, 0, 1]
 
-    snap_2 = lammpsio.Snapshot(snap.N, snap.box, snap.step+1)
+    snap_2 = lammpsio.Snapshot(snap.N, snap.box, snap.step + 1)
     snap_2.position = snap.position[::-1]
     snap_2.image = snap.image[::-1]
     snap_2.velocity = snap.velocity[::-1]
@@ -87,15 +91,15 @@ def test_dump_file_all(snap, use_gzip, shuffle_ids, sort_ids, tmp_path):
 
     # create file with 2 snapshots
     schema = {
-            'id': 13,
-            'position': (11, 10, 12),
-            'image': (9, 8, 7),
-            'velocity': (4, 5, 6),
-            'typeid': 3,
-            'mass': 2,
-            'molecule': 1,
-            'charge': 0
-            }
+        "id": 13,
+        "position": (11, 10, 12),
+        "image": (9, 8, 7),
+        "velocity": (4, 5, 6),
+        "typeid": 3,
+        "mass": 2,
+        "molecule": 1,
+        "charge": 0,
+    }
     if use_gzip:
         filename = tmp_path / "atoms.lammpstrj.gz"
     else:
@@ -107,7 +111,7 @@ def test_dump_file_all(snap, use_gzip, shuffle_ids, sort_ids, tmp_path):
     # read it back in and check snapshots
     f2 = lammpsio.DumpFile(filename, sort_ids=sort_ids)
     read_snaps = [s for s in f2]
-    for i,s in enumerate(f):
+    for i, s in enumerate(f):
         assert read_snaps[i].N == snaps[i].N
         assert read_snaps[i].step == snaps[i].step
         assert numpy.allclose(read_snaps[i].box.low, snaps[i].box.low)
@@ -119,9 +123,11 @@ def test_dump_file_all(snap, use_gzip, shuffle_ids, sort_ids, tmp_path):
         if shuffle_ids:
             assert read_snaps[i].has_id()
             if sort_ids:
-                assert numpy.allclose(read_snaps[i].id, numpy.arange(1,snaps[i].N+1))
+                assert numpy.allclose(read_snaps[i].id, numpy.arange(1, snaps[i].N + 1))
             else:
-                assert numpy.allclose(read_snaps[i].id, numpy.arange(1,snaps[i].N+1)[::-1])
+                assert numpy.allclose(
+                    read_snaps[i].id, numpy.arange(1, snaps[i].N + 1)[::-1]
+                )
         else:
             assert not read_snaps[i].has_id()
         assert read_snaps[i].has_position()
@@ -139,19 +145,20 @@ def test_dump_file_all(snap, use_gzip, shuffle_ids, sort_ids, tmp_path):
         assert read_snaps[i].has_charge()
         assert numpy.allclose(read_snaps[i].charge, snaps[i].charge[order])
 
+
 def test_copy_from(snap, tmp_path):
     ref_snap = copy.deepcopy(snap)
-    ref_snap.id = [12,0,1]
-    ref_snap.typeid = [2,1,2]
-    ref_snap.mass = [3,2,3]
-    ref_snap.molecule = [2,0,1]
-    ref_snap.charge = [-1,0,1]
+    ref_snap.id = [12, 0, 1]
+    ref_snap.typeid = [2, 1, 2]
+    ref_snap.mass = [3, 2, 3]
+    ref_snap.molecule = [2, 0, 1]
+    ref_snap.charge = [-1, 0, 1]
 
     snap.id = [0, 1, 12]
-    snap.position = [[0.1,0.2,0.3],[-0.4,-0.5,-0.6],[0.7,0.8,0.9]]
+    snap.position = [[0.1, 0.2, 0.3], [-0.4, -0.5, -0.6], [0.7, 0.8, 0.9]]
 
     filename = tmp_path / "atoms.lammpstrj"
-    schema = {'id': 0, 'position': (1, 2, 3)}
+    schema = {"id": 0, "position": (1, 2, 3)}
     lammpsio.DumpFile.create(filename, schema, snap)
     assert filename.exists
 
