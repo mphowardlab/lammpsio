@@ -1,7 +1,10 @@
 import copy
 
+import gsd
+import gsd.hoomd
 import numpy
 import pytest
+from packaging import version
 
 import lammpsio
 
@@ -10,6 +13,78 @@ def test_create(snap):
     assert snap.N == 3
     assert isinstance(snap.box, lammpsio.Box)
     assert snap.step == 10
+
+
+def test_gsd_conversion():
+    # make a GSD frame
+    if version.Version(gsd.__version__) >= version.Version("2.8.0"):
+        frame = gsd.hoomd.Frame()
+    else:
+        frame = gsd.hoomd.Snapshot()
+    frame.configuration.step = 3
+    frame.configuration.box = [4, 5, 6, 0.1, 0.2, 0.3]
+    frame.particles.N = 2
+    frame.particles.position = [[0.1, 0.2, 0.3], [-0.1, -0.2, -0.3]]
+    frame.particles.image = [[1, -1, 0], [0, 2, -2]]
+    frame.particles.velocity = [[1, 2, 3], [-4, -5, -6]]
+    frame.particles.body = [0, -1]
+    frame.particles.types = ["A", "B"]
+    frame.particles.typeid = [1, 0]
+    frame.particles.mass = [3, 2]
+    frame.particles.charge = [-1, 1]
+
+    # make Snapshot from GSD
+    snap, type_map = lammpsio.Snapshot.from_hoomd_gsd(frame)
+    assert snap.step == 3
+    assert numpy.allclose(snap.box.low, [-2, -2.5, -3])
+    assert numpy.allclose(snap.box.high, [2, 2.5, 3])
+    assert numpy.allclose(snap.box.tilt, [0.5, 1.2, 1.8])
+    assert snap.N == 2
+    assert numpy.allclose(snap.position, [[0.1, 0.2, 0.3], [-0.1, -0.2, -0.3]])
+    assert numpy.all(snap.image == [[1, -1, 0], [0, 2, -2]])
+    assert numpy.allclose(snap.velocity, [[1, 2, 3], [-4, -5, -6]])
+    assert numpy.all(snap.molecule == [1, 0])
+    assert numpy.all(snap.typeid == [2, 1])
+    assert numpy.allclose(snap.mass, [3, 2])
+    assert numpy.allclose(snap.charge, [-1, 1])
+    assert type_map == {1: "A", 2: "B"}
+
+    # go back to GSD frame
+    frame2 = snap.to_hoomd_gsd(type_map)
+    assert frame2.configuration.step == frame.configuration.step
+    assert numpy.allclose(frame2.configuration.box, frame.configuration.box)
+    assert frame2.particles.N == frame.particles.N
+    assert numpy.allclose(frame2.particles.position, frame.particles.position)
+    assert numpy.all(frame2.particles.image == frame.particles.image)
+    assert numpy.allclose(frame2.particles.velocity, frame.particles.velocity)
+    assert numpy.all(frame2.particles.types == frame.particles.types)
+    assert numpy.all(frame2.particles.typeid == frame.particles.typeid)
+    assert numpy.allclose(frame2.particles.mass, frame.particles.mass)
+    assert numpy.allclose(frame2.particles.charge, frame.particles.charge)
+    assert numpy.all(frame2.particles.body == frame.particles.body)
+
+    # do the same thing, but lose the type map
+    frame3 = snap.to_hoomd_gsd()
+    assert numpy.all(frame3.particles.types == ["1", "2"])
+    assert numpy.all(frame3.particles.typeid == [1, 0])
+
+    # check for warning on floppy molecules
+    frame.particles.body = [-2, -1]
+    with pytest.warns():
+        lammpsio.Snapshot.from_hoomd_gsd(frame)
+
+    # check for barebones Snapshot going to GSD
+    snap2 = lammpsio.Snapshot(N=2, box=lammpsio.Box([-5, -5, -5], [5, 5, 5]))
+    snap2.to_hoomd_gsd()
+    # check again with id remapping to make sure order is preserved
+    snap2.id = [2, 1]
+    snap2.to_hoomd_gsd()
+    assert numpy.all(snap2.id == [2, 1])
+
+    # check for error out on bad box
+    snap2.box.low = [-10, -10, -10]
+    with pytest.raises(ValueError):
+        snap2.to_hoomd_gsd()
 
 
 def test_position(snap):

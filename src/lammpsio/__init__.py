@@ -1,8 +1,19 @@
 import gzip
 import os
 import pathlib
+import warnings
 
 import numpy
+from packaging import version
+
+_optional_imports = set()
+try:
+    import gsd
+    import gsd.hoomd
+
+    _optional_imports.add("gsd")
+except ImportError:
+    pass
 
 
 def _readline(file_, require=False):
@@ -143,6 +154,140 @@ class Snapshot:
         self._typeid = None
         self._charge = None
         self._mass = None
+
+    @classmethod
+    def from_hoomd_gsd(cls, frame):
+        """Create from a HOOMD GSD frame.
+
+        Parameters
+        ----------
+        frame : :class:`gsd.hoomd.Frame` or `gsd.hoomd.Snapshot`
+            HOOMD GSD frame to convert.
+
+        Returns
+        -------
+        :class:`Snapshot`
+            Snapshot created from HOOMD GSD frame.
+        dict
+            A map from the :attr:`Snapshot.typeid` to the HOOMD type.
+
+        """
+        # ensures frame is well formed and that we have NumPy arrays
+        frame.validate()
+
+        # process HOOMD box to LAMMPS box
+        L = frame.configuration.box[:3]
+        tilt = frame.configuration.box[3:]
+        if frame.configuration.dimensions == 3:
+            tilt[0] *= L[1]
+            tilt[1:] *= L[2]
+        elif frame.configuration.dimensions == 2:
+            tilt[0] *= L[1]
+            # HOOMD boxes can have Lz = 0, but LAMMPS does not allow this.
+            if L[2] == 0:
+                L[2] = 1.0
+        box = Box(low=-0.5 * L, high=0.5 * L, tilt=tilt)
+
+        snap = Snapshot(
+            N=frame.particles.N,
+            box=box,
+            step=frame.configuration.step,
+        )
+        snap.position = frame.particles.position
+        snap.velocity = frame.particles.velocity
+        snap.image = frame.particles.image
+        snap.typeid = frame.particles.typeid + 1
+        snap.charge = frame.particles.charge
+        snap.mass = frame.particles.mass
+
+        snap.molecule = frame.particles.body + 1
+        if numpy.any(snap.molecule < 0):
+            warnings.warn("Some molecule IDs are negative, remapping needed.")
+
+        type_map = {typeid + 1: i for typeid, i in enumerate(frame.particles.types)}
+
+        return snap, type_map
+
+    def to_hoomd_gsd(self, type_map=None):
+        """Create a HOOMD GSD frame.
+
+        Parameters
+        ----------
+        type_map : dict
+            A map from the :attr:`Snapshot.typeid` to a HOOMD type.
+            If not specified, the typeids are used as the types.
+
+        Returns
+        -------
+        :class:`gsd.hoomd.Frame` or :class:`gsd.hoomd.Snapshot`
+            Converted HOOMD GSD frame.
+
+        """
+        if "gsd" not in _optional_imports:
+            raise ImportError("GSD package not found")
+
+        # make Frame/Snapshot without deprecation warnings
+        if version.Version(gsd.__version__) >= version.Version("2.8.0"):
+            frame = gsd.hoomd.Frame()
+        else:
+            frame = gsd.hoomd.Snapshot()
+
+        if self.step is not None:
+            frame.configuration.step = int(self.step)
+
+        # we could shift the box later, but for now this is an error
+        if not numpy.allclose(-self.box.low, self.box.high):
+            raise ValueError("GSD boxes must be centered around 0")
+        L = self.box.high - self.box.low
+        if self.box.tilt is not None:
+            tilt = self.box.tilt
+        else:
+            tilt = [0, 0, 0]
+        frame.configuration.box = numpy.concatenate((L, tilt))
+
+        # sort tags if specified and not increasing because GSD guarantees an order
+        reverse_order = None
+        if self.has_id() and self.N > 1 and not numpy.all(self.id[1:] > self.id[:-1]):
+            order = numpy.argsort(self.id)
+            self.reorder(order, check_order=False)
+            # build the reverse map to undo the sort later
+            reverse_order = numpy.zeros(self.N, dtype=int)
+            for i, v in enumerate(order):
+                reverse_order[v] = i
+
+        frame.particles.N = self.N
+        if self.has_position():
+            frame.particles.position = self.position.copy()
+        if self.has_velocity():
+            frame.particles.velocity = self.velocity.copy()
+        if self.has_image():
+            frame.particles.image = self.image.copy()
+        if self.has_typeid():
+            frame.particles.typeid = numpy.zeros(self.N, dtype=int)
+            if type_map is None:
+                sorted_typeids = numpy.sort(numpy.unique(self.typeid))
+                frame.particles.types = [str(typeid) for typeid in sorted_typeids]
+                for typeidx, typeid in enumerate(sorted_typeids):
+                    frame.particles.typeid[self.typeid == typeid] = typeidx
+            else:
+                frame.particles.types = list(type_map.values())
+                reverse_type_map = {
+                    typeid: typeidx for typeidx, typeid in enumerate(type_map.keys())
+                }
+                for i, typeid in enumerate(self.typeid):
+                    frame.particles.typeid[i] = reverse_type_map[typeid]
+        if self.has_charge():
+            frame.particles.charge = self.charge.copy()
+        if self.has_mass():
+            frame.particles.mass = self.mass.copy()
+        if self.has_molecule():
+            frame.particles.body = self.molecule - 1
+
+        # undo the sort so object goes back the way it was
+        if reverse_order is not None:
+            self.reorder(reverse_order, check_order=False)
+
+        return frame
 
     @property
     def N(self):
