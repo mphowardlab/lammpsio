@@ -1,6 +1,7 @@
 import numpy
 import pytest
 
+
 def test_orthorhombic(orthorhombic):
     box = orthorhombic
     assert numpy.allclose(box.low, [-5, -10, 0])
@@ -16,6 +17,7 @@ def test_orthorhombic(orthorhombic):
     assert numpy.allclose(box.high, [6, 20, 8])
     with pytest.raises(TypeError):
         box.high = [0, 0]
+
 
 def test_triclinic(triclinic):
     box = triclinic
