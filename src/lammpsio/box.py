@@ -51,7 +51,7 @@ class Box:
         """
         if isinstance(value, Box):
             return value
-        v = numpy.array(value, ndmin=1, copy=False, dtype=numpy.float64)
+        v = numpy.array(value, ndmin=1, copy=False, dtype=float)
         if v.shape == (9,):
             return Box(v[:3], v[3:6], v[6:])
         elif v.shape == (6,):
@@ -66,7 +66,7 @@ class Box:
 
     @low.setter
     def low(self, value):
-        v = numpy.array(value, ndmin=1, copy=True, dtype=numpy.float64)
+        v = numpy.array(value, ndmin=1, copy=True, dtype=float)
         if v.shape != (3,):
             raise TypeError("Low must be a 3-tuple")
         self._low = v
@@ -78,7 +78,7 @@ class Box:
 
     @high.setter
     def high(self, value):
-        v = numpy.array(value, ndmin=1, copy=True, dtype=numpy.float64)
+        v = numpy.array(value, ndmin=1, copy=True, dtype=float)
         if v.shape != (3,):
             raise TypeError("High must be a 3-tuple")
         self._high = v
@@ -92,7 +92,7 @@ class Box:
     def tilt(self, value):
         v = value
         if v is not None:
-            v = numpy.array(v, ndmin=1, copy=True, dtype=numpy.float64)
+            v = numpy.array(v, ndmin=1, copy=True, dtype=float)
             if v.shape != (3,):
                 raise TypeError("Tilt must be a 3-tuple")
         self._tilt = v
