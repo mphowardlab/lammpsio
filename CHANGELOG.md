@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2023-03-31
+### Added
+- Snapshot can be created from and converted to a GSD HOOMD frame.
+- Package version is embedded in `__version__`.
+
+### Changed
+- Python 3.11 is supported and tested.
+- Code style is enforced using `black` and `flake8`. Developers should install
+`requirements-dev.txt` and configure `pre-commit`.
+- Classes are broken into modules for readability. The user API does not change.
+- NumPy arrays use `float` and `int` as data types instead of specified precision.
+
 ## [0.3.0] - 2022-11-06
 ### Added
 - Dump file defaults to reading schema from atoms header.
@@ -34,7 +46,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - The package has been renamed `lammpsio` for consistency with PyPI.
 
-[Unreleased]: https://github.com/mphowardlab/lammpsio/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/mphowardlab/lammpsio/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/mphowardlab/lammpsio/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/mphowardlab/lammpsio/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/mphowardlab/lammpsio/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/mphowardlab/lammpsio/compare/v0.1.0...v0.1.1
