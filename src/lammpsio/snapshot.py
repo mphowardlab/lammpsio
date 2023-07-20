@@ -121,8 +121,11 @@ class Snapshot:
             raise ImportError("GSD package not found")
 
         # make Frame/Snapshot without deprecation warnings
-        gsd_version = packaging.version.Version(gsd.__version__)
-        if gsd_version >= packaging.version.Version("2.8.0"):
+        try:
+            gsd_version = gsd.version.version
+        except AttributeError:
+            gsd_version = gsd.__version__
+        if packaging.version.Version(gsd_version) >= packaging.version.Version("2.8.0"):
             frame = gsd.hoomd.Frame()
         else:
             frame = gsd.hoomd.Snapshot()

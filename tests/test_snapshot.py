@@ -17,7 +17,11 @@ def test_create(snap):
 
 def test_gsd_conversion():
     # make a GSD frame
-    if version.Version(gsd.__version__) >= version.Version("2.8.0"):
+    try:
+        gsd_version = gsd.version.version
+    except AttributeError:
+        gsd_version = gsd.__version__
+    if version.Version(gsd_version) >= version.Version("2.8.0"):
         frame = gsd.hoomd.Frame()
     else:
         frame = gsd.hoomd.Snapshot()
