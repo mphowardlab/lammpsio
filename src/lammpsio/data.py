@@ -2,6 +2,7 @@ import numpy
 
 from .box import Box
 from .snapshot import Snapshot
+from .topology import Bonds
 
 
 def _readline(file_, require=False):
@@ -44,9 +45,16 @@ class DataFile:
         self.filename = filename
         self.atom_style = atom_style
 
-    known_headers = ("atoms", "atom types", "xlo xhi", "ylo yhi", "zlo zhi", "xy xz yz")
-    unknown_headers = (
+    known_headers = (
+        "atoms",
+        "atom types",
+        "xlo xhi",
+        "ylo yhi",
+        "zlo zhi",
+        "xy xz yz",
         "bonds",
+    )
+    unknown_headers = (
         "angles",
         "dihedrals",
         "impropers",
@@ -267,6 +275,8 @@ class DataFile:
                     box_bounds[2], box_bounds[5] = [float(x) for x in line.split()[:2]]
                 elif "xy xz yz" in line:
                     box_tilt = [float(x) for x in line.split()[:3]]
+                elif "bonds" in line:
+                    bonds = Bonds(N=line.split()[0])
                 else:
                     raise RuntimeError("Uncaught header line! Check programming")
 
@@ -394,6 +404,18 @@ class DataFile:
                                 "Expected number of columns not read for mass"
                             )
                         masses[int(row[0])] = float(row[1])
+                elif "Bonds" in line:
+                    _readline(f, True)  # blank line
+                    bonds.typeid = numpy.zeros(bonds.N)
+                    bonds.members = numpy.zeros([bonds.N, 2])
+                    for i in range(int(bonds.N)):
+                        row = _readline(f, True).split()
+                        if len(row) < 4:
+                            raise IOError(
+                                "Expected number of columns not read for bonds"
+                            )
+                        bonds.typeid[i] = row[1]
+                        bonds.members[i, :] = row[2:]
                 else:
                     # silently ignore unknown sections / lines
                     pass
