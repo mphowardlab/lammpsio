@@ -417,6 +417,7 @@ class DataFile:
                         bonds.id[i] = row[0]
                         bonds.typeid[i] = row[1]
                         bonds.members[i] = row[2:]
+                        snap.bonds = bonds
                 else:
                     # silently ignore unknown sections / lines
                     pass

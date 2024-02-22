@@ -4,6 +4,7 @@ import numpy
 import packaging.version
 
 from .box import Box
+from .topology import Bonds
 
 _optional_imports = set()
 try:
@@ -48,6 +49,7 @@ class Snapshot:
         self._typeid = None
         self._charge = None
         self._mass = None
+        self._bonds = None
 
     @classmethod
     def from_hoomd_gsd(cls, frame):
@@ -436,6 +438,33 @@ class Snapshot:
 
         """
         return self._mass is not None
+
+    @property
+    def bonds(self):
+        """:class:Bonds: bonds."""
+        if not self.has_bonds():
+            pass
+        return self._bonds
+
+    @bonds.setter
+    def bonds(self, value):
+        if value is not None:
+            if not isinstance(value, Bonds):
+                raise ValueError("bonds must be :class:Bonds:")
+            self._bonds = value
+        else:
+            self._bonds = None
+
+    def has_bonds(self):
+        """Check if configuration has bonds.
+
+        Returns
+        -------
+        bool
+            True if bonds have been initialized.
+
+        """
+        return self._bonds is not None
 
     def reorder(self, order, check_order=True):
         """Reorder the particles in place.
