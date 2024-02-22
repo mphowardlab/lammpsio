@@ -221,6 +221,7 @@ class DataFile:
                             member2=snapshot.bonds.members[i, 1],
                         )
                     )
+        return DataFile(filename)
 
     def read(self):
         """Read the file.
