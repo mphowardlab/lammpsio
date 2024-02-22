@@ -407,16 +407,16 @@ class DataFile:
                         masses[int(row[0])] = float(row[1])
                 elif "Bonds" in line:
                     _readline(f, True)  # blank line
-                    bonds.typeid = numpy.zeros(bonds.N)
-                    bonds.members = numpy.zeros([bonds.N, 2])
                     for i in range(int(bonds.N)):
                         row = _readline(f, True).split()
                         if len(row) < 4:
                             raise IOError(
                                 "Expected number of columns not read for bonds"
                             )
+                        row = [int(x) for x in row]
+                        bonds.id[i] = row[0]
                         bonds.typeid[i] = row[1]
-                        bonds.members[i, :] = row[2:]
+                        bonds.members[i] = row[2:]
                 else:
                     # silently ignore unknown sections / lines
                     pass
