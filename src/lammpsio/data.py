@@ -137,6 +137,9 @@ class DataFile:
             if snapshot.box.tilt is not None:
                 f.write("{} {} {} xy xz yz\n".format(*snapshot.box.tilt))
 
+            if snapshot.bonds is not None:
+                f.write(f"{snapshot.bonds.N} bonds")
+
             # Atoms section
             # determine style if it is not given
             if atom_style is None:
@@ -206,7 +209,18 @@ class DataFile:
                 for i, mi in enumerate(masses):
                     f.write("{typeid:4d}{m:12}\n".format(typeid=i + 1, m=mi))
 
-        return DataFile(filename)
+            # Bonds Section
+            if snapshot.bonds is not None:
+                f.write("\nBonds\n\n")
+                for i in range(0, snapshot.bonds.N):
+                    f.write(
+                        "{id} {typeid} {member1} {member2}\n".format(
+                            id=snapshot.bonds.id[i],
+                            typeid=snapshot.bonds.typeid[i],
+                            member1=snapshot.bonds.members[i, 0],
+                            member2=snapshot.bonds.members[i, 1],
+                        )
+                    )
 
     def read(self):
         """Read the file.
