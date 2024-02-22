@@ -48,7 +48,7 @@ class Topology:
     def typeid(self):
         """:class:`numpy.ndarray`: Bond typeids."""
         if not self.has_typeid():
-            self._typeid = numpy.zeros(self.N)
+            self._typeid = numpy.zeros(self.N, dtype=int)
         return self._typeid
 
     @typeid.setter
@@ -76,7 +76,7 @@ class Topology:
     def members(self):
         """:class:`numpy.ndarray`: Bond members."""
         if not self.has_members():
-            self._members = numpy.zeros([self.N, self._num_members])
+            self._members = numpy.zeros([self.N, self._num_members], dtype=int)
         return self._members
 
     @members.setter
