@@ -76,7 +76,7 @@ class Topology:
     def members(self):
         """:class:`numpy.ndarray`: Bond members."""
         if not self.has_members():
-            self._members = numpy.zeros([self.N, 2])
+            self._members = numpy.zeros([self.N, self._num_members])
         return self._members
 
     @members.setter
@@ -84,7 +84,7 @@ class Topology:
         if value is not None:
             v = numpy.array(value, ndmin=2, copy=False, dtype=int)
             if v.shape != (self.N, self._num_members):
-                raise TypeError("Members must be a size Nx2 array")
+                raise TypeError("Members must be a size N x number of arrays array")
             self._members = v
         else:
             self._members = None
