@@ -276,7 +276,8 @@ class DataFile:
                 elif "xy xz yz" in line:
                     box_tilt = [float(x) for x in line.split()[:3]]
                 elif "bonds" in line:
-                    bonds = Bonds(N=line.split()[0])
+                    N_bonds = int(line.split()[0])
+                    bonds = Bonds(N=N_bonds)
                 else:
                     raise RuntimeError("Uncaught header line! Check programming")
 
