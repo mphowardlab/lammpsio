@@ -245,6 +245,7 @@ class DataFile:
             box_bounds = [None, None, None, None, None, None]
             box_tilt = None
             num_types = None
+            N_bonds = None
             # skip first line
             _readline(f, True)
             line = _readline(f)
@@ -292,7 +293,6 @@ class DataFile:
                     box_tilt = [float(x) for x in line.split()[:3]]
                 elif "bonds" in line:
                     N_bonds = int(line.split()[0])
-                    bonds = Bonds(N=N_bonds)
                 else:
                     raise RuntimeError("Uncaught header line! Check programming")
 
@@ -421,18 +421,19 @@ class DataFile:
                             )
                         masses[int(row[0])] = float(row[1])
                 elif "Bonds" in line:
+                    if N_bonds is not None:
+                        snap.bonds = Bonds(N_bonds)
                     _readline(f, True)  # blank line
-                    for i in range(int(bonds.N)):
+                    for i in range(int(snap.bonds.N)):
                         row = _readline(f, True).split()
                         if len(row) < 4:
                             raise IOError(
                                 "Expected number of columns not read for bonds"
                             )
                         row = [int(x) for x in row]
-                        bonds.id[i] = row[0]
-                        bonds.typeid[i] = row[1]
-                        bonds.members[i] = row[2:]
-                    snap.bonds = bonds
+                        snap.bonds.id[i] = row[0]
+                        snap.bonds.typeid[i] = row[1]
+                        snap.bonds.members[i] = row[2:]
                 else:
                     # silently ignore unknown sections / lines
                     pass

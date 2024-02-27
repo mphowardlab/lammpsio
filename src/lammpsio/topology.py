@@ -16,7 +16,7 @@ class Topology:
 
     @property
     def id(self):
-        """:class:`numpy.ndarray`: Bond IDs."""
+        """:class:`numpy.ndarray`: IDs."""
         if not self.has_id():
             self._id = numpy.arange(1, self.N + 1)
         return self._id
@@ -48,7 +48,7 @@ class Topology:
     def typeid(self):
         """:class:`numpy.ndarray`: Bond typeids."""
         if not self.has_typeid():
-            self._typeid = numpy.zeros(self.N, dtype=int)
+            self._typeid = numpy.ones(self.N, dtype=int)
         return self._typeid
 
     @typeid.setter

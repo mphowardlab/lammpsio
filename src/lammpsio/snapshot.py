@@ -443,14 +443,14 @@ class Snapshot:
     def bonds(self):
         """:class:Bonds: bonds."""
         if not self.has_bonds():
-            pass
+            self._bonds = None
         return self._bonds
 
     @bonds.setter
     def bonds(self, value):
         if value is not None:
             if not isinstance(value, Bonds):
-                raise ValueError("bonds must be :class:Bonds:")
+                raise ValueError("bonds must be Bonds")
             self._bonds = value
         else:
             self._bonds = None
