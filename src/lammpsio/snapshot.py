@@ -4,7 +4,7 @@ import numpy
 import packaging.version
 
 from .box import Box
-from .topology import Bonds
+from .topology import Angles, Bonds
 
 _optional_imports = set()
 try:
@@ -50,6 +50,7 @@ class Snapshot:
         self._charge = None
         self._mass = None
         self._bonds = None
+        self._angles = None
 
     @classmethod
     def from_hoomd_gsd(cls, frame):
@@ -465,6 +466,33 @@ class Snapshot:
 
         """
         return self._bonds is not None
+
+    @property
+    def angles(self):
+        """:class:Angles: angles."""
+        if not self.has_angles():
+            self._angles = None
+        return self._angles
+
+    @angles.setter
+    def angles(self, value):
+        if value is not None:
+            if not isinstance(value, Angles):
+                raise ValueError("angles must be Angles")
+            self._angles = value
+        else:
+            self._angles = None
+
+    def has_angles(self):
+        """Check if configuration has angles.
+
+        Returns
+        -------
+        bool
+            True if angles have been initialized.
+
+        """
+        return self._angles is not None
 
     def reorder(self, order, check_order=True):
         """Reorder the particles in place.

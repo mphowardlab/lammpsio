@@ -2,7 +2,7 @@ import numpy
 
 from .box import Box
 from .snapshot import Snapshot
-from .topology import Bonds
+from .topology import Angles, Bonds
 
 
 def _readline(file_, require=False):
@@ -53,9 +53,9 @@ class DataFile:
         "zlo zhi",
         "xy xz yz",
         "bonds",
+        "angles",
     )
     unknown_headers = (
-        "angles",
         "dihedrals",
         "impropers",
         "bond types",
@@ -138,7 +138,10 @@ class DataFile:
                 f.write("{} {} {} xy xz yz\n".format(*snapshot.box.tilt))
 
             if snapshot.bonds is not None:
-                f.write(f"{snapshot.bonds.N} bonds")
+                f.write(f"{snapshot.bonds.N} bonds\n")
+
+            if snapshot.angles is not None:
+                f.write(f"{snapshot.angles.N} angles\n")
 
             # Atoms section
             # determine style if it is not given
@@ -221,6 +224,19 @@ class DataFile:
                             member2=snapshot.bonds.members[i, 1],
                         )
                     )
+
+            # Angles Section
+            if snapshot.angles is not None:
+                f.write("\nAngles\n\n")
+                for i in range(0, snapshot.angles.N):
+                    f.write(
+                        "{id} {typeid} {member1} {member2}\n".format(
+                            id=snapshot.angles.id[i],
+                            typeid=snapshot.angles.typeid[i],
+                            member1=snapshot.angles.members[i, 0],
+                            member2=snapshot.angles.members[i, 1],
+                        )
+                    )
         return DataFile(filename)
 
     def read(self):
@@ -246,6 +262,7 @@ class DataFile:
             box_tilt = None
             num_types = None
             N_bonds = None
+            N_angles = None
             # skip first line
             _readline(f, True)
             line = _readline(f)
@@ -293,6 +310,8 @@ class DataFile:
                     box_tilt = [float(x) for x in line.split()[:3]]
                 elif "bonds" in line:
                     N_bonds = int(line.split()[0])
+                elif "angles" in line:
+                    N_angles = int(line.split()[0])
                 else:
                     raise RuntimeError("Uncaught header line! Check programming")
 
@@ -434,6 +453,20 @@ class DataFile:
                         snap.bonds.id[i] = row[0]
                         snap.bonds.typeid[i] = row[1]
                         snap.bonds.members[i] = row[2:]
+                elif "Angles" in line:
+                    if N_angles is not None:
+                        snap.angles = Angles(N_angles)
+                    _readline(f, True)  # blank line
+                    for i in range(int(snap.angles.N)):
+                        row = _readline(f, True).split()
+                        if len(row) < 4:
+                            raise IOError(
+                                "Expected number of columns not read for angles"
+                            )
+                        row = [int(x) for x in row]
+                        snap.angles.id[i] = row[0]
+                        snap.angles.typeid[i] = row[1]
+                        snap.angles.members[i] = row[2:]
                 else:
                     # silently ignore unknown sections / lines
                     pass
