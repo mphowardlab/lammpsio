@@ -300,6 +300,7 @@ class DataFile:
             N_bonds = None
             N_angles = None
             N_dihedrals = None
+            N_impropers = None
 
             # skip first line
             _readline(f, True)
