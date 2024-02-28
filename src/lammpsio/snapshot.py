@@ -4,7 +4,7 @@ import numpy
 import packaging.version
 
 from .box import Box
-from .topology import Angles, Bonds
+from .topology import Angles, Bonds, Dihedrals
 
 _optional_imports = set()
 try:
@@ -51,6 +51,7 @@ class Snapshot:
         self._mass = None
         self._bonds = None
         self._angles = None
+        self._dihedrals = None
 
     @classmethod
     def from_hoomd_gsd(cls, frame):
@@ -493,6 +494,33 @@ class Snapshot:
 
         """
         return self._angles is not None
+
+    @property
+    def dihedrals(self):
+        """:class:dihedrals: dihedrals."""
+        if not self.has_dihedrals():
+            self._dihedrals = None
+        return self._dihedrals
+
+    @dihedrals.setter
+    def dihedrals(self, value):
+        if value is not None:
+            if not isinstance(value, Dihedrals):
+                raise ValueError("dihedrals must be Dihedrals")
+            self._dihedrals = value
+        else:
+            self._dihedrals = None
+
+    def has_dihedrals(self):
+        """Check if configuration has dihedrals.
+
+        Returns
+        -------
+        bool
+            True if dihedrals have been initialized.
+
+        """
+        return self._dihedrals is not None
 
     def reorder(self, order, check_order=True):
         """Reorder the particles in place.

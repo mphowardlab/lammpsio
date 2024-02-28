@@ -2,7 +2,7 @@ import numpy
 
 from .box import Box
 from .snapshot import Snapshot
-from .topology import Angles, Bonds
+from .topology import Angles, Bonds, Dihedrals
 
 
 def _readline(file_, require=False):
@@ -54,9 +54,9 @@ class DataFile:
         "xy xz yz",
         "bonds",
         "angles",
+        "dihedrals",
     )
     unknown_headers = (
-        "dihedrals",
         "impropers",
         "bond types",
         "angle types",
@@ -143,6 +143,9 @@ class DataFile:
             if snapshot.angles is not None:
                 f.write(f"{snapshot.angles.N} angles\n")
 
+            if snapshot.dihedrals is not None:
+                f.write(f"{snapshot.dihedrals.N} dihedrals\n")
+
             # Atoms section
             # determine style if it is not given
             if atom_style is None:
@@ -217,11 +220,11 @@ class DataFile:
                 f.write("\nBonds\n\n")
                 for i in range(0, snapshot.bonds.N):
                     f.write(
-                        "{id} {typeid} {member1} {member2}\n".format(
+                        "{id} {typeid} {m1} {m2}\n".format(
                             id=snapshot.bonds.id[i],
                             typeid=snapshot.bonds.typeid[i],
-                            member1=snapshot.bonds.members[i, 0],
-                            member2=snapshot.bonds.members[i, 1],
+                            m1=snapshot.bonds.members[i, 0],
+                            m2=snapshot.bonds.members[i, 1],
                         )
                     )
 
@@ -230,11 +233,27 @@ class DataFile:
                 f.write("\nAngles\n\n")
                 for i in range(0, snapshot.angles.N):
                     f.write(
-                        "{id} {typeid} {member1} {member2}\n".format(
+                        "{id} {typeid} {m1} {m2} {m3}\n".format(
                             id=snapshot.angles.id[i],
                             typeid=snapshot.angles.typeid[i],
-                            member1=snapshot.angles.members[i, 0],
-                            member2=snapshot.angles.members[i, 1],
+                            m1=snapshot.angles.members[i, 0],
+                            m2=snapshot.angles.members[i, 1],
+                            m3=snapshot.angles.members[i, 2],
+                        )
+                    )
+
+            # Dihedrals Section
+            if snapshot.dihedrals is not None:
+                f.write("\nDihedrals\n\n")
+                for i in range(0, snapshot.dihedrals.N):
+                    f.write(
+                        "{id} {typeid} {m1} {m2} {m3} {m4}\n".format(
+                            id=snapshot.dihedrals.id[i],
+                            typeid=snapshot.dihedrals.typeid[i],
+                            m1=snapshot.dihedrals.members[i, 0],
+                            m2=snapshot.dihedrals.members[i, 1],
+                            m3=snapshot.dihedrals.members[i, 2],
+                            m4=snapshot.dihedrals.members[i, 3],
                         )
                     )
         return DataFile(filename)
@@ -263,6 +282,8 @@ class DataFile:
             num_types = None
             N_bonds = None
             N_angles = None
+            N_dihedrals = None
+
             # skip first line
             _readline(f, True)
             line = _readline(f)
@@ -312,6 +333,8 @@ class DataFile:
                     N_bonds = int(line.split()[0])
                 elif "angles" in line:
                     N_angles = int(line.split()[0])
+                elif "dihedrals" in line:
+                    N_dihedrals = int(line.split()[0])
                 else:
                     raise RuntimeError("Uncaught header line! Check programming")
 
@@ -467,6 +490,20 @@ class DataFile:
                         snap.angles.id[i] = row[0]
                         snap.angles.typeid[i] = row[1]
                         snap.angles.members[i] = row[2:]
+                elif "Dihedrals" in line:
+                    if N_dihedrals is not None:
+                        snap.dihedrals = Dihedrals(N_dihedrals)
+                    _readline(f, True)  # blank line
+                    for i in range(int(snap.dihedrals.N)):
+                        row = _readline(f, True).split()
+                        if len(row) < 4:
+                            raise IOError(
+                                "Expected number of columns not read for dihedrals"
+                            )
+                        row = [int(x) for x in row]
+                        snap.dihedrals.id[i] = row[0]
+                        snap.dihedrals.typeid[i] = row[1]
+                        snap.dihedrals.members[i] = row[2:]
                 else:
                     # silently ignore unknown sections / lines
                     pass

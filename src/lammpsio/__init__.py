@@ -2,6 +2,6 @@ from .box import Box
 from .data import DataFile
 from .dump import DumpFile
 from .snapshot import Snapshot
-from .topology import Bonds
+from .topology import Angles, Bonds, Dihedrals
 
 __version__ = "0.4.1"
