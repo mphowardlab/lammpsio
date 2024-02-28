@@ -4,7 +4,7 @@ import numpy
 import packaging.version
 
 from .box import Box
-from .topology import Angles, Bonds, Dihedrals
+from .topology import Angles, Bonds, Dihedrals, Impropers
 
 _optional_imports = set()
 try:
@@ -52,6 +52,7 @@ class Snapshot:
         self._bonds = None
         self._angles = None
         self._dihedrals = None
+        self._impropers = None
 
     @classmethod
     def from_hoomd_gsd(cls, frame):
@@ -521,6 +522,33 @@ class Snapshot:
 
         """
         return self._dihedrals is not None
+
+    @property
+    def impropers(self):
+        """:class:impropers: impropers."""
+        if not self.has_impropers():
+            self._impropers = None
+        return self._impropers
+
+    @impropers.setter
+    def impropers(self, value):
+        if value is not None:
+            if not isinstance(value, Impropers):
+                raise ValueError("impropers must be Impropers")
+            self._impropers = value
+        else:
+            self._impropers = None
+
+    def has_impropers(self):
+        """Check if configuration has impropers.
+
+        Returns
+        -------
+        bool
+            True if impropers have been initialized.
+
+        """
+        return self._impropers is not None
 
     def reorder(self, order, check_order=True):
         """Reorder the particles in place.

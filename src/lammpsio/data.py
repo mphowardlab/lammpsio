@@ -2,7 +2,7 @@ import numpy
 
 from .box import Box
 from .snapshot import Snapshot
-from .topology import Angles, Bonds, Dihedrals
+from .topology import Angles, Bonds, Dihedrals, Impropers
 
 
 def _readline(file_, require=False):
@@ -55,9 +55,9 @@ class DataFile:
         "bonds",
         "angles",
         "dihedrals",
+        "impropers",
     )
     unknown_headers = (
-        "impropers",
         "bond types",
         "angle types",
         "dihedral types",
@@ -145,6 +145,9 @@ class DataFile:
 
             if snapshot.dihedrals is not None:
                 f.write(f"{snapshot.dihedrals.N} dihedrals\n")
+
+            if snapshot.impropers is not None:
+                f.write(f"{snapshot.impropers.N} impropers\n")
 
             # Atoms section
             # determine style if it is not given
@@ -256,6 +259,20 @@ class DataFile:
                             m4=snapshot.dihedrals.members[i, 3],
                         )
                     )
+
+            if snapshot.impropers is not None:
+                f.write("\nImpropers\n\n")
+                for i in range(0, snapshot.impropers.N):
+                    f.write(
+                        "{id} {typeid} {m1} {m2} {m3} {m4}\n".format(
+                            id=snapshot.impropers.id[i],
+                            typeid=snapshot.impropers.typeid[i],
+                            m1=snapshot.impropers.members[i, 0],
+                            m2=snapshot.impropers.members[i, 1],
+                            m3=snapshot.impropers.members[i, 2],
+                            m4=snapshot.impropers.members[i, 3],
+                        )
+                    )
         return DataFile(filename)
 
     def read(self):
@@ -335,6 +352,8 @@ class DataFile:
                     N_angles = int(line.split()[0])
                 elif "dihedrals" in line:
                     N_dihedrals = int(line.split()[0])
+                elif "impropers" in line:
+                    N_impropers = int(line.split()[0])
                 else:
                     raise RuntimeError("Uncaught header line! Check programming")
 
@@ -504,6 +523,20 @@ class DataFile:
                         snap.dihedrals.id[i] = row[0]
                         snap.dihedrals.typeid[i] = row[1]
                         snap.dihedrals.members[i] = row[2:]
+                elif "Impropers" in line:
+                    if N_impropers is not None:
+                        snap.impropers = Impropers(N_impropers)
+                    _readline(f, True)  # blank line
+                    for i in range(int(snap.impropers.N)):
+                        row = _readline(f, True).split()
+                        if len(row) < 4:
+                            raise IOError(
+                                "Expected number of columns not read for impropers"
+                            )
+                        row = [int(x) for x in row]
+                        snap.impropers.id[i] = row[0]
+                        snap.impropers.typeid[i] = row[1]
+                        snap.impropers.members[i] = row[2:]
                 else:
                     # silently ignore unknown sections / lines
                     pass
