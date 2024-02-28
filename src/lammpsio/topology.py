@@ -109,3 +109,13 @@ class Bonds(Topology):
 class Angles(Topology):
     def __init__(self, N):
         super().__init__(N=N, num_members=3)
+
+
+class Dihedrals(Topology):
+    def __init__(self, N):
+        super().__init__(N=N, num_members=4)
+
+
+class Impropers(Topology):
+    def __init__(self, N):
+        super().__init__(N=N, num_members=4)
