@@ -445,8 +445,6 @@ class Snapshot:
     @property
     def bonds(self):
         """:class:Bonds: bonds."""
-        if not self.has_bonds():
-            self._bonds = None
         return self._bonds
 
     @bonds.setter
@@ -472,8 +470,6 @@ class Snapshot:
     @property
     def angles(self):
         """:class:Angles: angles."""
-        if not self.has_angles():
-            self._angles = None
         return self._angles
 
     @angles.setter
@@ -499,8 +495,6 @@ class Snapshot:
     @property
     def dihedrals(self):
         """:class:dihedrals: dihedrals."""
-        if not self.has_dihedrals():
-            self._dihedrals = None
         return self._dihedrals
 
     @dihedrals.setter
@@ -526,8 +520,6 @@ class Snapshot:
     @property
     def impropers(self):
         """:class:impropers: impropers."""
-        if not self.has_impropers():
-            self._impropers = None
         return self._impropers
 
     @impropers.setter
