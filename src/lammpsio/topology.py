@@ -3,7 +3,7 @@ import numpy
 
 class Topology:
     def __init__(self, N, num_members):
-        self._N = int(N)
+        self._N = N
         self._num_members = num_members
 
         self._id = None
