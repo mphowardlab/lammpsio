@@ -127,6 +127,34 @@ class Topology:
         """
         return self._num_type is not None
 
+    def reorder(self, order, check_order=True):
+        """Reorder the connections in place.
+
+        Parameters
+        ----------
+        order : list
+            New order of indexes.
+        check_order : bool
+            If true, validate the new ``order`` before applying it.
+
+        """
+        # sanity check the sorting order before applying it
+        if check_order and self.N > 1:
+            sorted_order = numpy.sort(order)
+            if (
+                sorted_order[0] != 0
+                or sorted_order[-1] != self.N - 1
+                or not numpy.all(sorted_order[1:] == sorted_order[:-1] + 1)
+            ):
+                raise ValueError("New order must be an array from 0 to N-1")
+
+        if self.has_id():
+            self._id = self._id[order]
+        if self.has_typeid():
+            self._typeid = self._typeid[order]
+        if self.has_members():
+            self._members = self._members[order]
+
 
 class Bonds(Topology):
     def __init__(self, N):
