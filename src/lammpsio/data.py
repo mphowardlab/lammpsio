@@ -56,12 +56,12 @@ class DataFile:
         "angles",
         "dihedrals",
         "impropers",
-    )
-    unknown_headers = (
         "bond types",
         "angle types",
         "dihedral types",
         "improper types",
+    )
+    unknown_headers = (
         "extra bond per atom",
         "extra angle per atom",
         "extra dihedral per atom",
@@ -137,17 +137,29 @@ class DataFile:
             if snapshot.box.tilt is not None:
                 f.write("{} {} {} xy xz yz\n".format(*snapshot.box.tilt))
 
-            if snapshot.bonds is not None:
+            if snapshot.has_bonds():
                 f.write(f"{snapshot.bonds.N} bonds\n")
 
-            if snapshot.angles is not None:
+            if snapshot.has_angles():
                 f.write(f"{snapshot.angles.N} angles\n")
 
-            if snapshot.dihedrals is not None:
+            if snapshot.has_dihedrals():
                 f.write(f"{snapshot.dihedrals.N} dihedrals\n")
 
-            if snapshot.impropers is not None:
+            if snapshot.has_impropers():
                 f.write(f"{snapshot.impropers.N} impropers\n")
+
+            if snapshot.has_bonds():
+                f.write(f"{snapshot.bonds.N} bond types\n")
+
+            if snapshot.has_angles():
+                f.write(f"{snapshot.angles.N} angle types\n")
+
+            if snapshot.has_dihedrals():
+                f.write(f"{snapshot.dihedrals.N} dihedral types\n")
+
+            if snapshot.has_impropers():
+                f.write(f"{snapshot.impropers.N} improper types\n")
 
             # Atoms section
             # determine style if it is not given
@@ -219,9 +231,9 @@ class DataFile:
                     f.write("{typeid:4d}{m:12}\n".format(typeid=i + 1, m=mi))
 
             # Bonds Section
-            if snapshot.bonds is not None:
+            if snapshot.has_bonds():
                 f.write("\nBonds\n\n")
-                for i in range(0, snapshot.bonds.N):
+                for i in range(snapshot.bonds.N):
                     f.write(
                         "{id} {typeid} {m1} {m2}\n".format(
                             id=snapshot.bonds.id[i],
@@ -232,9 +244,9 @@ class DataFile:
                     )
 
             # Angles Section
-            if snapshot.angles is not None:
+            if snapshot.has_angles():
                 f.write("\nAngles\n\n")
-                for i in range(0, snapshot.angles.N):
+                for i in range(snapshot.angles.N):
                     f.write(
                         "{id} {typeid} {m1} {m2} {m3}\n".format(
                             id=snapshot.angles.id[i],
@@ -246,9 +258,9 @@ class DataFile:
                     )
 
             # Dihedrals Section
-            if snapshot.dihedrals is not None:
+            if snapshot.has_dihedrals():
                 f.write("\nDihedrals\n\n")
-                for i in range(0, snapshot.dihedrals.N):
+                for i in range(snapshot.dihedrals.N):
                     f.write(
                         "{id} {typeid} {m1} {m2} {m3} {m4}\n".format(
                             id=snapshot.dihedrals.id[i],
@@ -260,9 +272,9 @@ class DataFile:
                         )
                     )
 
-            if snapshot.impropers is not None:
+            if snapshot.has_impropers():
                 f.write("\nImpropers\n\n")
-                for i in range(0, snapshot.impropers.N):
+                for i in range(snapshot.impropers.N):
                     f.write(
                         "{id} {typeid} {m1} {m2} {m3} {m4}\n".format(
                             id=snapshot.impropers.id[i],
@@ -301,6 +313,10 @@ class DataFile:
             N_angles = None
             N_dihedrals = None
             N_impropers = None
+            num_bond_types = None
+            num_angle_types = None
+            num_dihedral_types = None
+            num_improper_types = None
 
             # skip first line
             _readline(f, True)
@@ -349,12 +365,20 @@ class DataFile:
                     box_tilt = [float(x) for x in line.split()[:3]]
                 elif "bonds" in line:
                     N_bonds = int(line.split()[0])
+                elif "bond types" in line:
+                    num_bond_types = int(line.split()[0])
                 elif "angles" in line:
                     N_angles = int(line.split()[0])
+                elif "angle types" in line:
+                    num_angle_types = int(line.split()[0])
                 elif "dihedrals" in line:
                     N_dihedrals = int(line.split()[0])
+                elif "dihedral types" in line:
+                    num_dihedral_types = int(line.split()[0])
                 elif "impropers" in line:
                     N_impropers = int(line.split()[0])
+                elif "improper types" in line:
+                    num_improper_types = int(line.split()[0])
                 else:
                     raise RuntimeError("Uncaught header line! Check programming")
 
@@ -485,8 +509,9 @@ class DataFile:
                 elif "Bonds" in line:
                     if N_bonds is not None:
                         snap.bonds = Bonds(N_bonds)
+                        snap.bonds.num_type = num_bond_types
                     _readline(f, True)  # blank line
-                    for i in range(int(snap.bonds.N)):
+                    for i in range(snap.bonds.N):
                         row = _readline(f, True).split()
                         if len(row) < 4:
                             raise IOError(
@@ -495,49 +520,96 @@ class DataFile:
                         row = [int(x) for x in row]
                         snap.bonds.id[i] = row[0]
                         snap.bonds.typeid[i] = row[1]
-                        snap.bonds.members[i] = row[2:]
+                        snap.bonds.members[i] = row[2:4]
+
+                    # sanity check
+                    if snap.has_bonds():
+                        if numpy.any(
+                            numpy.logical_or(
+                                snap.bonds.num_type < 1,
+                                snap.bonds.num_type
+                                < numpy.amax(numpy.unique(snap.bonds.typeid)),
+                            )
+                        ):
+                            raise ValueError("Invalid number of bond types")
                 elif "Angles" in line:
                     if N_angles is not None:
                         snap.angles = Angles(N_angles)
+                        snap.angles.num_type = num_angle_types
                     _readline(f, True)  # blank line
-                    for i in range(int(snap.angles.N)):
+                    for i in range(snap.angles.N):
                         row = _readline(f, True).split()
-                        if len(row) < 4:
+                        if len(row) < 5:
                             raise IOError(
                                 "Expected number of columns not read for angles"
                             )
                         row = [int(x) for x in row]
                         snap.angles.id[i] = row[0]
                         snap.angles.typeid[i] = row[1]
-                        snap.angles.members[i] = row[2:]
+                        snap.angles.members[i] = row[2:5]
+
+                    # sanity check
+                    if snap.has_angles():
+                        if numpy.any(
+                            numpy.logical_or(
+                                snap.angles.num_type < 1,
+                                snap.angles.num_type
+                                < numpy.amax(numpy.unique(snap.angles.typeid)),
+                            )
+                        ):
+                            raise ValueError("Invalid number of angle types")
                 elif "Dihedrals" in line:
                     if N_dihedrals is not None:
                         snap.dihedrals = Dihedrals(N_dihedrals)
+                        snap.dihedrals.num_type = num_dihedral_types
                     _readline(f, True)  # blank line
-                    for i in range(int(snap.dihedrals.N)):
+                    for i in range(snap.dihedrals.N):
                         row = _readline(f, True).split()
-                        if len(row) < 4:
+                        if len(row) < 6:
                             raise IOError(
                                 "Expected number of columns not read for dihedrals"
                             )
                         row = [int(x) for x in row]
                         snap.dihedrals.id[i] = row[0]
                         snap.dihedrals.typeid[i] = row[1]
-                        snap.dihedrals.members[i] = row[2:]
+                        snap.dihedrals.members[i] = row[2:6]
+
+                    # sanity check
+                    if snap.has_dihedrals():
+                        if numpy.any(
+                            numpy.logical_or(
+                                snap.dihedrals.num_type < 1,
+                                snap.dihedrals.num_type
+                                < numpy.amax(numpy.unique(snap.dihedrals.typeid)),
+                            )
+                        ):
+                            raise ValueError("Invalid number of dihedral types")
                 elif "Impropers" in line:
                     if N_impropers is not None:
                         snap.impropers = Impropers(N_impropers)
+                        snap.impropers.num_type = num_improper_types
                     _readline(f, True)  # blank line
-                    for i in range(int(snap.impropers.N)):
+                    for i in range(snap.impropers.N):
                         row = _readline(f, True).split()
-                        if len(row) < 4:
+                        if len(row) < 6:
                             raise IOError(
                                 "Expected number of columns not read for impropers"
                             )
                         row = [int(x) for x in row]
                         snap.impropers.id[i] = row[0]
                         snap.impropers.typeid[i] = row[1]
-                        snap.impropers.members[i] = row[2:]
+                        snap.impropers.members[i] = row[2:6]
+
+                    # sanity check
+                    if snap.has_impropers():
+                        if numpy.any(
+                            numpy.logical_or(
+                                snap.impropers.num_type < 1,
+                                snap.impropers.num_type
+                                < numpy.amax(numpy.unique(snap.impropers.typeid)),
+                            )
+                        ):
+                            raise ValueError("Invalid number of improper types")
                 else:
                     # silently ignore unknown sections / lines
                     pass
