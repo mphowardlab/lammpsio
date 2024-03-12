@@ -9,9 +9,11 @@ class Topology:
         self._id = None
         self._typeid = None
         self._members = None
+        self._num_type = None
 
     @property
     def N(self):
+        """:class:`int`: number of connections."""
         return self._N
 
     @property
@@ -74,9 +76,9 @@ class Topology:
 
     @property
     def members(self):
-        """:class:`numpy.ndarray`: Bond members."""
+        """:class:`numpy.ndarray`: Connection members."""
         if not self.has_members():
-            self._members = numpy.zeros([self.N, self._num_members], dtype=int)
+            self._members = numpy.ones((self.N, self._num_members), dtype=int)
         return self._members
 
     @members.setter
@@ -99,6 +101,31 @@ class Topology:
 
         """
         return self._members is not None
+
+    @property
+    def num_type(self):
+        """:class:`Int`: num_types."""
+        if not self.has_num_type():
+            self._num_type = numpy.amax(numpy.unique(self.typeid))
+        return self._num_type
+
+    @num_type.setter
+    def num_type(self, value):
+        if value is not None:
+            self._num_type = int(value)
+        else:
+            self._num_type = None
+
+    def has_num_type(self):
+        """Check if configuration has num_types.
+
+        Returns
+        -------
+        bool
+            True if connection num_types have been initialized.
+
+        """
+        return self._num_type is not None
 
 
 class Bonds(Topology):
