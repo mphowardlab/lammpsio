@@ -465,7 +465,7 @@ class Snapshot:
             True if bonds have been initialized.
 
         """
-        return self._bonds is not None
+        return self._bonds is not None and self._bonds.N > 0
 
     @property
     def angles(self):
@@ -490,7 +490,7 @@ class Snapshot:
             True if angles have been initialized.
 
         """
-        return self._angles is not None
+        return self._angles is not None and self._angles.N > 0
 
     @property
     def dihedrals(self):
@@ -515,7 +515,7 @@ class Snapshot:
             True if dihedrals have been initialized.
 
         """
-        return self._dihedrals is not None
+        return self._dihedrals is not None and self._dihedrals.N > 0
 
     @property
     def impropers(self):
@@ -540,7 +540,7 @@ class Snapshot:
             True if impropers have been initialized.
 
         """
-        return self._impropers is not None
+        return self._impropers is not None and self._impropers.N > 0
 
     def reorder(self, order, check_order=True):
         """Reorder the particles in place.
