@@ -509,7 +509,7 @@ class DataFile:
                 elif "Bonds" in line:
                     if N_bonds is not None:
                         snap.bonds = Bonds(N_bonds)
-                        snap.bonds.num_type = num_bond_types
+                        snap.bonds.num_types = num_bond_types
                     _readline(f, True)  # blank line
                     for i in range(snap.bonds.N):
                         row = _readline(f, True).split()
@@ -526,8 +526,8 @@ class DataFile:
                     if snap.has_bonds():
                         if numpy.any(
                             numpy.logical_or(
-                                snap.bonds.num_type < 1,
-                                snap.bonds.num_type
+                                snap.bonds.num_types < 1,
+                                snap.bonds.num_types
                                 < numpy.amax(numpy.unique(snap.bonds.typeid)),
                             )
                         ):
@@ -535,7 +535,7 @@ class DataFile:
                 elif "Angles" in line:
                     if N_angles is not None:
                         snap.angles = Angles(N_angles)
-                        snap.angles.num_type = num_angle_types
+                        snap.angles.num_types = num_angle_types
                     _readline(f, True)  # blank line
                     for i in range(snap.angles.N):
                         row = _readline(f, True).split()
@@ -552,8 +552,8 @@ class DataFile:
                     if snap.has_angles():
                         if numpy.any(
                             numpy.logical_or(
-                                snap.angles.num_type < 1,
-                                snap.angles.num_type
+                                snap.angles.num_types < 1,
+                                snap.angles.num_types
                                 < numpy.amax(numpy.unique(snap.angles.typeid)),
                             )
                         ):
@@ -561,7 +561,7 @@ class DataFile:
                 elif "Dihedrals" in line:
                     if N_dihedrals is not None:
                         snap.dihedrals = Dihedrals(N_dihedrals)
-                        snap.dihedrals.num_type = num_dihedral_types
+                        snap.dihedrals.num_types = num_dihedral_types
                     _readline(f, True)  # blank line
                     for i in range(snap.dihedrals.N):
                         row = _readline(f, True).split()
@@ -578,8 +578,8 @@ class DataFile:
                     if snap.has_dihedrals():
                         if numpy.any(
                             numpy.logical_or(
-                                snap.dihedrals.num_type < 1,
-                                snap.dihedrals.num_type
+                                snap.dihedrals.num_types < 1,
+                                snap.dihedrals.num_types
                                 < numpy.amax(numpy.unique(snap.dihedrals.typeid)),
                             )
                         ):
@@ -587,7 +587,7 @@ class DataFile:
                 elif "Impropers" in line:
                     if N_impropers is not None:
                         snap.impropers = Impropers(N_impropers)
-                        snap.impropers.num_type = num_improper_types
+                        snap.impropers.num_types = num_improper_types
                     _readline(f, True)  # blank line
                     for i in range(snap.impropers.N):
                         row = _readline(f, True).split()
@@ -604,8 +604,8 @@ class DataFile:
                     if snap.has_impropers():
                         if numpy.any(
                             numpy.logical_or(
-                                snap.impropers.num_type < 1,
-                                snap.impropers.num_type
+                                snap.impropers.num_types < 1,
+                                snap.impropers.num_types
                                 < numpy.amax(numpy.unique(snap.impropers.typeid)),
                             )
                         ):

@@ -9,7 +9,7 @@ class Topology:
         self._id = None
         self._typeid = None
         self._members = None
-        self._num_type = None
+        self._num_types = None
 
     @property
     def N(self):
@@ -103,20 +103,20 @@ class Topology:
         return self._members is not None
 
     @property
-    def num_type(self):
+    def num_types(self):
         """:class:`Int`: num_types."""
-        if not self.has_num_type():
-            self._num_type = numpy.amax(numpy.unique(self.typeid))
-        return self._num_type
+        if not self.has_num_types():
+            self._num_types = numpy.amax(numpy.unique(self.typeid))
+        return self._num_types
 
-    @num_type.setter
-    def num_type(self, value):
+    @num_types.setter
+    def num_types(self, value):
         if value is not None:
-            self._num_type = int(value)
+            self._num_types = int(value)
         else:
-            self._num_type = None
+            self._num_types = None
 
-    def has_num_type(self):
+    def has_num_types(self):
         """Check if configuration has num_types.
 
         Returns
@@ -125,7 +125,7 @@ class Topology:
             True if connection num_types have been initialized.
 
         """
-        return self._num_type is not None
+        return self._num_types is not None
 
     def reorder(self, order, check_order=True):
         """Reorder the connections in place.
