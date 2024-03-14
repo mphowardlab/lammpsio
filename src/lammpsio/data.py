@@ -150,16 +150,16 @@ class DataFile:
                 f.write(f"{snapshot.impropers.N} impropers\n")
 
             if snapshot.has_bonds():
-                f.write(f"{snapshot.bonds.N} bond types\n")
+                f.write(f"{snapshot.bonds.num_types} bond types\n")
 
             if snapshot.has_angles():
-                f.write(f"{snapshot.angles.N} angle types\n")
+                f.write(f"{snapshot.angles.num_types} angle types\n")
 
             if snapshot.has_dihedrals():
-                f.write(f"{snapshot.dihedrals.N} dihedral types\n")
+                f.write(f"{snapshot.dihedrals.num_types} dihedral types\n")
 
             if snapshot.has_impropers():
-                f.write(f"{snapshot.impropers.N} improper types\n")
+                f.write(f"{snapshot.impropers.num_types} improper types\n")
 
             # Atoms section
             # determine style if it is not given
@@ -523,15 +523,14 @@ class DataFile:
                         snap.bonds.members[i] = row[2:4]
 
                     # sanity check
-                    if snap.has_bonds():
-                        if numpy.any(
-                            numpy.logical_or(
-                                snap.bonds.num_types < 1,
-                                snap.bonds.num_types
-                                < numpy.amax(numpy.unique(snap.bonds.typeid)),
-                            )
-                        ):
-                            raise ValueError("Invalid number of bond types")
+                    if snap.has_bonds() and numpy.any(
+                        numpy.logical_or(
+                            snap.bonds.num_types < 1,
+                            snap.bonds.num_types
+                            < numpy.amax(numpy.unique(snap.bonds.typeid)),
+                        )
+                    ):
+                        raise ValueError("Invalid number of bond types")
                 elif "Angles" in line:
                     if N_angles is not None:
                         snap.angles = Angles(N_angles)
@@ -549,15 +548,14 @@ class DataFile:
                         snap.angles.members[i] = row[2:5]
 
                     # sanity check
-                    if snap.has_angles():
-                        if numpy.any(
-                            numpy.logical_or(
-                                snap.angles.num_types < 1,
-                                snap.angles.num_types
-                                < numpy.amax(numpy.unique(snap.angles.typeid)),
-                            )
-                        ):
-                            raise ValueError("Invalid number of angle types")
+                    if snap.has_angles() and numpy.any(
+                        numpy.logical_or(
+                            snap.angles.num_types < 1,
+                            snap.angles.num_types
+                            < numpy.amax(numpy.unique(snap.angles.typeid)),
+                        )
+                    ):
+                        raise ValueError("Invalid number of angle types")
                 elif "Dihedrals" in line:
                     if N_dihedrals is not None:
                         snap.dihedrals = Dihedrals(N_dihedrals)
@@ -575,15 +573,14 @@ class DataFile:
                         snap.dihedrals.members[i] = row[2:6]
 
                     # sanity check
-                    if snap.has_dihedrals():
-                        if numpy.any(
-                            numpy.logical_or(
-                                snap.dihedrals.num_types < 1,
-                                snap.dihedrals.num_types
-                                < numpy.amax(numpy.unique(snap.dihedrals.typeid)),
-                            )
-                        ):
-                            raise ValueError("Invalid number of dihedral types")
+                    if snap.has_dihedrals() and numpy.any(
+                        numpy.logical_or(
+                            snap.dihedrals.num_types < 1,
+                            snap.dihedrals.num_types
+                            < numpy.amax(numpy.unique(snap.dihedrals.typeid)),
+                        )
+                    ):
+                        raise ValueError("Invalid number of dihedral types")
                 elif "Impropers" in line:
                     if N_impropers is not None:
                         snap.impropers = Impropers(N_impropers)
@@ -601,15 +598,14 @@ class DataFile:
                         snap.impropers.members[i] = row[2:6]
 
                     # sanity check
-                    if snap.has_impropers():
-                        if numpy.any(
-                            numpy.logical_or(
-                                snap.impropers.num_types < 1,
-                                snap.impropers.num_types
-                                < numpy.amax(numpy.unique(snap.impropers.typeid)),
-                            )
-                        ):
-                            raise ValueError("Invalid number of improper types")
+                    if snap.has_impropers() and numpy.any(
+                        numpy.logical_or(
+                            snap.impropers.num_types < 1,
+                            snap.impropers.num_types
+                            < numpy.amax(numpy.unique(snap.impropers.typeid)),
+                        )
+                    ):
+                        raise ValueError("Invalid number of improper types")
                 else:
                     # silently ignore unknown sections / lines
                     pass
