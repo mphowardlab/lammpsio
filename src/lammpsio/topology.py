@@ -59,7 +59,9 @@ class Topology:
             v = numpy.array(value, ndmin=1, copy=False, dtype=int)
             if v.shape != (self.N,):
                 raise TypeError("typeids must be a size N array")
-            self._typeid = v
+            if not self.has_typeid():
+                self._typeid = numpy.ones(self.N, dtype=int)
+            numpy.copyto(self._typeid, v)
         else:
             self._typeid = None
 
@@ -87,7 +89,7 @@ class Topology:
             v = numpy.array(value, ndmin=2, copy=False, dtype=int)
             if v.shape != (self.N, self._num_members):
                 raise TypeError("Members must be a size N x number of arrays array")
-            self._members = v
+            numpy.copyto(self._members, v)
         else:
             self._members = None
 
@@ -105,9 +107,13 @@ class Topology:
     @property
     def num_types(self):
         """:class:`Int`: num_types."""
-        if not self.has_num_types():
-            self._num_types = numpy.amax(numpy.unique(self.typeid))
-        return self._num_types
+        if self._num_types is not None:
+            return self._num_types
+        else:
+            if self.has_typeid():
+                return numpy.amax(numpy.unique(self.typeid))
+            else:
+                return 1
 
     @num_types.setter
     def num_types(self, value):
@@ -115,17 +121,6 @@ class Topology:
             self._num_types = int(value)
         else:
             self._num_types = None
-
-    def has_num_types(self):
-        """Check if configuration has num_types.
-
-        Returns
-        -------
-        bool
-            True if connection num_types have been initialized.
-
-        """
-        return self._num_types is not None
 
     def reorder(self, order, check_order=True):
         """Reorder the connections in place.
