@@ -46,6 +46,7 @@ class Snapshot:
         self._velocity = None
         self._image = None
         self._molecule = None
+        self._num_types = None
         self._typeid = None
         self._charge = None
         self._mass = None
@@ -351,6 +352,24 @@ class Snapshot:
 
         """
         return self._molecule is not None
+
+    @property
+    def num_types(self):
+        """:class:`Int`: num_types."""
+        if self._num_types is not None:
+            return self._num_types
+        else:
+            if self.has_typeid():
+                return numpy.amax(numpy.unique(self.typeid))
+            else:
+                return 1
+
+    @num_types.setter
+    def num_types(self, value):
+        if value is not None:
+            self._num_types = int(value)
+        else:
+            self._num_types = None
 
     @property
     def typeid(self):

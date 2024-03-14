@@ -108,13 +108,11 @@ class DataFile:
             If all masses are not the same for a given type.
 
         """
-        # extract number of types
-        num_types = numpy.amax(numpy.unique(snapshot.typeid))
 
         # extract mass by type
         if snapshot.has_mass():
-            masses = numpy.empty(num_types)
-            for i in range(num_types):
+            masses = numpy.empty(snapshot.num_types)
+            for i in range(snapshot.num_types):
                 mi = snapshot.mass[snapshot.typeid == i + 1]
                 if not numpy.all(mi == mi[0]):
                     raise ValueError("All masses for a type must be equal")
@@ -129,7 +127,7 @@ class DataFile:
             f.write(
                 f"LAMMPS {filename}\n\n"
                 f"{snapshot.N} atoms\n"
-                f"{num_types} atom types\n"
+                f"{snapshot.num_types} atom types\n"
                 f"{snapshot.box.low[0]} {snapshot.box.high[0]} xlo xhi\n"
                 f"{snapshot.box.low[1]} {snapshot.box.high[1]} ylo yhi\n"
                 f"{snapshot.box.low[2]} {snapshot.box.high[2]} zlo zhi\n"
@@ -425,6 +423,7 @@ class DataFile:
 
                     # read atom coordinates
                     _readline(f, True)  # blank line
+                    snap.num_types = num_types
                     for i in range(snap.N):
                         # strip out comments
                         row = _readline(f, True).split()
