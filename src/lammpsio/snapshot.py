@@ -36,9 +36,10 @@ class Snapshot:
 
     """
 
-    def __init__(self, N, box, step=None):
+    def __init__(self, N, box, num_types, step=None):
         self._N = N
         self._box = Box.cast(box)
+        self.num_types = num_types
         self.step = step
 
         self._id = None

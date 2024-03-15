@@ -390,7 +390,7 @@ class DataFile:
             elif None in box_bounds:
                 raise IOError("Box bounds not read")
             box = Box(box_bounds[:3], box_bounds[3:], box_tilt)
-            snap = Snapshot(N, box)
+            snap = Snapshot(N, box, num_types=num_types)
             id_map = {}
 
             # now that snapshot is made, file it in with body sections
@@ -423,7 +423,6 @@ class DataFile:
 
                     # read atom coordinates
                     _readline(f, True)  # blank line
-                    snap.num_types = num_types
                     for i in range(snap.N):
                         # strip out comments
                         row = _readline(f, True).split()
@@ -507,8 +506,7 @@ class DataFile:
                         masses[int(row[0])] = float(row[1])
                 elif "Bonds" in line:
                     if N_bonds is not None:
-                        snap.bonds = Bonds(N_bonds)
-                        snap.bonds.num_types = num_bond_types
+                        snap.bonds = Bonds(N_bonds, num_types=num_bond_types)
                     _readline(f, True)  # blank line
                     for i in range(snap.bonds.N):
                         row = _readline(f, True).split()
@@ -532,8 +530,7 @@ class DataFile:
                         raise ValueError("Invalid number of bond types")
                 elif "Angles" in line:
                     if N_angles is not None:
-                        snap.angles = Angles(N_angles)
-                        snap.angles.num_types = num_angle_types
+                        snap.angles = Angles(N_angles, num_types=num_angle_types)
                     _readline(f, True)  # blank line
                     for i in range(snap.angles.N):
                         row = _readline(f, True).split()
@@ -557,8 +554,9 @@ class DataFile:
                         raise ValueError("Invalid number of angle types")
                 elif "Dihedrals" in line:
                     if N_dihedrals is not None:
-                        snap.dihedrals = Dihedrals(N_dihedrals)
-                        snap.dihedrals.num_types = num_dihedral_types
+                        snap.dihedrals = Dihedrals(
+                            N_dihedrals, num_types=num_dihedral_types
+                        )
                     _readline(f, True)  # blank line
                     for i in range(snap.dihedrals.N):
                         row = _readline(f, True).split()
@@ -582,8 +580,9 @@ class DataFile:
                         raise ValueError("Invalid number of dihedral types")
                 elif "Impropers" in line:
                     if N_impropers is not None:
-                        snap.impropers = Impropers(N_impropers)
-                        snap.impropers.num_types = num_improper_types
+                        snap.impropers = Impropers(
+                            N_impropers, num_types=num_improper_types
+                        )
                     _readline(f, True)  # blank line
                     for i in range(snap.impropers.N):
                         row = _readline(f, True).split()

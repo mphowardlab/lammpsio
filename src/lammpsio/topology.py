@@ -2,14 +2,14 @@ import numpy
 
 
 class Topology:
-    def __init__(self, N, num_members):
+    def __init__(self, N, num_members, num_types=None):
         self._N = N
         self._num_members = num_members
+        self.num_types = num_types
 
         self._id = None
         self._typeid = None
         self._members = None
-        self._num_types = None
 
     @property
     def N(self):
@@ -152,20 +152,20 @@ class Topology:
 
 
 class Bonds(Topology):
-    def __init__(self, N):
-        super().__init__(N=N, num_members=2)
+    def __init__(self, N, num_types):
+        super().__init__(N=N, num_members=2, num_types=num_types)
 
 
 class Angles(Topology):
-    def __init__(self, N):
-        super().__init__(N=N, num_members=3)
+    def __init__(self, N, num_types):
+        super().__init__(N=N, num_members=3, num_types=num_types)
 
 
 class Dihedrals(Topology):
-    def __init__(self, N):
-        super().__init__(N=N, num_members=4)
+    def __init__(self, N, num_types):
+        super().__init__(N=N, num_members=4, num_types=num_types)
 
 
 class Impropers(Topology):
-    def __init__(self, N):
-        super().__init__(N=N, num_members=4)
+    def __init__(self, N, num_types):
+        super().__init__(N=N, num_members=4, num_types=num_types)
