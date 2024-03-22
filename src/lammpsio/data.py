@@ -135,28 +135,28 @@ class DataFile:
             if snapshot.box.tilt is not None:
                 f.write("{} {} {} xy xz yz\n".format(*snapshot.box.tilt))
 
-            if snapshot.has_bonds():
+            if snapshot.bonds is not None:
                 f.write(f"{snapshot.bonds.N} bonds\n")
 
-            if snapshot.has_angles():
+            if snapshot.angles is not None:
                 f.write(f"{snapshot.angles.N} angles\n")
 
-            if snapshot.has_dihedrals():
+            if snapshot.dihedrals is not None:
                 f.write(f"{snapshot.dihedrals.N} dihedrals\n")
 
-            if snapshot.has_impropers():
+            if snapshot.impropers is not None:
                 f.write(f"{snapshot.impropers.N} impropers\n")
 
-            if snapshot.has_bonds():
+            if snapshot.bonds is not None:
                 f.write(f"{snapshot.bonds.num_types} bond types\n")
 
-            if snapshot.has_angles():
+            if snapshot.angles is not None:
                 f.write(f"{snapshot.angles.num_types} angle types\n")
 
-            if snapshot.has_dihedrals():
+            if snapshot.dihedrals is not None:
                 f.write(f"{snapshot.dihedrals.num_types} dihedral types\n")
 
-            if snapshot.has_impropers():
+            if snapshot.impropers is not None:
                 f.write(f"{snapshot.impropers.num_types} improper types\n")
 
             # Atoms section
@@ -520,7 +520,7 @@ class DataFile:
                         snap.bonds.members[i] = row[2:4]
 
                     # sanity check
-                    if snap.has_bonds() and numpy.any(
+                    if numpy.any(
                         numpy.logical_or(
                             snap.bonds.num_types < 1,
                             snap.bonds.typeid > snap.bonds.num_types,
@@ -543,7 +543,7 @@ class DataFile:
                         snap.angles.members[i] = row[2:5]
 
                     # sanity check
-                    if snap.has_angles() and numpy.any(
+                    if numpy.any(
                         numpy.logical_or(
                             snap.angles.num_types < 1,
                             snap.angles.typeid > snap.angles.num_types,
@@ -568,7 +568,7 @@ class DataFile:
                         snap.dihedrals.members[i] = row[2:6]
 
                     # sanity check
-                    if snap.has_dihedrals() and numpy.any(
+                    if numpy.any(
                         numpy.logical_or(
                             snap.dihedrals.num_types < 1,
                             snap.dihedrals.typeid > snap.dihedrals.num_types,
@@ -593,7 +593,7 @@ class DataFile:
                         snap.impropers.members[i] = row[2:6]
 
                     # sanity check
-                    if snap.has_impropers() and numpy.any(
+                    if numpy.any(
                         numpy.logical_or(
                             snap.impropers.num_types < 1,
                             snap.impropers.typeid > snap.impropers.num_types,
