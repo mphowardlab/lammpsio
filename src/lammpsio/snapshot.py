@@ -371,7 +371,7 @@ class Snapshot:
 
     @property
     def num_types(self):
-        """:class:`Int`: num_types."""
+        """int: Number of atom types"""
         if self._num_types is not None:
             return self._num_types
         else:
@@ -479,14 +479,14 @@ class Snapshot:
 
     @property
     def bonds(self):
-        """:class:Bonds: bonds."""
+        """:class:lammpsio.topology.Bonds: Bond data."""
         return self._bonds
 
     @bonds.setter
     def bonds(self, value):
         if value is not None:
             if not isinstance(value, Bonds):
-                raise ValueError("bonds must be Bonds")
+                raise TypeError("bonds must be Bonds")
             self._bonds = value
         else:
             self._bonds = None
@@ -497,21 +497,21 @@ class Snapshot:
         Returns
         -------
         bool
-            True if bonds have been initialized.
+            True if bonds is initialized and there is atleast one bond.
 
         """
         return self._bonds is not None and self._bonds.N > 0
 
     @property
     def angles(self):
-        """:class:Angles: angles."""
+        """:class:lammpsio.topology.Angles: Angle data."""
         return self._angles
 
     @angles.setter
     def angles(self, value):
         if value is not None:
             if not isinstance(value, Angles):
-                raise ValueError("angles must be Angles")
+                raise TypeError("angles must be Angles")
             self._angles = value
         else:
             self._angles = None
@@ -522,21 +522,21 @@ class Snapshot:
         Returns
         -------
         bool
-            True if angles have been initialized.
+            True if angles is initialized and there is atleast one angle.
 
         """
         return self._angles is not None and self._angles.N > 0
 
     @property
     def dihedrals(self):
-        """:class:dihedrals: dihedrals."""
+        """:class:lammpsio.topology.Dihedrals: Dihedral data."""
         return self._dihedrals
 
     @dihedrals.setter
     def dihedrals(self, value):
         if value is not None:
             if not isinstance(value, Dihedrals):
-                raise ValueError("dihedrals must be Dihedrals")
+                raise TypeError("dihedrals must be Dihedrals")
             self._dihedrals = value
         else:
             self._dihedrals = None
@@ -547,21 +547,21 @@ class Snapshot:
         Returns
         -------
         bool
-            True if dihedrals have been initialized.
+            True if dihedrals is initialized and there is atleast one dihedral.
 
         """
         return self._dihedrals is not None and self._dihedrals.N > 0
 
     @property
     def impropers(self):
-        """:class:impropers: impropers."""
+        """:class:lammpsio.topology.Impropers: Improper data."""
         return self._impropers
 
     @impropers.setter
     def impropers(self, value):
         if value is not None:
             if not isinstance(value, Impropers):
-                raise ValueError("impropers must be Impropers")
+                raise TypeError("impropers must be Impropers")
             self._impropers = value
         else:
             self._impropers = None
@@ -572,7 +572,7 @@ class Snapshot:
         Returns
         -------
         bool
-            True if impropers have been initialized.
+            True if impropers is initialized and there is atleast one improper.
 
         """
         return self._impropers is not None and self._impropers.N > 0
