@@ -13,7 +13,7 @@ class Topology:
 
     @property
     def N(self):
-        """:class:`int`: number of connections."""
+        """int: Number of connections."""
         return self._N
 
     @property
@@ -48,7 +48,7 @@ class Topology:
 
     @property
     def typeid(self):
-        """:class:`numpy.ndarray`: Bond typeids."""
+        """:class:`numpy.ndarray`: Connection typeids."""
         if not self.has_typeid():
             self._typeid = numpy.ones(self.N, dtype=int)
         return self._typeid
@@ -88,7 +88,9 @@ class Topology:
         if value is not None:
             v = numpy.array(value, ndmin=2, copy=False, dtype=int)
             if v.shape != (self.N, self._num_members):
-                raise TypeError("Members must be a size N x number of arrays array")
+                raise TypeError("Members must be a size N x number of members array")
+            if not self.has_members():
+                self._members = numpy.ones((self.N, self._num_members), dtype=int)
             numpy.copyto(self._members, v)
         else:
             self._members = None
@@ -106,7 +108,7 @@ class Topology:
 
     @property
     def num_types(self):
-        """:class:`Int`: num_types."""
+        """int: Number of connection types"""
         if self._num_types is not None:
             return self._num_types
         else:
@@ -152,17 +154,17 @@ class Topology:
 
 
 class Bonds(Topology):
-    def __init__(self, N, num_types):
+    def __init__(self, N, num_types=None):
         super().__init__(N=N, num_members=2, num_types=num_types)
 
 
 class Angles(Topology):
-    def __init__(self, N, num_types):
+    def __init__(self, N, num_types=None):
         super().__init__(N=N, num_members=3, num_types=num_types)
 
 
 class Dihedrals(Topology):
-    def __init__(self, N, num_types):
+    def __init__(self, N, num_types=None):
         super().__init__(N=N, num_members=4, num_types=num_types)
 
 
