@@ -2,6 +2,22 @@ import numpy
 
 
 class Topology:
+    """Topology of configuration.
+
+    Parameters
+    ----------
+    N : int
+        Number of connections.
+    num_members : int
+        Number of members in a connection.
+
+    Attributes
+    ----------
+    num_types : int
+        Number of connection types.
+
+    """
+
     def __init__(self, N, num_members, num_types=None):
         self._N = N
         self._num_members = num_members
