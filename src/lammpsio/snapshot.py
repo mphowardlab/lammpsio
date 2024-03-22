@@ -36,10 +36,9 @@ class Snapshot:
 
     """
 
-    def __init__(self, N, box, num_types, step=None):
+    def __init__(self, N, box, step=None, num_types=None):
         self._N = N
         self._box = Box.cast(box)
-        self.num_types = num_types
         self.step = step
 
         self._id = None
@@ -105,6 +104,14 @@ class Snapshot:
         if numpy.any(snap.molecule < 0):
             warnings.warn("Some molecule IDs are negative, remapping needed.")
 
+        print(frame.bonds.N)
+        if (
+            frame.bonds.N > 0
+            or frame.angles.N > 0
+            or frame.dihedrals.N > 0
+            or frame.impropers.N > 0
+        ):
+            warnings.warn("conversion of topology from gsd is not supported")
         type_map = {typeid + 1: i for typeid, i in enumerate(frame.particles.types)}
 
         return snap, type_map
@@ -191,6 +198,14 @@ class Snapshot:
         # undo the sort so object goes back the way it was
         if reverse_order is not None:
             self.reorder(reverse_order, check_order=False)
+
+        if (
+            self.has_bonds()
+            or self.has_angles()
+            or self.has_dihedrals()
+            or self.has_impropers()
+        ):
+            warnings.warn("conversion of topology to gsd is not supported")
 
         return frame
 
