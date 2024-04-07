@@ -104,7 +104,6 @@ class Snapshot:
         if numpy.any(snap.molecule < 0):
             warnings.warn("Some molecule IDs are negative, remapping needed.")
 
-        print(frame.bonds.N)
         if (
             frame.bonds.N > 0
             or frame.angles.N > 0
