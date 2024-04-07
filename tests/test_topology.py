@@ -25,6 +25,10 @@ def test_bonds(snap_top):
     assert numpy.allclose(snap_top.bonds.typeid, typeid)
     assert numpy.allclose(snap_top.bonds.members, members)
 
+    # test cases that raise errors
+    with pytest.raises(TypeError):
+        snap_top.bonds = lammpsio.topology.Angles(N=6, num_types=2)
+
     id = [1, 2, 3, 4, 5, 6, 7]
     with pytest.raises(TypeError):
         snap_top.bonds.id = id
@@ -62,7 +66,11 @@ def test_angles(snap_top):
     assert numpy.allclose(snap_top.angles.typeid, typeid)
     assert numpy.allclose(snap_top.angles.members, members)
 
-    id = id = [1, 2, 3, 4, 5]
+    # test cases that raise errors
+    with pytest.raises(TypeError):
+        snap_top.angles = lammpsio.topology.Bonds(N=4, num_types=2)
+
+    id = [1, 2, 3, 4, 5]
     with pytest.raises(TypeError):
         snap_top.angles.id = id
 
@@ -98,6 +106,10 @@ def test_dihedrals(snap_top):
     assert numpy.allclose(snap_top.dihedrals.typeid, typeid)
     assert numpy.allclose(snap_top.dihedrals.members, members)
 
+    # test cases that raise errors
+    with pytest.raises(TypeError):
+        snap_top.dihedrals = lammpsio.topology.Angles(N=2, num_types=2)
+
     id = [1, 2, 3]
     with pytest.raises(TypeError):
         snap_top.dihedrals.id = id
@@ -131,6 +143,10 @@ def test_impropers(snap_top):
     assert numpy.allclose(snap_top.impropers.id, id)
     assert numpy.allclose(snap_top.impropers.typeid, typeid)
     assert numpy.allclose(snap_top.impropers.members, members)
+
+    # test cases that raise errors
+    with pytest.raises(TypeError):
+        snap_top.impropers = lammpsio.topology.Angles(N=2, num_types=2)
 
     id = [1, 2, 3]
     with pytest.raises(TypeError):
