@@ -111,7 +111,7 @@ class DataFile:
 
         # extract mass by type
         if snapshot.has_mass():
-            masses = numpy.empty(snapshot.num_types)
+            masses = numpy.ones(snapshot.num_types)
             for i in range(snapshot.num_types):
                 mi = snapshot.mass[snapshot.typeid == i + 1]
                 if not numpy.all(mi == mi[0]):
