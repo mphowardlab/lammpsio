@@ -2,7 +2,7 @@ import numpy
 
 
 class Topology:
-    """Topology of configuration.
+    """Particle topology.
 
     Parameters
     ----------
@@ -10,6 +10,8 @@ class Topology:
         Number of connections.
     num_members : int
         Number of members in a connection.
+    num_types : int
+        Number of connection types.
 
     Attributes
     ----------
@@ -129,7 +131,7 @@ class Topology:
             return self._num_types
         else:
             if self.has_typeid():
-                return numpy.amax(numpy.unique(self.typeid))
+                return numpy.amax(self.typeid)
             else:
                 return 1
 
@@ -170,20 +172,84 @@ class Topology:
 
 
 class Bonds(Topology):
+    """Particle bonds.
+
+    Parameters
+    ----------
+    N : int
+        Number of bonds.
+    num_types : int
+        Number of bond types.
+
+    Attributes
+    ----------
+    num_types : int
+        Number of bond types.
+
+    """
+
     def __init__(self, N, num_types=None):
         super().__init__(N=N, num_members=2, num_types=num_types)
 
 
 class Angles(Topology):
+    """Particle angles.
+
+    Parameters
+    ----------
+    N : int
+        Number of angles.
+    num_types : int
+        Number of angle types.
+
+    Attributes
+    ----------
+    num_types : int
+        Number of angle types.
+
+    """
+
     def __init__(self, N, num_types=None):
         super().__init__(N=N, num_members=3, num_types=num_types)
 
 
 class Dihedrals(Topology):
+    """Particle dihedrals.
+
+    Parameters
+    ----------
+    N : int
+        Number of diehdrals.
+    num_types : int
+        Number of dihedral types.
+
+    Attributes
+    ----------
+    num_types : int
+        Number of dihedral types.
+
+    """
+
     def __init__(self, N, num_types=None):
         super().__init__(N=N, num_members=4, num_types=num_types)
 
 
 class Impropers(Topology):
+    """Particle improper dihedrals.
+
+    Parameters
+    ----------
+    N : int
+        Number of improper dihedrals.
+    num_types : int
+        Number of improper dihedral types.
+
+    Attributes
+    ----------
+    num_types : int
+        Number of improper dihedral types.
+
+    """
+
     def __init__(self, N, num_types):
         super().__init__(N=N, num_members=4, num_types=num_types)
