@@ -124,16 +124,7 @@ class DataFile:
 
         with open(filename, "w") as f:
             # LAMMPS header
-            f.write(
-                f"LAMMPS {filename}\n\n"
-                f"{snapshot.N} atoms\n"
-                f"{snapshot.num_types} atom types\n"
-                f"{snapshot.box.low[0]} {snapshot.box.high[0]} xlo xhi\n"
-                f"{snapshot.box.low[1]} {snapshot.box.high[1]} ylo yhi\n"
-                f"{snapshot.box.low[2]} {snapshot.box.high[2]} zlo zhi\n"
-            )
-            if snapshot.box.tilt is not None:
-                f.write("{} {} {} xy xz yz\n".format(*snapshot.box.tilt))
+            f.write(f"LAMMPS {filename}\n\n" f"{snapshot.N} atoms\n")
 
             if snapshot.bonds is not None:
                 f.write(f"{snapshot.bonds.N} bonds\n")
@@ -147,6 +138,8 @@ class DataFile:
             if snapshot.impropers is not None:
                 f.write(f"{snapshot.impropers.N} impropers\n")
 
+            f.write(f"{snapshot.num_types} atom types\n")
+
             if snapshot.bonds is not None:
                 f.write(f"{snapshot.bonds.num_types} bond types\n")
 
@@ -158,6 +151,15 @@ class DataFile:
 
             if snapshot.impropers is not None:
                 f.write(f"{snapshot.impropers.num_types} improper types\n")
+
+            f.write(
+                f"{snapshot.box.low[0]} {snapshot.box.high[0]} xlo xhi\n"
+                f"{snapshot.box.low[1]} {snapshot.box.high[1]} ylo yhi\n"
+                f"{snapshot.box.low[2]} {snapshot.box.high[2]} zlo zhi\n"
+            )
+
+            if snapshot.box.tilt is not None:
+                f.write("{} {} {} xy xz yz\n".format(*snapshot.box.tilt))
 
             # Atoms section
             # determine style if it is not given
