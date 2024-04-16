@@ -110,7 +110,7 @@ class Snapshot:
             or frame.dihedrals.N > 0
             or frame.impropers.N > 0
         ):
-            warnings.warn("conversion of topology from gsd is not supported")
+            warnings.warn("Conversion of topology from gsd is not supported")
         type_map = {typeid + 1: i for typeid, i in enumerate(frame.particles.types)}
 
         return snap, type_map
@@ -204,7 +204,7 @@ class Snapshot:
             or self.has_dihedrals()
             or self.has_impropers()
         ):
-            warnings.warn("conversion of topology to gsd is not supported")
+            warnings.warn("Conversion of topology to gsd is not supported")
 
         return frame
 
@@ -370,12 +370,12 @@ class Snapshot:
 
     @property
     def num_types(self):
-        """int: Number of atom types"""
+        """int: Number of atom types."""
         if self._num_types is not None:
             return self._num_types
         else:
             if self.has_typeid():
-                return numpy.amax(numpy.unique(self.typeid))
+                return numpy.amax(self.typeid)
             else:
                 return 1
 
@@ -478,7 +478,7 @@ class Snapshot:
 
     @property
     def bonds(self):
-        """:class:lammpsio.topology.Bonds: Bond data."""
+        """Bonds: Bond data."""
         return self._bonds
 
     @bonds.setter
@@ -496,14 +496,14 @@ class Snapshot:
         Returns
         -------
         bool
-            True if bonds is initialized and there is atleast one bond.
+            True if bonds is initialized and there is at least one bond.
 
         """
         return self._bonds is not None and self._bonds.N > 0
 
     @property
     def angles(self):
-        """:class:lammpsio.topology.Angles: Angle data."""
+        """Angles: Angle data."""
         return self._angles
 
     @angles.setter
@@ -521,14 +521,14 @@ class Snapshot:
         Returns
         -------
         bool
-            True if angles is initialized and there is atleast one angle.
+            True if angles is initialized and there is at least one angle.
 
         """
         return self._angles is not None and self._angles.N > 0
 
     @property
     def dihedrals(self):
-        """:class:lammpsio.topology.Dihedrals: Dihedral data."""
+        """Dihedrals: Dihedral data."""
         return self._dihedrals
 
     @dihedrals.setter
@@ -546,14 +546,14 @@ class Snapshot:
         Returns
         -------
         bool
-            True if dihedrals is initialized and there is atleast one dihedral.
+            True if dihedrals is initialized and there is at least one dihedral.
 
         """
         return self._dihedrals is not None and self._dihedrals.N > 0
 
     @property
     def impropers(self):
-        """:class:lammpsio.topology.Impropers: Improper data."""
+        """Impropers: Improper data."""
         return self._impropers
 
     @impropers.setter
@@ -571,7 +571,7 @@ class Snapshot:
         Returns
         -------
         bool
-            True if impropers is initialized and there is atleast one improper.
+            True if impropers is initialized and there is at least one improper.
 
         """
         return self._impropers is not None and self._impropers.N > 0
