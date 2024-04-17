@@ -200,7 +200,11 @@ def test_data_file_topology(snap_8, tmp_path, shuffle_ids):
 
     # test bonds
     assert snap_2.bonds.N == snap_8.bonds.N
-    assert snap_2.bonds.has_id()
+    if shuffle_ids:
+        assert snap_2.bonds.has_id()
+        assert numpy.allclose(snap_2.bonds.id, snap_8.bonds.id)
+    else:
+        assert not snap_2.bonds.has_id()
     assert numpy.allclose(snap_2.bonds.id, snap_8.bonds.id)
     assert snap_2.bonds.has_typeid()
     assert numpy.allclose(snap_2.bonds.typeid, snap_8.bonds.typeid)
@@ -209,7 +213,11 @@ def test_data_file_topology(snap_8, tmp_path, shuffle_ids):
 
     # test angles
     assert snap_2.angles.N == snap_8.angles.N
-    assert snap_2.angles.has_id()
+    if shuffle_ids:
+        assert snap_2.angles.has_id()
+        assert numpy.allclose(snap_2.angles.id, snap_8.angles.id)
+    else:
+        assert not snap_2.angles.has_id()
     assert numpy.allclose(snap_2.angles.id, snap_8.angles.id)
     assert snap_2.angles.has_typeid()
     assert numpy.allclose(snap_2.angles.typeid, snap_8.angles.typeid)
@@ -218,7 +226,11 @@ def test_data_file_topology(snap_8, tmp_path, shuffle_ids):
 
     # test dihedrals
     assert snap_2.dihedrals.N == snap_8.dihedrals.N
-    assert snap_2.dihedrals.has_id()
+    if shuffle_ids:
+        assert snap_2.dihedrals.has_id()
+        assert numpy.allclose(snap_2.dihedrals.id, snap_8.dihedrals.id)
+    else:
+        assert not snap_2.dihedrals.has_id()
     assert numpy.allclose(snap_2.dihedrals.id, snap_8.dihedrals.id)
     assert snap_2.dihedrals.has_typeid()
     assert numpy.allclose(snap_2.dihedrals.typeid, snap_8.dihedrals.typeid)
@@ -227,7 +239,11 @@ def test_data_file_topology(snap_8, tmp_path, shuffle_ids):
 
     # test impropers
     assert snap_2.impropers.N == snap_8.impropers.N
-    assert snap_2.impropers.has_id()
+    if shuffle_ids:
+        assert snap_2.impropers.has_id()
+        assert numpy.allclose(snap_2.impropers.id, snap_8.impropers.id)
+    else:
+        assert not snap_2.impropers.has_id()
     assert numpy.allclose(snap_2.impropers.id, snap_8.impropers.id)
     assert snap_2.impropers.has_typeid()
     assert numpy.allclose(snap_2.impropers.typeid, snap_8.impropers.typeid)

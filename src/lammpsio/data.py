@@ -518,7 +518,10 @@ class DataFile:
                                 "Expected number of columns not read for bonds"
                             )
                         row = [int(x) for x in row]
-                        snap.bonds.id[i] = row[0]
+                        # only write ID if it is out of default order
+                        id = row[0]
+                        if id != i + 1:
+                            snap.bonds.id[i] = id
                         snap.bonds.typeid[i] = row[1]
                         snap.bonds.members[i] = row[2:4]
 
@@ -538,7 +541,10 @@ class DataFile:
                                 "Expected number of columns not read for angles"
                             )
                         row = [int(x) for x in row]
-                        snap.angles.id[i] = row[0]
+                        # only write ID if it is out of default order
+                        id = row[0]
+                        if id != i + 1:
+                            snap.angles.id[i] = id
                         snap.angles.typeid[i] = row[1]
                         snap.angles.members[i] = row[2:5]
 
@@ -558,7 +564,10 @@ class DataFile:
                                 "Expected number of columns not read for dihedrals"
                             )
                         row = [int(x) for x in row]
-                        snap.dihedrals.id[i] = row[0]
+                        # only write ID if it is out of default order
+                        id = row[0]
+                        if id != i + 1:
+                            snap.dihedrals.id[i] = id
                         snap.dihedrals.typeid[i] = row[1]
                         snap.dihedrals.members[i] = row[2:6]
 
@@ -578,7 +587,10 @@ class DataFile:
                                 "Expected number of columns not read for impropers"
                             )
                         row = [int(x) for x in row]
-                        snap.impropers.id[i] = row[0]
+                        # only write ID if it is out of default order
+                        id = row[0]
+                        if id != i + 1:
+                            snap.impropers.id[i] = id
                         snap.impropers.typeid[i] = row[1]
                         snap.impropers.members[i] = row[2:6]
 
