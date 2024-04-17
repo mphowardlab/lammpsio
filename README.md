@@ -29,6 +29,7 @@ These constructor arguments are available as attributes:
 - `N`: number of particles (int)
 - `box`: bounding box (`Box`)
 - `step`: timestep counter (int)
+- `num_types`: number of particle types (int)
 
 The data contained in a `Snapshot` per particle is:
 
@@ -40,6 +41,10 @@ The data contained in a `Snapshot` per particle is:
 - `typeid`: (*N*,) array of type indexes (dtype: `int`, default: `1`)
 - `mass`: (*N*,) array of masses (dtype: `float`, default: `1`)
 - `charge`: (*N*,) array of charges (dtype: `float`, default: `0`)
+- `bonds`: Bond data (dtype: `Topology.Bonds`, default: None)
+- `angles`: Angle data (dtype: `Topology.Angles`, default: None)
+- `dihedrals`: Dihedral data (dtype: `Topology.Dihedrals`, default: None)
+- `impropers`: Improper data (dtype: `Topology.Improper`, default: None)
 
 All values of indexes will follow the LAMMPS 1-indexed convention, but the
 arrays themselves are 0-indexed.
@@ -53,6 +58,30 @@ corresponding `has_` method instead (e.g., `has_position()`):
     snapshot.typeid[2] = 2
     if not snapshot.has_mass():
         snapshot.mass = [2.,2.,10.]
+
+## Topology
+
+The particle topology is stored in `Topology` derived classes. `Topology` derived
+classes are `Bonds`, `Angles`, `Dihedrals`, and `Impropers`.
+
+These constructor arguments are available to each type of topology as attributes:
+
+- `N`: number of topology, e.g., bonds, angles, dihedrals, or impropers (int)
+- `num_types`: number of topology types (int)
+
+The data contained in a `Topology` derived classes per particle is:
+- `num_members`: (*N*,i) array of particles IDs in each topology (dtype: `int`, default: `1`)
+, where i=2 for bonds, i=3 for angles, i=4 for dihedrals and impropers.
+- `id`: (*N*,) array topology IDs (dtype: `int`, default: runs from 1 to *N*)
+- `typeid`: (*N*,) array of type indexes (dtype: `int`, default: `1`)
+
+All values of indexes will follow the LAMMPS 1-indexed convention, but the
+arrays themselves are 0-indexed.
+
+The `Topology` derived classes will lazily initialize these per-topology arrays as they are
+accessed to save memory. Hence, accessing a per-topology property will allocate
+it to default values. If you want to check if an attribute has been set, use the
+corresponding `has_` method instead (e.g., `has_id()`).
 
 ## Data files
 
