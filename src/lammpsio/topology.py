@@ -251,5 +251,5 @@ class Impropers(Topology):
 
     """
 
-    def __init__(self, N, num_types):
+    def __init__(self, N, num_types=None):
         super().__init__(N=N, num_members=4, num_types=num_types)
