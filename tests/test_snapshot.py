@@ -160,8 +160,8 @@ def test_mass(snap):
         snap.mass = [1, 1]
 
 
-def test_bonds(snap_top):
-    snap_top.bonds = lammpsio.topology.Bonds(N=6, num_types=2)
+def test_bonds(snap_8):
+    snap_8.bonds = lammpsio.topology.Bonds(N=6, num_types=2)
     id = [1, 2, 3, 4, 5, 6]
     typeid = [1, 2, 1, 2, 1, 2]
     members = [
@@ -173,21 +173,21 @@ def test_bonds(snap_top):
         [7, 8],
     ]
 
-    snap_top.bonds.id = id
-    snap_top.bonds.typeid = typeid
-    snap_top.bonds.members = members
+    snap_8.bonds.id = id
+    snap_8.bonds.typeid = typeid
+    snap_8.bonds.members = members
 
-    assert numpy.allclose(snap_top.bonds.id, id)
-    assert numpy.allclose(snap_top.bonds.typeid, typeid)
-    assert numpy.allclose(snap_top.bonds.members, members)
+    assert numpy.allclose(snap_8.bonds.id, id)
+    assert numpy.allclose(snap_8.bonds.typeid, typeid)
+    assert numpy.allclose(snap_8.bonds.members, members)
 
     # test for setting wrong topology type to snapshot
     with pytest.raises(TypeError):
-        snap_top.bonds = lammpsio.topology.Angles(N=6, num_types=2)
+        snap_8.bonds = lammpsio.topology.Angles(N=6, num_types=2)
 
 
-def test_angles(snap_top):
-    snap_top.angles = lammpsio.topology.Angles(N=4, num_types=2)
+def test_angles(snap_8):
+    snap_8.angles = lammpsio.topology.Angles(N=4, num_types=2)
     id = [
         1,
         2,
@@ -202,21 +202,21 @@ def test_angles(snap_top):
         [6, 7, 8],
     ]
 
-    snap_top.angles.id = id
-    snap_top.angles.typeid = typeid
-    snap_top.angles.members = members
+    snap_8.angles.id = id
+    snap_8.angles.typeid = typeid
+    snap_8.angles.members = members
 
-    assert numpy.allclose(snap_top.angles.id, id)
-    assert numpy.allclose(snap_top.angles.typeid, typeid)
-    assert numpy.allclose(snap_top.angles.members, members)
+    assert numpy.allclose(snap_8.angles.id, id)
+    assert numpy.allclose(snap_8.angles.typeid, typeid)
+    assert numpy.allclose(snap_8.angles.members, members)
 
     # test for setting wrong topology type to snapshot
     with pytest.raises(TypeError):
-        snap_top.angles = lammpsio.topology.Bonds(N=4, num_types=2)
+        snap_8.angles = lammpsio.topology.Bonds(N=4, num_types=2)
 
 
-def test_dihedrals(snap_top):
-    snap_top.dihedrals = lammpsio.topology.Dihedrals(N=2, num_types=2)
+def test_dihedrals(snap_8):
+    snap_8.dihedrals = lammpsio.topology.Dihedrals(N=2, num_types=2)
     id = [1, 2]
     typeid = [1, 2]
     members = [
@@ -224,21 +224,21 @@ def test_dihedrals(snap_top):
         [5, 6, 7, 8],
     ]
 
-    snap_top.dihedrals.id = id
-    snap_top.dihedrals.typeid = typeid
-    snap_top.dihedrals.members = members
+    snap_8.dihedrals.id = id
+    snap_8.dihedrals.typeid = typeid
+    snap_8.dihedrals.members = members
 
-    assert numpy.allclose(snap_top.dihedrals.id, id)
-    assert numpy.allclose(snap_top.dihedrals.typeid, typeid)
-    assert numpy.allclose(snap_top.dihedrals.members, members)
+    assert numpy.allclose(snap_8.dihedrals.id, id)
+    assert numpy.allclose(snap_8.dihedrals.typeid, typeid)
+    assert numpy.allclose(snap_8.dihedrals.members, members)
 
     # test for setting wrong topology type to snapshot
     with pytest.raises(TypeError):
-        snap_top.dihedrals = lammpsio.topology.Angles(N=2, num_types=2)
+        snap_8.dihedrals = lammpsio.topology.Angles(N=2, num_types=2)
 
 
-def test_impropers(snap_top):
-    snap_top.impropers = lammpsio.topology.Impropers(N=2, num_types=2)
+def test_impropers(snap_8):
+    snap_8.impropers = lammpsio.topology.Impropers(N=2, num_types=2)
     id = [1, 2]
     typeid = [1, 2]
     members = [
@@ -246,17 +246,17 @@ def test_impropers(snap_top):
         [5, 6, 7, 8],
     ]
 
-    snap_top.impropers.id = id
-    snap_top.impropers.typeid = typeid
-    snap_top.impropers.members = members
+    snap_8.impropers.id = id
+    snap_8.impropers.typeid = typeid
+    snap_8.impropers.members = members
 
-    assert numpy.allclose(snap_top.impropers.id, id)
-    assert numpy.allclose(snap_top.impropers.typeid, typeid)
-    assert numpy.allclose(snap_top.impropers.members, members)
+    assert numpy.allclose(snap_8.impropers.id, id)
+    assert numpy.allclose(snap_8.impropers.typeid, typeid)
+    assert numpy.allclose(snap_8.impropers.members, members)
 
     # test for setting wrong topology type to snapshot
     with pytest.raises(TypeError):
-        snap_top.impropers = lammpsio.topology.Angles(N=2, num_types=2)
+        snap_8.impropers = lammpsio.topology.Angles(N=2, num_types=2)
 
 
 def test_charge(snap):

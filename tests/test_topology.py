@@ -3,34 +3,34 @@ import pytest
 import lammpsio
 
 
-def test_bonds(snap_top):
-    snap_top.bonds = lammpsio.topology.Bonds(N=6, num_types=2)
+def test_bonds_wrong_shape(snap_8):
+    snap_8.bonds = lammpsio.topology.Bonds(N=6, num_types=2)
 
     # check that error is raised if array is the wrong shape
     id = [1, 2, 3, 4, 5, 6, 7]
     with pytest.raises(TypeError):
-        snap_top.bonds.id = id
+        snap_8.bonds.id = id
 
     typeid = [1, 1, 1, 2, 2, 2, 3]
     with pytest.raises(TypeError):
-        snap_top.bonds.typeid = typeid
+        snap_8.bonds.typeid = typeid
 
     members = [[1, 2], [2, 3], [3, 4], [5, 6], [6, 7], [7, 8], [8, 9]]
     with pytest.raises(TypeError):
-        snap_top.bonds.members = members
+        snap_8.bonds.members = members
 
 
-def test_angles(snap_top):
-    snap_top.angles = lammpsio.topology.Angles(N=4, num_types=2)
+def test_angles_wrong_shape(snap_8):
+    snap_8.angles = lammpsio.topology.Angles(N=4, num_types=2)
 
     # check that error is raised if array is the wrong shape
     id = [1, 2, 3, 4, 5]
     with pytest.raises(TypeError):
-        snap_top.angles.id = id
+        snap_8.angles.id = id
 
     typeid = [1, 1, 2, 2, 3]
     with pytest.raises(TypeError):
-        snap_top.angles.typeid = typeid
+        snap_8.angles.typeid = typeid
 
     members = [
         [1, 2, 3],
@@ -40,20 +40,20 @@ def test_angles(snap_top):
         [7, 8, 9],
     ]
     with pytest.raises(TypeError):
-        snap_top.angles.members = members
+        snap_8.angles.members = members
 
 
-def test_dihedrals(snap_top):
-    snap_top.dihedrals = lammpsio.topology.Dihedrals(N=2, num_types=2)
+def test_dihedrals_wrong_shape(snap_8):
+    snap_8.dihedrals = lammpsio.topology.Dihedrals(N=2, num_types=2)
 
     # check that error is raised if array is the wrong shape
     id = [1, 2, 3]
     with pytest.raises(TypeError):
-        snap_top.dihedrals.id = id
+        snap_8.dihedrals.id = id
 
     typeid = [1, 2, 3]
     with pytest.raises(TypeError):
-        snap_top.dihedrals.typeid = typeid
+        snap_8.dihedrals.typeid = typeid
 
     members = [
         [1, 2, 3, 4],
@@ -61,20 +61,20 @@ def test_dihedrals(snap_top):
         [6, 7, 8, 9],
     ]
     with pytest.raises(TypeError):
-        snap_top.dihedrals.members = members
+        snap_8.dihedrals.members = members
 
 
-def test_impropers(snap_top):
-    snap_top.impropers = lammpsio.topology.Impropers(N=2, num_types=2)
+def test_impropers_wrong_shape(snap_8):
+    snap_8.impropers = lammpsio.topology.Impropers(N=2, num_types=2)
 
     # check that error is raised if array is the wrong shape
     id = [1, 2, 3]
     with pytest.raises(TypeError):
-        snap_top.impropers.id = id
+        snap_8.impropers.id = id
 
     typeid = [1, 2, 3]
     with pytest.raises(TypeError):
-        snap_top.impropers.typeid = typeid
+        snap_8.impropers.typeid = typeid
 
     members = [
         [1, 2, 3, 4],
@@ -82,4 +82,4 @@ def test_impropers(snap_top):
         [6, 7, 8, 9],
     ]
     with pytest.raises(TypeError):
-        snap_top.impropers.members = members
+        snap_8.impropers.members = members
