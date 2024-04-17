@@ -3,6 +3,122 @@ import pytest
 import lammpsio
 
 
+def test_bonds(snap_8):
+    # default is no bonds
+    assert snap_8.bonds is None
+    assert not snap_8.has_bonds()
+
+    # empty bonds set still means we don't have bonds
+    bonds = lammpsio.Bonds(N=0)
+    snap_8.bonds = bonds
+    assert snap_8.bonds is bonds
+    assert not snap_8.has_bonds()
+
+    # one bond counts as bonds
+    bonds = lammpsio.Bonds(N=1)
+    snap_8.bonds = bonds
+    assert snap_8.bonds is bonds
+    assert snap_8.has_bonds()
+
+    # make sure can set back to None
+    snap_8.bonds = None
+    assert snap_8.bonds is None
+    assert not snap_8.has_bonds()
+
+    # make sure other types cannot be set and nothing changes
+    with pytest.raises(TypeError):
+        snap_8.bonds = lammpsio.Angles(N=0)
+    assert snap_8.bonds is None
+    assert not snap_8.has_bonds()
+
+
+def test_angles(snap_8):
+    # default is no angles
+    assert snap_8.angles is None
+    assert not snap_8.has_angles()
+
+    # empty angles set still means we don't have angles
+    angles = lammpsio.Angles(N=0)
+    snap_8.angles = angles
+    assert snap_8.angles is angles
+    assert not snap_8.has_angles()
+
+    # one bond counts as angles
+    angles = lammpsio.Angles(N=1)
+    snap_8.angles = angles
+    assert snap_8.angles is angles
+    assert snap_8.has_angles()
+
+    # make sure can set back to None
+    snap_8.angles = None
+    assert snap_8.angles is None
+    assert not snap_8.has_angles()
+
+    # make sure other types cannot be set and nothing changes
+    with pytest.raises(TypeError):
+        snap_8.angles = lammpsio.Bonds(N=0)
+    assert snap_8.angles is None
+    assert not snap_8.has_angles()
+
+
+def test_dihedrals(snap_8):
+    # default is no dihedrals
+    assert snap_8.dihedrals is None
+    assert not snap_8.has_dihedrals()
+
+    # empty dihedrals set still means we don't have dihedrals
+    dihedrals = lammpsio.Dihedrals(N=0)
+    snap_8.dihedrals = dihedrals
+    assert snap_8.dihedrals is dihedrals
+    assert not snap_8.has_dihedrals()
+
+    # one bond counts as dihedrals
+    dihedrals = lammpsio.Dihedrals(N=1)
+    snap_8.dihedrals = dihedrals
+    assert snap_8.dihedrals is dihedrals
+    assert snap_8.has_dihedrals()
+
+    # make sure can set back to None
+    snap_8.dihedrals = None
+    assert snap_8.dihedrals is None
+    assert not snap_8.has_dihedrals()
+
+    # make sure other types cannot be set and nothing changes
+    with pytest.raises(TypeError):
+        snap_8.dihedrals = lammpsio.Angles(N=0)
+    assert snap_8.dihedrals is None
+    assert not snap_8.has_dihedrals()
+
+
+def test_impropers(snap_8):
+    # default is no impropers
+    assert snap_8.impropers is None
+    assert not snap_8.has_impropers()
+
+    # empty impropers set still means we don't have impropers
+    impropers = lammpsio.Impropers(N=0)
+    snap_8.impropers = impropers
+    assert snap_8.impropers is impropers
+    assert not snap_8.has_impropers()
+
+    # one bond counts as impropers
+    impropers = lammpsio.Impropers(N=1)
+    snap_8.impropers = impropers
+    assert snap_8.impropers is impropers
+    assert snap_8.has_impropers()
+
+    # make sure can set back to None
+    snap_8.impropers = None
+    assert snap_8.impropers is None
+    assert not snap_8.has_impropers()
+
+    # make sure other types cannot be set and nothing changes
+    with pytest.raises(TypeError):
+        snap_8.impropers = lammpsio.Angles(N=0)
+    assert snap_8.impropers is None
+    assert not snap_8.has_impropers()
+
+
 def test_bonds_wrong_shape(snap_8):
     snap_8.bonds = lammpsio.topology.Bonds(N=6, num_types=2)
 
