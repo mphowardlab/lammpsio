@@ -41,10 +41,10 @@ The data contained in a `Snapshot` per particle is:
 - `typeid`: (*N*,) array of type indexes (dtype: `int`, default: `1`)
 - `mass`: (*N*,) array of masses (dtype: `float`, default: `1`)
 - `charge`: (*N*,) array of charges (dtype: `float`, default: `0`)
-- `bonds`: Bond data (dtype: `Topology.Bonds`, default: None)
-- `angles`: Angle data (dtype: `Topology.Angles`, default: None)
-- `dihedrals`: Dihedral data (dtype: `Topology.Dihedrals`, default: None)
-- `impropers`: Improper data (dtype: `Topology.Improper`, default: None)
+- `bonds`: Bond data (dtype: `Bonds`, default: `None`)
+- `angles`: Angle data (dtype: `Angles`, default: `None`)
+- `dihedrals`: Dihedral data (dtype: `Dihedrals`, default: `None`)
+- `impropers`: Improper data (dtype: `Impropers`, default: `None`)
 
 All values of indexes will follow the LAMMPS 1-indexed convention, but the
 arrays themselves are 0-indexed.
@@ -61,27 +61,28 @@ corresponding `has_` method instead (e.g., `has_position()`):
 
 ## Topology
 
-The particle topology is stored in `Topology` derived classes. `Topology` derived
-classes are `Bonds`, `Angles`, `Dihedrals`, and `Impropers`.
+The topology (bond information) can be stored in `Bonds`, `Angles`, `Dihedrals`,
+and `Impropers` objects. All these objects function similarly, differing only in the
+number of particles that are included in a connection (2 for a bond, 3 for an angle,
+4 for a dihedral or improper). Each connection has an associated `id` and `typeid`.
 
-These constructor arguments are available to each type of topology as attributes:
+```py
+bonds = Bonds(N=3, num_types=2)
+angles = Angles(N=2, num_types=1)
 
-- `N`: number of topology, e.g., bonds, angles, dihedrals, or impropers (int)
-- `num_types`: number of topology types (int)
+These constructor arguments are available as attributes:
 
-The data contained in a `Topology` derived classes per particle is:
-- `num_members`: (*N*,i) array of particles IDs in each topology (dtype: `int`, default: `1`)
-, where i=2 for bonds, i=3 for angles, i=4 for dihedrals and impropers.
+- `N`: number of connections (int)
+- `num_types`: number of connection types (int)
+
+The data contained per connection is:
+- `num_members`: (*N*, *M*) array of particles IDs in each topology (dtype: `int`, default: `1`),
+where *M* is the number of particles in a connection.
 - `id`: (*N*,) array topology IDs (dtype: `int`, default: runs from 1 to *N*)
 - `typeid`: (*N*,) array of type indexes (dtype: `int`, default: `1`)
 
 All values of indexes will follow the LAMMPS 1-indexed convention, but the
-arrays themselves are 0-indexed.
-
-The `Topology` derived classes will lazily initialize these per-topology arrays as they are
-accessed to save memory. Hence, accessing a per-topology property will allocate
-it to default values. If you want to check if an attribute has been set, use the
-corresponding `has_` method instead (e.g., `has_id()`).
+arrays themselves are 0-indexed. Lazy array initialization is used as for the `Snapshot`.
 
 ## Data files
 
