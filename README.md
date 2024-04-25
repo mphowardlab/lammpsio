@@ -29,7 +29,7 @@ These constructor arguments are available as attributes:
 - `N`: number of particles (int)
 - `box`: bounding box (`Box`)
 - `step`: timestep counter (int)
-- `num_types`: number of particle types (int)
+- `num_types`: number of particle types (int). If `num_types is None`, then the number of types is deduced from `typeid`.
 
 The data contained in a `Snapshot` per particle is:
 
@@ -69,11 +69,11 @@ number of particles that are included in a connection (2 for a bond, 3 for an an
 ```py
 bonds = Bonds(N=3, num_types=2)
 angles = Angles(N=2, num_types=1)
-
+```
 These constructor arguments are available as attributes:
 
 - `N`: number of connections (int)
-- `num_types`: number of connection types (int)
+- `num_types`: number of connection types (int). If `num_types is None`, then the number of types is deduced from `typeid`.
 
 The data contained per connection is:
 - `num_members`: (*N*, *M*) array of particles IDs in each topology (dtype: `int`, default: `1`),
