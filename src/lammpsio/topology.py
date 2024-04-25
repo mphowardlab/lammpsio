@@ -181,11 +181,6 @@ class Bonds(Topology):
     num_types : int
         Number of bond types.
 
-    Attributes
-    ----------
-    num_types : int
-        Number of bond types.
-
     """
 
     def __init__(self, N, num_types=None):
@@ -199,11 +194,6 @@ class Angles(Topology):
     ----------
     N : int
         Number of angles.
-    num_types : int
-        Number of angle types.
-
-    Attributes
-    ----------
     num_types : int
         Number of angle types.
 
@@ -223,11 +213,6 @@ class Dihedrals(Topology):
     num_types : int
         Number of dihedral types.
 
-    Attributes
-    ----------
-    num_types : int
-        Number of dihedral types.
-
     """
 
     def __init__(self, N, num_types=None):
@@ -241,11 +226,6 @@ class Impropers(Topology):
     ----------
     N : int
         Number of improper dihedrals.
-    num_types : int
-        Number of improper dihedral types.
-
-    Attributes
-    ----------
     num_types : int
         Number of improper dihedral types.
 

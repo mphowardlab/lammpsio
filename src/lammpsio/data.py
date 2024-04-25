@@ -157,7 +157,6 @@ class DataFile:
                 f"{snapshot.box.low[1]} {snapshot.box.high[1]} ylo yhi\n"
                 f"{snapshot.box.low[2]} {snapshot.box.high[2]} zlo zhi\n"
             )
-
             if snapshot.box.tilt is not None:
                 f.write("{} {} {} xy xz yz\n".format(*snapshot.box.tilt))
 
