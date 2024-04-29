@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2024-04-29
+### Added
+- Basic support for molecular topology data. These data are exposed as `Bonds`,
+`Angles`, `Dihedrals` and `Impropers` objects that can be included in a
+`Snapshot` and read/written to a `DataFile`. Some features are not yet fully
+supported, such as conversion to/from GSD format and as an option to `copy_from`
+for a `DumpFile`.
+- Testing for Python 3.12.
+
+### Changed
+- Bumped license year to 2024.
+
 ## [0.4.1] - 2023-07-20
 ### Added
 - `lammpsio` is available for download on conda-forge. Installation directions
@@ -20,7 +32,7 @@ have been updated to include this option.
 
 ## [0.4.0] - 2023-03-31
 ### Added
-- Snapshot can be created from and converted to a GSD HOOMD frame.
+- `Snapshot` can be created from and converted to a GSD HOOMD frame.
 - Package version is embedded in `__version__`.
 
 ### Changed
@@ -57,7 +69,8 @@ have been updated to include this option.
 ### Changed
 - The package has been renamed `lammpsio` for consistency with PyPI.
 
-[Unreleased]: https://github.com/mphowardlab/lammpsio/compare/v0.4.1...HEAD
+[Unreleased]: https://github.com/mphowardlab/lammpsio/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/mphowardlab/lammpsio/compare/v0.4.1...v0.5.0
 [0.4.1]: https://github.com/mphowardlab/lammpsio/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/mphowardlab/lammpsio/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/mphowardlab/lammpsio/compare/v0.2.0...v0.3.0

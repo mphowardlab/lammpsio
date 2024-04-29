@@ -4,4 +4,4 @@ from .dump import DumpFile
 from .snapshot import Snapshot
 from .topology import Angles, Bonds, Dihedrals, Impropers
 
-__version__ = "0.4.1"
+__version__ = "0.5.0"
