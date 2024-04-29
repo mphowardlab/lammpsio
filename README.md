@@ -29,6 +29,7 @@ These constructor arguments are available as attributes:
 - `N`: number of particles (int)
 - `box`: bounding box (`Box`)
 - `step`: timestep counter (int)
+- `num_types`: number of particle types (int). If `num_types is None`, then the number of types is deduced from `typeid`.
 
 The data contained in a `Snapshot` per particle is:
 
@@ -40,6 +41,10 @@ The data contained in a `Snapshot` per particle is:
 - `typeid`: (*N*,) array of type indexes (dtype: `int`, default: `1`)
 - `mass`: (*N*,) array of masses (dtype: `float`, default: `1`)
 - `charge`: (*N*,) array of charges (dtype: `float`, default: `0`)
+- `bonds`: Bond data (dtype: `Bonds`, default: `None`)
+- `angles`: Angle data (dtype: `Angles`, default: `None`)
+- `dihedrals`: Dihedral data (dtype: `Dihedrals`, default: `None`)
+- `impropers`: Improper data (dtype: `Impropers`, default: `None`)
 
 All values of indexes will follow the LAMMPS 1-indexed convention, but the
 arrays themselves are 0-indexed.
@@ -53,6 +58,31 @@ corresponding `has_` method instead (e.g., `has_position()`):
     snapshot.typeid[2] = 2
     if not snapshot.has_mass():
         snapshot.mass = [2.,2.,10.]
+
+## Topology
+
+The topology (bond information) can be stored in `Bonds`, `Angles`, `Dihedrals`,
+and `Impropers` objects. All these objects function similarly, differing only in the
+number of particles that are included in a connection (2 for a bond, 3 for an angle,
+4 for a dihedral or improper). Each connection has an associated `id` and `typeid`.
+
+```py
+bonds = Bonds(N=3, num_types=2)
+angles = Angles(N=2, num_types=1)
+```
+These constructor arguments are available as attributes:
+
+- `N`: number of connections (int)
+- `num_types`: number of connection types (int). If `num_types is None`, then the number of types is deduced from `typeid`.
+
+The data contained per connection is:
+- `num_members`: (*N*, *M*) array of particles IDs in each topology (dtype: `int`, default: `1`),
+where *M* is the number of particles in a connection.
+- `id`: (*N*,) array topology IDs (dtype: `int`, default: runs from 1 to *N*)
+- `typeid`: (*N*,) array of type indexes (dtype: `int`, default: `1`)
+
+All values of indexes will follow the LAMMPS 1-indexed convention, but the
+arrays themselves are 0-indexed. Lazy array initialization is used as for the `Snapshot`.
 
 ## Data files
 

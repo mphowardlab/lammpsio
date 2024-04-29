@@ -4,6 +4,7 @@ import numpy
 import packaging.version
 
 from .box import Box
+from .topology import Angles, Bonds, Dihedrals, Impropers
 
 _optional_imports = set()
 try:
@@ -35,7 +36,7 @@ class Snapshot:
 
     """
 
-    def __init__(self, N, box, step=None):
+    def __init__(self, N, box, step=None, num_types=None):
         self._N = N
         self._box = Box.cast(box)
         self.step = step
@@ -45,9 +46,14 @@ class Snapshot:
         self._velocity = None
         self._image = None
         self._molecule = None
+        self._num_types = None
         self._typeid = None
         self._charge = None
         self._mass = None
+        self._bonds = None
+        self._angles = None
+        self._dihedrals = None
+        self._impropers = None
 
     @classmethod
     def from_hoomd_gsd(cls, frame):
@@ -98,6 +104,13 @@ class Snapshot:
         if numpy.any(snap.molecule < 0):
             warnings.warn("Some molecule IDs are negative, remapping needed.")
 
+        if (
+            frame.bonds.N > 0
+            or frame.angles.N > 0
+            or frame.dihedrals.N > 0
+            or frame.impropers.N > 0
+        ):
+            warnings.warn("Conversion of topology from gsd is not supported")
         type_map = {typeid + 1: i for typeid, i in enumerate(frame.particles.types)}
 
         return snap, type_map
@@ -184,6 +197,14 @@ class Snapshot:
         # undo the sort so object goes back the way it was
         if reverse_order is not None:
             self.reorder(reverse_order, check_order=False)
+
+        if (
+            self.has_bonds()
+            or self.has_angles()
+            or self.has_dihedrals()
+            or self.has_impropers()
+        ):
+            warnings.warn("Conversion of topology to gsd is not supported")
 
         return frame
 
@@ -348,6 +369,24 @@ class Snapshot:
         return self._molecule is not None
 
     @property
+    def num_types(self):
+        """int: Number of atom types."""
+        if self._num_types is not None:
+            return self._num_types
+        else:
+            if self.has_typeid():
+                return numpy.amax(self.typeid)
+            else:
+                return 1
+
+    @num_types.setter
+    def num_types(self, value):
+        if value is not None:
+            self._num_types = int(value)
+        else:
+            self._num_types = None
+
+    @property
     def typeid(self):
         """:class:`numpy.ndarray`: Types."""
         if not self.has_typeid():
@@ -436,6 +475,106 @@ class Snapshot:
 
         """
         return self._mass is not None
+
+    @property
+    def bonds(self):
+        """Bonds: Bond data."""
+        return self._bonds
+
+    @bonds.setter
+    def bonds(self, value):
+        if value is not None:
+            if not isinstance(value, Bonds):
+                raise TypeError("bonds must be Bonds")
+            self._bonds = value
+        else:
+            self._bonds = None
+
+    def has_bonds(self):
+        """Check if configuration has bonds.
+
+        Returns
+        -------
+        bool
+            True if bonds is initialized and there is at least one bond.
+
+        """
+        return self._bonds is not None and self._bonds.N > 0
+
+    @property
+    def angles(self):
+        """Angles: Angle data."""
+        return self._angles
+
+    @angles.setter
+    def angles(self, value):
+        if value is not None:
+            if not isinstance(value, Angles):
+                raise TypeError("angles must be Angles")
+            self._angles = value
+        else:
+            self._angles = None
+
+    def has_angles(self):
+        """Check if configuration has angles.
+
+        Returns
+        -------
+        bool
+            True if angles is initialized and there is at least one angle.
+
+        """
+        return self._angles is not None and self._angles.N > 0
+
+    @property
+    def dihedrals(self):
+        """Dihedrals: Dihedral data."""
+        return self._dihedrals
+
+    @dihedrals.setter
+    def dihedrals(self, value):
+        if value is not None:
+            if not isinstance(value, Dihedrals):
+                raise TypeError("dihedrals must be Dihedrals")
+            self._dihedrals = value
+        else:
+            self._dihedrals = None
+
+    def has_dihedrals(self):
+        """Check if configuration has dihedrals.
+
+        Returns
+        -------
+        bool
+            True if dihedrals is initialized and there is at least one dihedral.
+
+        """
+        return self._dihedrals is not None and self._dihedrals.N > 0
+
+    @property
+    def impropers(self):
+        """Impropers: Improper data."""
+        return self._impropers
+
+    @impropers.setter
+    def impropers(self, value):
+        if value is not None:
+            if not isinstance(value, Impropers):
+                raise TypeError("impropers must be Impropers")
+            self._impropers = value
+        else:
+            self._impropers = None
+
+    def has_impropers(self):
+        """Check if configuration has impropers.
+
+        Returns
+        -------
+        bool
+            True if impropers is initialized and there is at least one improper.
+
+        """
+        return self._impropers is not None and self._impropers.N > 0
 
     def reorder(self, order, check_order=True):
         """Reorder the particles in place.

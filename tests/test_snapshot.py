@@ -160,6 +160,89 @@ def test_mass(snap):
         snap.mass = [1, 1]
 
 
+def test_bonds(snap_8):
+    snap_8.bonds = lammpsio.topology.Bonds(N=6, num_types=2)
+    id = [1, 2, 3, 4, 5, 6]
+    typeid = [1, 2, 1, 2, 1, 2]
+    members = [
+        [1, 2],
+        [2, 3],
+        [3, 4],
+        [5, 6],
+        [6, 7],
+        [7, 8],
+    ]
+
+    snap_8.bonds.id = id
+    snap_8.bonds.typeid = typeid
+    snap_8.bonds.members = members
+
+    assert numpy.allclose(snap_8.bonds.id, id)
+    assert numpy.allclose(snap_8.bonds.typeid, typeid)
+    assert numpy.allclose(snap_8.bonds.members, members)
+
+
+def test_angles(snap_8):
+    snap_8.angles = lammpsio.topology.Angles(N=4, num_types=2)
+    id = [
+        1,
+        2,
+        3,
+        4,
+    ]
+    typeid = [1, 2, 1, 2]
+    members = [
+        [1, 2, 3],
+        [2, 3, 4],
+        [5, 6, 7],
+        [6, 7, 8],
+    ]
+
+    snap_8.angles.id = id
+    snap_8.angles.typeid = typeid
+    snap_8.angles.members = members
+
+    assert numpy.allclose(snap_8.angles.id, id)
+    assert numpy.allclose(snap_8.angles.typeid, typeid)
+    assert numpy.allclose(snap_8.angles.members, members)
+
+
+def test_dihedrals(snap_8):
+    snap_8.dihedrals = lammpsio.topology.Dihedrals(N=2, num_types=2)
+    id = [1, 2]
+    typeid = [1, 2]
+    members = [
+        [1, 2, 3, 4],
+        [5, 6, 7, 8],
+    ]
+
+    snap_8.dihedrals.id = id
+    snap_8.dihedrals.typeid = typeid
+    snap_8.dihedrals.members = members
+
+    assert numpy.allclose(snap_8.dihedrals.id, id)
+    assert numpy.allclose(snap_8.dihedrals.typeid, typeid)
+    assert numpy.allclose(snap_8.dihedrals.members, members)
+
+
+def test_impropers(snap_8):
+    snap_8.impropers = lammpsio.topology.Impropers(N=2, num_types=2)
+    id = [1, 2]
+    typeid = [1, 2]
+    members = [
+        [1, 2, 3, 4],
+        [5, 6, 7, 8],
+    ]
+
+    snap_8.impropers.id = id
+    snap_8.impropers.typeid = typeid
+    snap_8.impropers.members = members
+
+    assert numpy.allclose(snap_8.impropers.id, id)
+    assert numpy.allclose(snap_8.impropers.typeid, typeid)
+    assert numpy.allclose(snap_8.impropers.members, members)
+
+
 def test_charge(snap):
     assert not snap.has_charge()
     assert numpy.allclose(snap.charge, 0)

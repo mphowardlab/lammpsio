@@ -17,3 +17,8 @@ def triclinic():
 @pytest.fixture(params=[lazy_fixture("orthorhombic"), lazy_fixture("triclinic")])
 def snap(request):
     return lammpsio.Snapshot(3, request.param, 10)
+
+
+@pytest.fixture(params=[lazy_fixture("orthorhombic"), lazy_fixture("triclinic")])
+def snap_8(request):
+    return lammpsio.Snapshot(8, request.param, 10)
