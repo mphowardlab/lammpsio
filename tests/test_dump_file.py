@@ -187,3 +187,26 @@ def test_copy_from(snap, tmp_path):
     assert numpy.all(read_snap.molecule == [0, 1, 2])
     assert read_snap.has_charge()
     assert numpy.allclose(read_snap.charge, [0, 1, -1])
+
+
+def test_dump_schema_error(snap, tmp_path):
+    filename = tmp_path / "atoms.lammpstrj"
+    schema = {"id": 0, "image": ([1, 2, 3])}
+    lammpsio.DumpFile.create(filename, schema, snap)
+    f = open(tmp_path / "atoms.lammpstrj", "r")
+    g = open(tmp_path / "atoms_validate.lammpstrj", "w")
+    count = 0
+    for line in f:
+        if count < 8:
+            if line.strip():
+                g.write(" ".join(line.split()) + "\n")
+        else:
+            if line.strip():
+                g.write(" ".join(line.split()[:-1]) + "\n")
+        count += 1
+    f.close()
+    g.close()
+    filename = tmp_path / "atoms_validate.lammpstrj"
+    with pytest.raises(OSError) as error:
+        pytest.raises(lammpsio.DumpFile(filename))
+    assert str(error.value) == "lammpsio requires 3-element vectors"
