@@ -203,23 +203,24 @@ def test_copy_from(snap, tmp_path):
 )
 def test_faulty_dump_schema(snap, tmp_path, schema):
     # test schema
-    schema_zeros = [0] * len(schema.split())
-    print(schema_zeros)
-    f = open(tmp_path/"atoms.lammpstrj", "w")
+    schema_zeros = " ".join(["0"] * len(schema.split()))
+    f = open(tmp_path / "atoms.lammpstrj", "w")
     f.write(
         "ITEM: TIMESTEP\n"
-        "0 \n"
-        "ITEM: NUMBER OF ATOMS \n"
-        "1 \n"
+        "0\n"
+        "ITEM: NUMBER OF ATOMS\n"
+        "1\n"
         "ITEM: BOX BOUNDS pp pp pp\n"
-        "-7.0 7.0 \n"
-        "-7.0 7.0 \n"
-        "-7.0 7.0 \n"
+        "-7.0 7.0\n"
+        "-7.0 7.0\n"
+        "-7.0 7.0\n"
         f"ITEM: ATOMS id type {schema}\n"
-        f"1 1 {" ".join(str(i) for i in schema_zeros)} \n"
+        f"1 1 {schema_zeros}\n"
     )
     f.close()
-    filename = tmp_path/"atoms.lammpstrj"
+    filename = tmp_path / "atoms.lammpstrj"
 
+    traj = lammpsio.DumpFile(filename)
     with pytest.raises(IOError):
-        lammpsio.DumpFile(filename)
+        for snap in traj:
+            pass
