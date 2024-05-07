@@ -191,16 +191,18 @@ def test_copy_from(snap, tmp_path):
 
 def test_faulty_dump_schema(snap, tmp_path):
     f = open(tmp_path / "atoms.lammpstrj", "r")
-    f.write("""ITEM: TIMESTEP \n 
-            0 \n 
-            ITEM: NUMBER OF ATOMS \n 
-            1 \n 
-            ITEM: BOX BOUNDS pp pp pp \n 
-            -7.0 7.0 \n 
-            -7.0 7.0 \n 
-            -7.0 7.0 \n 
+    f.write(
+        """ITEM: TIMESTEP \n
+            0 \n
+            ITEM: NUMBER OF ATOMS \n
+            1 \n
+            ITEM: BOX BOUNDS pp pp pp \n
+            -7.0 7.0 \n
+            -7.0 7.0 \n
+            -7.0 7.0 \n
             ITEM: ATOMS id type ix iy \n
-            1 1 0 0""")
+            1 1 0 0"""
+    )
     f.close()
     filename = tmp_path / "atoms.lammpstrj"
     with pytest.raises(OSError) as error:
