@@ -223,4 +223,3 @@ def test_faulty_dump_schema(snap, tmp_path, schema):
 
     with pytest.raises(IOError):
         lammpsio.DumpFile(filename)
-
