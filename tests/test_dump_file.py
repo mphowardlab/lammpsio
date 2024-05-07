@@ -218,8 +218,8 @@ def test_faulty_dump_schema(snap, tmp_path, schema):
         f"1 1 {schema_zeros}\n"
     )
     f.close()
-    filename = tmp_path / "atoms.lammpstrj"
 
+    filename = tmp_path / "atoms.lammpstrj"
     traj = lammpsio.DumpFile(filename)
     with pytest.raises(IOError):
         for snap in traj:
