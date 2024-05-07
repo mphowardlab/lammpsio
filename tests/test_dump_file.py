@@ -190,21 +190,68 @@ def test_copy_from(snap, tmp_path):
 
 
 def test_faulty_dump_schema(snap, tmp_path):
+    # test image schema
     f = open(tmp_path / "atoms.lammpstrj", "w")
     f.write(
-        """ITEM: TIMESTEP
-            0
-            ITEM: NUMBER OF ATOMS
-            1
-            ITEM: BOX BOUNDS pp pp pp
-            -7.0 7.0
-            -7.0 7.0
-            -7.0 7.0
-            ITEM: ATOMS id type ix iy
-            1 1 0 0"""
+        """
+    ITEM: TIMESTEP
+    0
+    ITEM: NUMBER OF ATOMS
+    1
+    ITEM: BOX BOUNDS pp pp pp
+    -7.0 7.0
+    -7.0 7.0
+    -7.0 7.0
+    ITEM: ATOMS id type ix iy
+    1 1 0 0 """
     )
     f.close()
     filename = tmp_path / "atoms.lammpstrj"
     with pytest.raises(OSError) as error:
         pytest.raises(lammpsio.DumpFile(filename))
+
+    assert str(error.value) == "lammpsio requires 3-element vectors"
+
+    # test position schema
+    f = open(tmp_path / "atoms.lammpstrj", "w")
+    f.write(
+        """
+    ITEM: TIMESTEP
+    0
+    ITEM: NUMBER OF ATOMS
+    1
+    ITEM: BOX BOUNDS pp pp pp
+    -7.0 7.0
+    -7.0 7.0
+    -7.0 7.0
+    ITEM: ATOMS id type x y
+    1 1 0 0 """
+    )
+    f.close()
+    filename = tmp_path / "atoms.lammpstrj"
+    with pytest.raises(OSError) as error:
+        pytest.raises(lammpsio.DumpFile(filename))
+
+    assert str(error.value) == "lammpsio requires 3-element vectors"
+
+    # test velocity schema
+    f = open(tmp_path / "atoms.lammpstrj", "w")
+    f.write(
+        """
+    ITEM: TIMESTEP
+    0
+    ITEM: NUMBER OF ATOMS
+    1
+    ITEM: BOX BOUNDS pp pp pp
+    -7.0 7.0
+    -7.0 7.0
+    -7.0 7.0
+    ITEM: ATOMS id type vx vy
+    1 1 0 0"""
+    )
+    f.close()
+    filename = tmp_path / "atoms.lammpstrj"
+    with pytest.raises(OSError) as error:
+        pytest.raises(lammpsio.DumpFile(filename))
+
     assert str(error.value) == "lammpsio requires 3-element vectors"
