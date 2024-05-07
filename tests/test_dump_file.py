@@ -189,69 +189,38 @@ def test_copy_from(snap, tmp_path):
     assert numpy.allclose(read_snap.charge, [0, 1, -1])
 
 
-def test_faulty_dump_schema(snap, tmp_path):
-    # test image schema
-    f = open(tmp_path / "atoms.lammpstrj", "w")
+@pytest.mark.parametrize(
+    "schema",
+    ["x", "x y", "vx", "vx vy", "ix", "ix iy"],
+    ids=[
+        "position-1d",
+        "position-2d",
+        "velocity-1d",
+        "velocity-2d",
+        "image-1d",
+        "image-2d",
+    ],
+)
+def test_faulty_dump_schema(snap, tmp_path, schema):
+    # test schema
+    schema_zeros = [0] * len(schema.split())
+    print(schema_zeros)
+    f = open(tmp_path/"atoms.lammpstrj", "w")
     f.write(
-        """
-    ITEM: TIMESTEP
-    0
-    ITEM: NUMBER OF ATOMS
-    1
-    ITEM: BOX BOUNDS pp pp pp
-    -7.0 7.0
-    -7.0 7.0
-    -7.0 7.0
-    ITEM: ATOMS id type ix iy
-    1 1 0 0 """
+        "ITEM: TIMESTEP\n"
+        "0 \n"
+        "ITEM: NUMBER OF ATOMS \n"
+        "1 \n"
+        "ITEM: BOX BOUNDS pp pp pp\n"
+        "-7.0 7.0 \n"
+        "-7.0 7.0 \n"
+        "-7.0 7.0 \n"
+        f"ITEM: ATOMS id type {schema}\n"
+        f"1 1 {" ".join(str(i) for i in schema_zeros)} \n"
     )
     f.close()
-    filename = tmp_path / "atoms.lammpstrj"
-    with pytest.raises(OSError) as error:
-        pytest.raises(lammpsio.DumpFile(filename))
+    filename = tmp_path/"atoms.lammpstrj"
 
-    assert str(error.value) == "lammpsio requires 3-element vectors"
+    with pytest.raises(IOError):
+        lammpsio.DumpFile(filename)
 
-    # test position schema
-    f = open(tmp_path / "atoms.lammpstrj", "w")
-    f.write(
-        """
-    ITEM: TIMESTEP
-    0
-    ITEM: NUMBER OF ATOMS
-    1
-    ITEM: BOX BOUNDS pp pp pp
-    -7.0 7.0
-    -7.0 7.0
-    -7.0 7.0
-    ITEM: ATOMS id type x y
-    1 1 0 0 """
-    )
-    f.close()
-    filename = tmp_path / "atoms.lammpstrj"
-    with pytest.raises(OSError) as error:
-        pytest.raises(lammpsio.DumpFile(filename))
-
-    assert str(error.value) == "lammpsio requires 3-element vectors"
-
-    # test velocity schema
-    f = open(tmp_path / "atoms.lammpstrj", "w")
-    f.write(
-        """
-    ITEM: TIMESTEP
-    0
-    ITEM: NUMBER OF ATOMS
-    1
-    ITEM: BOX BOUNDS pp pp pp
-    -7.0 7.0
-    -7.0 7.0
-    -7.0 7.0
-    ITEM: ATOMS id type vx vy
-    1 1 0 0"""
-    )
-    f.close()
-    filename = tmp_path / "atoms.lammpstrj"
-    with pytest.raises(OSError) as error:
-        pytest.raises(lammpsio.DumpFile(filename))
-
-    assert str(error.value) == "lammpsio requires 3-element vectors"
