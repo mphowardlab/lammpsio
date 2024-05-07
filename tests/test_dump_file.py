@@ -191,7 +191,8 @@ def test_copy_from(snap, tmp_path):
 
 def test_faulty_dump_schema(snap, tmp_path):
     f = open(tmp_path / "atoms.lammpstrj", "w")
-    f.write("""ITEM: TIMESTEP
+    f.write(
+        """ITEM: TIMESTEP
             0
             ITEM: NUMBER OF ATOMS
             1
@@ -200,7 +201,8 @@ def test_faulty_dump_schema(snap, tmp_path):
             -7.0 7.0
             -7.0 7.0
             ITEM: ATOMS id type ix iy
-            1 1 0 0""")
+            1 1 0 0"""
+    )
     f.close()
     filename = tmp_path / "atoms.lammpstrj"
     with pytest.raises(OSError) as error:
