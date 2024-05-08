@@ -323,7 +323,7 @@ class DumpFile:
                                 else:
                                     schema[key] = i
                         # validate tuple
-                        for key in ("position", "velocity", " image"):
+                        for key in ("position", "velocity", "image"):
                             if key in schema and any(x is None for x in schema[key]):
                                 raise IOError("lammpsio requires 3-element vectors")
                         self.schema = schema

@@ -187,3 +187,40 @@ def test_copy_from(snap, tmp_path):
     assert numpy.all(read_snap.molecule == [0, 1, 2])
     assert read_snap.has_charge()
     assert numpy.allclose(read_snap.charge, [0, 1, -1])
+
+
+@pytest.mark.parametrize(
+    "schema",
+    ["x", "x y", "vx", "vx vy", "ix", "ix iy"],
+    ids=[
+        "position-1d",
+        "position-2d",
+        "velocity-1d",
+        "velocity-2d",
+        "image-1d",
+        "image-2d",
+    ],
+)
+def test_faulty_dump_schema(tmp_path, schema):
+    # test schema
+    schema_zeros = " ".join(["0"] * len(schema.split()))
+    filename = tmp_path / "atoms.lammpstrj"
+    f = open(filename, "w")
+    f.write(
+        "ITEM: TIMESTEP\n"
+        "0\n"
+        "ITEM: NUMBER OF ATOMS\n"
+        "1\n"
+        "ITEM: BOX BOUNDS pp pp pp\n"
+        "-7.0 7.0\n"
+        "-7.0 7.0\n"
+        "-7.0 7.0\n"
+        f"ITEM: ATOMS id type {schema}\n"
+        f"1 1 {schema_zeros}\n"
+    )
+    f.close()
+
+    traj = lammpsio.DumpFile(filename)
+    with pytest.raises(IOError):
+        for snap in traj:
+            pass
