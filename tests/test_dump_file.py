@@ -201,7 +201,7 @@ def test_copy_from(snap, tmp_path):
         "image-2d",
     ],
 )
-def test_faulty_dump_schema(snap, tmp_path, schema):
+def test_faulty_dump_schema(tmp_path, schema):
     # test schema
     schema_zeros = " ".join(["0"] * len(schema.split()))
     filename = tmp_path / "atoms.lammpstrj"
