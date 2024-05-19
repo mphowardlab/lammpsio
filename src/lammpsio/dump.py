@@ -92,10 +92,9 @@ class DumpFile:
                 f.write(f"{snap.N}\n")
 
                 # always assume periodic in all directions
-                box_header = "ITEM: BOX BOUNDS pp pp pp"
                 if snap.box.tilt is not None:
+                    f.write("ITEM: BOX BOUNDS xy xz yz pp pp pp\n")
                     xy, xz, yz = snap.box.tilt
-                    box_header += f" {xy:f} {xz:f} {yz:f}"
                     lo = [
                         snap.box.low[0] + min([0.0, xy, xz, xy + xz]),
                         snap.box.low[1] + min([0.0, yz]),
@@ -106,12 +105,14 @@ class DumpFile:
                         snap.box.high[1] + max([0.0, yz]),
                         snap.box.high[2],
                     ]
+                    for i in range(3):
+                        f.write(f"{lo[i]:f} {hi[i]:f} {snap.box.tilt[i]:f}\n")
                 else:
+                    f.write("ITEM: BOX BOUNDS pp pp pp\n")
                     lo = snap.box.low
                     hi = snap.box.high
-                f.write(box_header + "\n")
-                for i in range(3):
-                    f.write(f"{lo[i]:f} {hi[i]:f}\n")
+                    for i in range(3):
+                        f.write(f"{lo[i]:f} {hi[i]:f}\n")
 
                 # mapping from lammpsio to LAMMPS dump keys
                 lammps_fields = {
