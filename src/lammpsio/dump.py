@@ -265,7 +265,9 @@ class DumpFile:
                         is_triclinic = False
                     else:
                         raise IOError("Incorrectly formed box bound header")
-                    _box = [[float(v) for v in _readline(f, True).split()] for _ in range(3)]
+                    _box = [
+                        [float(v) for v in _readline(f, True).split()] for _ in range(3)
+                    ]
                     x_lo, x_hi = _box[0][:2]
                     y_lo, y_hi = _box[1][:2]
                     z_lo, z_hi = _box[2][:2]
