@@ -266,7 +266,8 @@ class DumpFile:
                     else:
                         raise IOError("Incorrectly formed box bound header")
                     box_ = [
-                        [float(v) for v in _readline(f, True).split()] for line_ in range(3)
+                        [float(v) for v in _readline(f, True).split()]
+                        for line_ in range(3)
                     ]
                     x_lo, x_hi = box_[0][:2]
                     y_lo, y_hi = box_[1][:2]
