@@ -16,7 +16,7 @@ def test_dump_file_min(snap, compression_extensions, shuffle_ids, sort_ids, tmp_
     if shuffle_ids:
         for s in snaps:
             s.id = s.id[::-1]
- 
+
     filename = tmp_path / f"atoms.lammpstrj{compression_extensions}"
     schema = {"id": 0, "position": (1, 2, 3)}
     f = lammpsio.DumpFile.create(filename, schema, snaps)
@@ -98,7 +98,7 @@ def test_dump_file_all(snap, compression_extensions, shuffle_ids, sort_ids, tmp_
         "molecule": 1,
         "charge": 0,
     }
-    
+
     filename = tmp_path / f"atoms.lammpstrj{compression_extensions}"
     f = lammpsio.DumpFile.create(filename, schema, snaps)
     assert filename.exists
