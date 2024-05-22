@@ -8,18 +8,16 @@ import lammpsio
 
 @pytest.mark.parametrize("sort_ids", [False, True])
 @pytest.mark.parametrize("shuffle_ids", [False, True])
-@pytest.mark.parametrize("use_gzip", [False, True])
-def test_dump_file_min(snap, use_gzip, shuffle_ids, sort_ids, tmp_path):
+@pytest.mark.parametrize("compression_extensions", ["", ".gz", ".zstd"])
+def test_dump_file_min(snap, compression_extensions, shuffle_ids, sort_ids, tmp_path):
     # create file with 2 snapshots with defaults, changing N & step
     snap_2 = lammpsio.Snapshot(snap.N + 2, snap.box, snap.step + 1)
     snaps = [snap, snap_2]
     if shuffle_ids:
         for s in snaps:
             s.id = s.id[::-1]
-    if use_gzip:
-        filename = tmp_path / "atoms.lammpstrj.gz"
-    else:
-        filename = tmp_path / "atoms.lammpstrj"
+ 
+    filename = tmp_path / f"atoms.lammpstrj{compression_extensions}"
     schema = {"id": 0, "position": (1, 2, 3)}
     f = lammpsio.DumpFile.create(filename, schema, snaps)
     assert filename.exists
@@ -59,8 +57,8 @@ def test_dump_file_min(snap, use_gzip, shuffle_ids, sort_ids, tmp_path):
 
 @pytest.mark.parametrize("sort_ids", [False, True])
 @pytest.mark.parametrize("shuffle_ids", [False, True])
-@pytest.mark.parametrize("use_gzip", [False, True])
-def test_dump_file_all(snap, use_gzip, shuffle_ids, sort_ids, tmp_path):
+@pytest.mark.parametrize("compression_extensions", ["", ".gz", ".zstd"])
+def test_dump_file_all(snap, compression_extensions, shuffle_ids, sort_ids, tmp_path):
     snap.position = [[0.1, 0.2, 0.3], [-0.4, -0.5, -0.6], [0.7, 0.8, 0.9]]
     snap.image = [[1, 2, 3], [-4, -5, -6], [7, 8, 9]]
     snap.velocity = [[-3, -2, -1], [6, 5, 4], [9, 8, 7]]
@@ -100,10 +98,8 @@ def test_dump_file_all(snap, use_gzip, shuffle_ids, sort_ids, tmp_path):
         "molecule": 1,
         "charge": 0,
     }
-    if use_gzip:
-        filename = tmp_path / "atoms.lammpstrj.gz"
-    else:
-        filename = tmp_path / "atoms.lammpstrj"
+    
+    filename = tmp_path / f"atoms.lammpstrj{compression_extensions}"
     f = lammpsio.DumpFile.create(filename, schema, snaps)
     assert filename.exists
     assert len(f) == 2
