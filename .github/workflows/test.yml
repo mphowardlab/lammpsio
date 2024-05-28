@@ -36,3 +36,9 @@ jobs:
       - name: Test
         run: |
           python -m pytest
+      - name: Install optional dependencies
+        run: |
+          pip install -r tests/requirements-optin.txt
+      - name: Test (optin)
+        run: |
+          python -m pytest tests/test_dump_file.py

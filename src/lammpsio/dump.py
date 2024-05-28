@@ -8,6 +8,13 @@ from .box import Box
 from .data import _readline
 from .snapshot import Snapshot
 
+try:
+    import pyzstd
+
+    _has_pyzstd = True
+except ModuleNotFoundError:
+    _has_pyzstd = False
+
 
 class DumpFile:
     """LAMMPS dump file.
@@ -158,13 +165,25 @@ class DumpFile:
                     f.write(line + "\n")
 
         filename_path = pathlib.Path(filename)
-        if filename_path.suffix == ".gz":
+        compression = cls._compression_from_suffix(filename_path.suffix)
+        if compression:
             tmp = pathlib.Path(filename).with_suffix(filename_path.suffix + ".tmp")
-            with open(filename, "rb") as src, gzip.open(tmp, "wb") as dest:
+            with open(filename, "rb") as src, compression.open(tmp, "wb") as dest:
                 dest.writelines(src)
             os.replace(tmp, filename)
 
         return DumpFile(filename, schema)
+
+    @staticmethod
+    def _compression_from_suffix(suffix):
+        if suffix == ".gz":
+            return gzip
+        elif suffix == ".zst":
+            if not _has_pyzstd:
+                raise ModuleNotFoundError("pyzstd needed for zstd compression")
+            return pyzstd
+        else:
+            return None
 
     @property
     def copy_from(self):
@@ -184,7 +203,7 @@ class DumpFile:
     @filename.setter
     def filename(self, value):
         self._filename = value
-        self._gzip = pathlib.Path(value).suffix == ".gz"
+        self._compression = self._compression_from_suffix(pathlib.Path(value).suffix)
 
         # configure section labels of dump file
         self._section = {
@@ -193,7 +212,7 @@ class DumpFile:
             "box": "ITEM: BOX BOUNDS",
             "atoms": "ITEM: ATOMS",
         }
-        if self._gzip:
+        if self._compression:
             for key, val in self._section.items():
                 self._section[key] = val.encode()
 
@@ -216,8 +235,8 @@ class DumpFile:
 
     def _open(self):
         """Open the file handle for reading."""
-        if self._gzip:
-            f = gzip.open(self.filename, "rb")
+        if self._compression:
+            f = self._compression.open(self.filename, "rb")
         else:
             f = open(self.filename, "r")
         return f
@@ -314,7 +333,7 @@ class DumpFile:
                         schema = {}
                         schema_header = line.split()[2:]
                         for i, field in enumerate(schema_header):
-                            if self._gzip:
+                            if self._compression:
                                 field = field.decode()
                             if field in lammps_fields:
                                 key, key_idx = lammps_fields[field]
