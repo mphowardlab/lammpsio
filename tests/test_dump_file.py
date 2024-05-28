@@ -7,9 +7,11 @@ import lammpsio
 
 try:
     import pyzstd
+
     has_pyzstd = True
 except ModuleNotFoundError:
     has_pyzstd = False
+
 
 @pytest.mark.parametrize("sort_ids", [False, True])
 @pytest.mark.parametrize("shuffle_ids", [False, True])
@@ -17,7 +19,7 @@ except ModuleNotFoundError:
 def test_dump_file_min(snap, compression_extension, shuffle_ids, sort_ids, tmp_path):
     if not has_pyzstd and compression_extension == ".zst":
         pytest.skip("pyzstd not installed")
-    
+
     # create file with 2 snapshots with defaults, changing N & step
     snap_2 = lammpsio.Snapshot(snap.N + 2, snap.box, snap.step + 1)
     snaps = [snap, snap_2]
@@ -69,7 +71,7 @@ def test_dump_file_min(snap, compression_extension, shuffle_ids, sort_ids, tmp_p
 def test_dump_file_all(snap, compression_extension, shuffle_ids, sort_ids, tmp_path):
     if not has_pyzstd and compression_extension == ".zst":
         pytest.skip("pyzstd not installed")
-        
+
     snap.position = [[0.1, 0.2, 0.3], [-0.4, -0.5, -0.6], [0.7, 0.8, 0.9]]
     snap.image = [[1, 2, 3], [-4, -5, -6], [7, 8, 9]]
     snap.velocity = [[-3, -2, -1], [6, 5, 4], [9, 8, 7]]
