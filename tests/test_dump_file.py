@@ -6,7 +6,7 @@ import pytest
 import lammpsio
 
 try:
-    import pyzstd
+    import pyzstd  # noqa
 
     has_pyzstd = True
 except ModuleNotFoundError:
