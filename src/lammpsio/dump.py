@@ -99,10 +99,9 @@ class DumpFile:
                 f.write(f"{snap.N}\n")
 
                 # always assume periodic in all directions
-                box_header = "ITEM: BOX BOUNDS pp pp pp"
                 if snap.box.tilt is not None:
+                    f.write("ITEM: BOX BOUNDS xy xz yz pp pp pp\n")
                     xy, xz, yz = snap.box.tilt
-                    box_header += f" {xy:f} {xz:f} {yz:f}"
                     lo = [
                         snap.box.low[0] + min([0.0, xy, xz, xy + xz]),
                         snap.box.low[1] + min([0.0, yz]),
@@ -113,12 +112,14 @@ class DumpFile:
                         snap.box.high[1] + max([0.0, yz]),
                         snap.box.high[2],
                     ]
+                    for i in range(3):
+                        f.write(f"{lo[i]:f} {hi[i]:f} {snap.box.tilt[i]:f}\n")
                 else:
+                    f.write("ITEM: BOX BOUNDS pp pp pp\n")
                     lo = snap.box.low
                     hi = snap.box.high
-                f.write(box_header + "\n")
-                for i in range(3):
-                    f.write(f"{lo[i]:f} {hi[i]:f}\n")
+                    for i in range(3):
+                        f.write(f"{lo[i]:f} {hi[i]:f}\n")
 
                 # mapping from lammpsio to LAMMPS dump keys
                 lammps_fields = {
@@ -278,19 +279,20 @@ class DumpFile:
                     box_header = line.split()
                     # check for triclinic
                     if len(box_header) == 9:
-                        box_tilt = [float(x) for x in box_header[6:9]]
+                        is_triclinic = True
                     elif len(box_header) == 6:
-                        box_tilt = None
+                        is_triclinic = False
                     else:
                         raise IOError("Incorrectly formed box bound header")
-                    box_x = _readline(f, True)
-                    box_y = _readline(f, True)
-                    box_z = _readline(f, True)
-                    x_lo, x_hi = [float(x) for x in box_x.split()]
-                    y_lo, y_hi = [float(y) for y in box_y.split()]
-                    z_lo, z_hi = [float(z) for z in box_z.split()]
-                    if box_tilt is not None:
-                        xy, xz, yz = box_tilt
+                    box_ = [
+                        [float(v) for v in _readline(f, True).split()]
+                        for line_ in range(3)
+                    ]
+                    x_lo, x_hi = box_[0][:2]
+                    y_lo, y_hi = box_[1][:2]
+                    z_lo, z_hi = box_[2][:2]
+                    if is_triclinic:
+                        xy, xz, yz = [row[2] for row in box_]
                         lo = [
                             x_lo - min([0.0, xy, xz, xy + xz]),
                             y_lo - min([0.0, yz]),
@@ -301,7 +303,7 @@ class DumpFile:
                             y_hi - max([0.0, yz]),
                             z_hi,
                         ]
-                        box = Box(lo, hi, box_tilt)
+                        box = Box(lo, hi, [xy, xz, yz])
                     else:
                         box = Box([x_lo, y_lo, z_lo], [x_hi, y_hi, z_hi])
 
