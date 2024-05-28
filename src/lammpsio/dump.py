@@ -10,6 +10,7 @@ from .snapshot import Snapshot
 
 try:
     import pyzstd
+
     _has_pyzstd = True
 except ModuleNotFoundError:
     _has_pyzstd = False
