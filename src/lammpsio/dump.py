@@ -311,7 +311,7 @@ class DumpFile:
                 if state == 3 and self._section["atoms"] in line:
                     state += 1
 
-                    # extract the scehma
+                    # extract the schema
                     if self.schema is None:
                         # mapping from LAMMPS dump keys to lammpsio
                         lammps_fields = {
