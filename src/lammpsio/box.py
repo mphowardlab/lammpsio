@@ -1,5 +1,7 @@
 import numpy
 
+from . import _compatibility
+
 
 class Box:
     """Triclinic simulation box.
@@ -51,7 +53,9 @@ class Box:
         """
         if isinstance(value, Box):
             return value
-        v = numpy.array(value, ndmin=1, copy=False, dtype=float)
+        v = numpy.array(
+            value, ndmin=1, copy=_compatibility.numpy_copy_if_needed, dtype=float
+        )
         if v.shape == (9,):
             return Box(v[:3], v[3:6], v[6:])
         elif v.shape == (6,):

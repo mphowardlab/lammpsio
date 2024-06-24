@@ -4,16 +4,13 @@ import pathlib
 
 import numpy
 
+from . import _compatibility
 from .box import Box
 from .data import _readline
 from .snapshot import Snapshot
 
-try:
+if _compatibility.pyzstd_version is not None:
     import pyzstd
-
-    _has_pyzstd = True
-except ModuleNotFoundError:
-    _has_pyzstd = False
 
 
 class DumpFile:
@@ -179,7 +176,7 @@ class DumpFile:
         if suffix == ".gz":
             return gzip
         elif suffix == ".zst":
-            if not _has_pyzstd:
+            if _compatibility.pyzstd_version is None:
                 raise ModuleNotFoundError("pyzstd needed for zstd compression")
             return pyzstd
         else:
