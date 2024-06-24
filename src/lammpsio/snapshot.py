@@ -1,15 +1,10 @@
 import warnings
 
 import numpy
-import packaging.version
 
 from . import _compatibility
 from .box import Box
 from .topology import Angles, Bonds, Dihedrals, Impropers
-
-if _compatibility.gsd_version is not None:
-    import gsd
-    import gsd.hoomd
 
 
 class Snapshot:
@@ -129,11 +124,7 @@ class Snapshot:
         if _compatibility.gsd_version is None:
             raise ImportError("GSD package not found")
 
-        # make Frame/Snapshot without deprecation warnings
-        if _compatibility.gsd_version >= packaging.version.Version("2.8.0"):
-            frame = gsd.hoomd.Frame()
-        else:
-            frame = gsd.hoomd.Snapshot()
+        frame = _compatibility.gsd_frame_class()
 
         if self.step is not None:
             frame.configuration.step = int(self.step)
