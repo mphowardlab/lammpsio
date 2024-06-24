@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.1] - 2024-06-24
+### Added
+- Backwards compatible support for NumPy 2.0.
+
+### Fixed
+- Test dependencies for Python 3.8.
+
 ## [0.6.0] - 2024-05-28
 ### Added
 - Support for reading and writing dump files with zstd compression.
@@ -77,7 +84,8 @@ have been updated to include this option.
 ### Changed
 - The package has been renamed `lammpsio` for consistency with PyPI.
 
-[Unreleased]: https://github.com/mphowardlab/lammpsio/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/mphowardlab/lammpsio/compare/v0.6.1...HEAD
+[0.6.1]: https://github.com/mphowardlab/lammpsio/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/mphowardlab/lammpsio/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/mphowardlab/lammpsio/compare/v0.4.1...v0.5.0
 [0.4.1]: https://github.com/mphowardlab/lammpsio/compare/v0.4.0...v0.4.1
