@@ -106,7 +106,14 @@ class Snapshot:
 
         return snap, type_map
 
-    def to_hoomd_gsd(self, type_map=None):
+    def to_hoomd_gsd(
+        self,
+        type_map=None,
+        bond_type_map=None,
+        angle_type_map=None,
+        dihedral_type_map=None,
+        improper_type_map=None,
+    ):
         """Create a HOOMD GSD frame.
 
         Parameters
@@ -176,18 +183,89 @@ class Snapshot:
             frame.particles.mass = self.mass.copy()
         if self.has_molecule():
             frame.particles.body = self.molecule - 1
-
+        if self.has_bonds():
+            frame.bonds.N = self.bonds.N
+            frame.bonds.types = self.bonds.id
+            frame.bonds.group = self.bonds.members - 1
+            if self.bonds.has_typeid():
+                frame.bonds.typeid = numpy.zeros(self.bonds.N, dtype=int)
+                if bond_type_map is None:
+                    sorted_typeids = numpy.sort(numpy.unique(self.bonds.typeid))
+                    frame.bonds.types = [str(typeid) for typeid in sorted_typeids]
+                    for typeidx, typeid in enumerate(sorted_typeids):
+                        frame.bonds.typeid[self.bonds.typeid == typeid] = typeidx
+                else:
+                    frame.bonds.types = list(bond_type_map.values())
+                    reverse_bond_type_map = {
+                        typeid: typeidx
+                        for typeidx, typeid in enumerate(bond_type_map.keys())
+                    }
+                    for i, typeid in enumerate(self.bonds.typeid):
+                        frame.bonds.typeid[i] = reverse_bond_type_map[typeid]
+        if self.has_angles():
+            frame.angles.N = self.angles.N
+            frame.angles.types = self.angles.id
+            frame.angles.group = self.angles.members - 1
+            if self.angles.has_typeid():
+                frame.angles.typeid = numpy.zeros(self.angles.N, dtype=int)
+                if angle_type_map is None:
+                    sorted_typeids = numpy.sort(numpy.unique(self.angles.typeid))
+                    frame.angles.types = [str(typeid) for typeid in sorted_typeids]
+                    for typeidx, typeid in enumerate(sorted_typeids):
+                        frame.angles.typeid[self.angles.typeid == typeid] = typeidx
+                else:
+                    frame.angles.types = list(angle_type_map.values())
+                    reverse_angle_type_map = {
+                        typeid: typeidx
+                        for typeidx, typeid in enumerate(angle_type_map.keys())
+                    }
+                    for i, typeid in enumerate(self.angles.typeid):
+                        frame.angles.typeid[i] = reverse_angle_type_map[typeid]
+        if self.has_dihedrals():
+            frame.dihedrals.N = self.dihedrals.N
+            frame.dihedrals.types = self.dihedrals.id
+            frame.dihedrals.group = self.dihedrals.members - 1
+            if self.dihedrals.has_typeid():
+                frame.dihedrals.typeid = numpy.zeros(self.dihedrals.N, dtype=int)
+                if dihedral_type_map is None:
+                    sorted_typeids = numpy.sort(numpy.unique(self.dihedrals.typeid))
+                    frame.dihedrals.types = [str(typeid) for typeid in sorted_typeids]
+                    for typeidx, typeid in enumerate(sorted_typeids):
+                        frame.dihedrals.typeid[self.dihedrals.typeid == typeid] = (
+                            typeidx
+                        )
+                else:
+                    frame.dihedrals.types = list(dihedral_type_map.values())
+                    reverse_dihedral_type_map = {
+                        typeid: typeidx
+                        for typeidx, typeid in enumerate(dihedral_type_map.keys())
+                    }
+                    for i, typeid in enumerate(self.dihedrals.typeid):
+                        frame.dihedrals.typeid[i] = reverse_dihedral_type_map[typeid]
+        if self.has_impropers():
+            frame.impropers.N = self.impropers.N
+            frame.impropers.types = self.impropers.id
+            frame.impropers.group = self.impropers.members - 1
+            if self.impropers.has_typeid():
+                frame.impropers.typeid = numpy.zeros(self.impropers.N, dtype=int)
+                if improper_type_map is None:
+                    sorted_typeids = numpy.sort(numpy.unique(self.impropers.typeid))
+                    frame.impropers.types = [str(typeid) for typeid in sorted_typeids]
+                    for typeidx, typeid in enumerate(sorted_typeids):
+                        frame.impropers.typeid[self.impropers.typeid == typeid] = (
+                            typeidx
+                        )
+                else:
+                    frame.impropers.types = list(improper_type_map.values())
+                    reverse_improper_type_map = {
+                        typeid: typeidx
+                        for typeidx, typeid in enumerate(improper_type_map.keys())
+                    }
+                    for i, typeid in enumerate(self.impropers.typeid):
+                        frame.impropers.typeid[i] = reverse_improper_type_map[typeid]
         # undo the sort so object goes back the way it was
         if reverse_order is not None:
             self.reorder(reverse_order, check_order=False)
-
-        if (
-            self.has_bonds()
-            or self.has_angles()
-            or self.has_dihedrals()
-            or self.has_impropers()
-        ):
-            warnings.warn("Conversion of topology to gsd is not supported")
 
         return frame
 
