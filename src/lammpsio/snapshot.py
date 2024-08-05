@@ -196,12 +196,9 @@ class Snapshot:
                         frame.bonds.typeid[self.bonds.typeid == typeid] = typeidx
                 else:
                     frame.bonds.types = list(bond_type_map.values())
-                    reverse_bond_type_map = {
-                        typeid: typeidx
-                        for typeidx, typeid in enumerate(bond_type_map.keys())
-                    }
-                    for i, typeid in enumerate(self.bonds.typeid):
-                        frame.bonds.typeid[i] = reverse_bond_type_map[typeid]
+                    Snapshot._set_type_id(
+                        frame.bonds.typeid, self.bonds.typeid, bond_type_map
+                    )
         if self.has_angles():
             frame.angles.N = self.angles.N
             frame.angles.types = self.angles.id
@@ -215,12 +212,9 @@ class Snapshot:
                         frame.angles.typeid[self.angles.typeid == typeid] = typeidx
                 else:
                     frame.angles.types = list(angle_type_map.values())
-                    reverse_angle_type_map = {
-                        typeid: typeidx
-                        for typeidx, typeid in enumerate(angle_type_map.keys())
-                    }
-                    for i, typeid in enumerate(self.angles.typeid):
-                        frame.angles.typeid[i] = reverse_angle_type_map[typeid]
+                    Snapshot._set_type_id(
+                        frame.angles.typeid, self.angles.typeid, bond_type_map
+                    )
         if self.has_dihedrals():
             frame.dihedrals.N = self.dihedrals.N
             frame.dihedrals.types = self.dihedrals.id
@@ -236,12 +230,10 @@ class Snapshot:
                         )
                 else:
                     frame.dihedrals.types = list(dihedral_type_map.values())
-                    reverse_dihedral_type_map = {
-                        typeid: typeidx
-                        for typeidx, typeid in enumerate(dihedral_type_map.keys())
-                    }
-                    for i, typeid in enumerate(self.dihedrals.typeid):
-                        frame.dihedrals.typeid[i] = reverse_dihedral_type_map[typeid]
+                    Snapshot._set_type_id(
+                        frame.dihedrals.typeid, self.dihedrals.typeid, bond_type_map
+                    )
+
         if self.has_impropers():
             frame.impropers.N = self.impropers.N
             frame.impropers.types = self.impropers.id
@@ -257,12 +249,10 @@ class Snapshot:
                         )
                 else:
                     frame.impropers.types = list(improper_type_map.values())
-                    reverse_improper_type_map = {
-                        typeid: typeidx
-                        for typeidx, typeid in enumerate(improper_type_map.keys())
-                    }
-                    for i, typeid in enumerate(self.impropers.typeid):
-                        frame.impropers.typeid[i] = reverse_improper_type_map[typeid]
+                    Snapshot._set_type_id(
+                        frame.impropers.typeid, self.impropers.typeid, bond_type_map
+                    )
+
         # undo the sort so object goes back the way it was
         if reverse_order is not None:
             self.reorder(reverse_order, check_order=False)
@@ -690,3 +680,29 @@ class Snapshot:
             self._charge = self._charge[order]
         if self.has_mass():
             self._mass = self._mass[order]
+
+    def _set_type_id(gsd_typeid, lammps_typeid, type_map):
+        """Maps LAMMPS type IDs to GSD type IDs using a given type map and
+        accounting for LAMMPS being one-indexed while GSD is zero-indexed.
+
+        Parameters:
+            gsd_typeid (list): List of GSD type IDs to be updated.
+            lammps_typeid (list): List of LAMMPS type IDs to be mapped.
+            type_map (dict): Dictionary mapping LAMMPS type IDs to GSD types.
+        Returns:
+            None
+        Raises:
+            KeyError: If a Lammps type ID is not found in the type_map.
+        Example:
+            type_map = {1: "bond_A", 2: "bond_B"}
+            gsd_typeid = [0, 0, 0, 0, 0, 0]
+            lammps_typeid = [1, 2, 1, 2, 1, 2]
+            set_type_id(gsd_typeid, lammps_typeid, type_map)
+            # gsd_typeid is updated to [0, 1, 0, 1, 0, 1]
+        """
+
+        reverse_type_map = {
+            typeid: typeidx for typeidx, typeid in enumerate(type_map.keys())
+        }
+        for i, typeid in enumerate(lammps_typeid):
+            gsd_typeid[i] = reverse_type_map[typeid]
