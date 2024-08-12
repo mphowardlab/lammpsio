@@ -4,7 +4,7 @@ import numpy
 
 from . import _compatibility
 from .box import Box
-from .topology import Angles, Bonds, Dihedrals, Impropers
+from .topology import Angles, Bonds, Dihedrals, Impropers, TypeMap
 
 
 class Snapshot:
@@ -109,10 +109,6 @@ class Snapshot:
     def to_hoomd_gsd(
         self,
         type_map=None,
-        bond_type_map=None,
-        angle_type_map=None,
-        dihedral_type_map=None,
-        improper_type_map=None,
     ):
         """Create a HOOMD GSD frame.
 
@@ -171,12 +167,18 @@ class Snapshot:
                 for typeidx, typeid in enumerate(sorted_typeids):
                     frame.particles.typeid[self.typeid == typeid] = typeidx
             else:
-                frame.particles.types = list(type_map.values())
-                reverse_type_map = {
-                    typeid: typeidx for typeidx, typeid in enumerate(type_map.keys())
-                }
-                for i, typeid in enumerate(self.typeid):
-                    frame.particles.typeid[i] = reverse_type_map[typeid]
+                if isinstance(type_map, dict):
+                    type_map = TypeMap(particle_type_map=type_map)
+                    warnings.warn(
+                        "Deprecation Warning: type_map should be a TypeMap object."
+                    )
+                frame.particles.types = type_map.particle_types
+                Snapshot._set_type_id(
+                    self,
+                    self.typeid,
+                    frame.particles.typeid,
+                    type_map.particle_type_map,
+                )
         if self.has_charge():
             frame.particles.charge = self.charge.copy()
         if self.has_mass():
@@ -189,50 +191,60 @@ class Snapshot:
             frame.bonds.group = self.bonds.members - 1
             if self.bonds.has_typeid():
                 frame.bonds.typeid = numpy.zeros(self.bonds.N, dtype=int)
-                if bond_type_map is None:
+                if isinstance(type_map, TypeMap) and type_map.has_bond_type_map():
+                    frame.bonds.types = (TypeMap.bond_types,)
+                    Snapshot._set_type_id(
+                        self,
+                        self.bonds.typeid,
+                        frame.bonds.typeid,
+                        type_map.bond_type_map,
+                    )
+                else:
                     sorted_typeids = numpy.sort(numpy.unique(self.bonds.typeid))
                     frame.bonds.types = [str(typeid) for typeid in sorted_typeids]
                     for typeidx, typeid in enumerate(sorted_typeids):
                         frame.bonds.typeid[self.bonds.typeid == typeid] = typeidx
-                else:
-                    frame.bonds.types = list(bond_type_map.values())
-                    Snapshot._set_type_id(
-                        frame.bonds.typeid, self.bonds.typeid, bond_type_map
-                    )
         if self.has_angles():
             frame.angles.N = self.angles.N
             frame.angles.types = self.angles.id
             frame.angles.group = self.angles.members - 1
             if self.angles.has_typeid():
                 frame.angles.typeid = numpy.zeros(self.angles.N, dtype=int)
-                if angle_type_map is None:
+                if isinstance(type_map, TypeMap) and type_map.has_angle_type_map():
+                    frame.angles.types = (TypeMap.angle_types,)
+                    Snapshot._set_type_id(
+                        self,
+                        self.angles.typeid,
+                        frame.angles.typeid,
+                        type_map.angle_type_map,
+                    )
+                else:
                     sorted_typeids = numpy.sort(numpy.unique(self.angles.typeid))
                     frame.angles.types = [str(typeid) for typeid in sorted_typeids]
                     for typeidx, typeid in enumerate(sorted_typeids):
                         frame.angles.typeid[self.angles.typeid == typeid] = typeidx
-                else:
-                    frame.angles.types = list(angle_type_map.values())
-                    Snapshot._set_type_id(
-                        frame.angles.typeid, self.angles.typeid, bond_type_map
-                    )
+
         if self.has_dihedrals():
             frame.dihedrals.N = self.dihedrals.N
             frame.dihedrals.types = self.dihedrals.id
             frame.dihedrals.group = self.dihedrals.members - 1
             if self.dihedrals.has_typeid():
                 frame.dihedrals.typeid = numpy.zeros(self.dihedrals.N, dtype=int)
-                if dihedral_type_map is None:
+                if isinstance(type_map, TypeMap) and type_map.has_dihedral_type_map():
+                    frame.dihedrals.types = (TypeMap.dihedral_types,)
+                    Snapshot._set_type_id(
+                        self,
+                        self.dihedrals.typeid,
+                        frame.dihedrals.typeid,
+                        type_map.dihedral_type_map,
+                    )
+                else:
                     sorted_typeids = numpy.sort(numpy.unique(self.dihedrals.typeid))
                     frame.dihedrals.types = [str(typeid) for typeid in sorted_typeids]
                     for typeidx, typeid in enumerate(sorted_typeids):
                         frame.dihedrals.typeid[self.dihedrals.typeid == typeid] = (
                             typeidx
                         )
-                else:
-                    frame.dihedrals.types = list(dihedral_type_map.values())
-                    Snapshot._set_type_id(
-                        frame.dihedrals.typeid, self.dihedrals.typeid, bond_type_map
-                    )
 
         if self.has_impropers():
             frame.impropers.N = self.impropers.N
@@ -240,18 +252,22 @@ class Snapshot:
             frame.impropers.group = self.impropers.members - 1
             if self.impropers.has_typeid():
                 frame.impropers.typeid = numpy.zeros(self.impropers.N, dtype=int)
-                if improper_type_map is None:
+                if isinstance(type_map, TypeMap) and type_map.has_improper_type_map():
+                    frame.impropers.types = (TypeMap.improper_types,)
+                    Snapshot._set_type_id(
+                        self,
+                        self.impropers.typeid,
+                        frame.impropers.typeid,
+                        type_map.improper_type_map,
+                    )
+
+                else:
                     sorted_typeids = numpy.sort(numpy.unique(self.impropers.typeid))
                     frame.impropers.types = [str(typeid) for typeid in sorted_typeids]
                     for typeidx, typeid in enumerate(sorted_typeids):
                         frame.impropers.typeid[self.impropers.typeid == typeid] = (
                             typeidx
                         )
-                else:
-                    frame.impropers.types = list(improper_type_map.values())
-                    Snapshot._set_type_id(
-                        frame.impropers.typeid, self.impropers.typeid, bond_type_map
-                    )
 
         # undo the sort so object goes back the way it was
         if reverse_order is not None:
@@ -681,24 +697,14 @@ class Snapshot:
         if self.has_mass():
             self._mass = self._mass[order]
 
-    def _set_type_id(gsd_typeid, lammps_typeid, type_map):
+    def _set_type_id(self, lammps_typeid, gsd_typeid, type_map):
         """Maps LAMMPS type IDs to GSD type IDs using a given type map and
         accounting for LAMMPS being one-indexed while GSD is zero-indexed.
 
         Parameters:
-            gsd_typeid (list): List of GSD type IDs to be updated.
             lammps_typeid (list): List of LAMMPS type IDs to be mapped.
+            gsd_typeid (list): List of GSD type IDs to be updated.
             type_map (dict): Dictionary mapping LAMMPS type IDs to GSD types.
-        Returns:
-            None
-        Raises:
-            KeyError: If a Lammps type ID is not found in the type_map.
-        Example:
-            type_map = {1: "bond_A", 2: "bond_B"}
-            gsd_typeid = [0, 0, 0, 0, 0, 0]
-            lammps_typeid = [1, 2, 1, 2, 1, 2]
-            set_type_id(gsd_typeid, lammps_typeid, type_map)
-            # gsd_typeid is updated to [0, 1, 0, 1, 0, 1]
         """
 
         reverse_type_map = {
