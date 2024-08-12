@@ -241,3 +241,230 @@ class Impropers(Topology):
 
     def __init__(self, N, num_types=None):
         super().__init__(N=N, num_members=4, num_types=num_types)
+
+
+class TypeMap:
+    """Map between HOOMD types and snapshot typeids.
+
+    Parameters
+    ----------
+    type_map : dict
+        A map from the :attr:`Snapshot.typeid` to a HOOMD type.
+
+    Attributes
+    ----------
+    type_map : dict
+        A map from the :attr:`Snapshot.typeid` to a HOOMD type
+
+    """
+
+    def __init__(
+        self,
+        particle_type_map,
+        bond_type_map=None,
+        angle_type_map=None,
+        dihedral_type_map=None,
+        improper_type_map=None,
+    ):
+        self._particle_type_map = particle_type_map
+        self._bond_type_map = bond_type_map
+        self._angle_type_map = angle_type_map
+        self._dihedral_type_map = dihedral_type_map
+        self._improper_type_map = improper_type_map
+
+    @property
+    def particle_type_map(self):
+        """dict: A map from the :attr:`Snapshot.typeid` to a HOOMD type."""
+        return self._particle_type_map
+
+    @particle_type_map.setter
+    def particle_type_map(self, value):
+        if value is not None:
+            if not isinstance(value, dict):
+                raise TypeError("type_map must be a dictionary")
+            self._particle_type_map = value
+        else:
+            self._particle_type_map = None
+
+    def has_particle_type_map(self):
+        """Check if TypeMap has a type map.
+
+        Returns
+        -------
+        bool
+            True if type map has been initialized.
+
+        """
+        return self._particle_type_map is not None
+
+    @property
+    def bond_type_map(self):
+        """dict: A map from the :attr:`Snapshot.typeid` to a HOOMD bond type."""
+        return self._bond_type_map
+
+    @bond_type_map.setter
+    def bond_type_map(self, value):
+        if value is not None:
+            if not isinstance(value, dict):
+                raise TypeError("bond_type_map must be a dictionary")
+            self._bond_type_map = value
+        else:
+            self._bond_type_map = None
+
+    def has_bond_type_map(self):
+        """Check if TypeMap has a bond type map.
+
+        Returns
+        -------
+        bool
+            True if bond type map has been initialized.
+
+        """
+        return self._bond_type_map is not None
+
+    @property
+    def angle_type_map(self):
+        """dict: A map from the :attr:`Snapshot.typeid` to a HOOMD angle type."""
+        return self._angle_type_map
+
+    @angle_type_map.setter
+    def angle_type_map(self, value):
+        if value is not None:
+            if not isinstance(value, dict):
+                raise TypeError("angle_type_map must be a dictionary")
+            self._angle_type_map = value
+        else:
+            self._angle_type_map = None
+
+    def has_angle_type_map(self):
+        """Check if TypeMap has an angle type map.
+
+        Returns
+        -------
+        bool
+            True if angle type map has been initialized.
+
+        """
+        return self._angle_type_map is not None
+
+    @property
+    def dihedral_type_map(self):
+        """dict: A map from the :attr:`Snapshot.typeid` to a HOOMD dihedral type."""
+        return self._dihedral_type_map
+
+    @dihedral_type_map.setter
+    def dihedral_type_map(self, value):
+        if value is not None:
+            if not isinstance(value, dict):
+                raise TypeError("dihedral_type_map must be a dictionary")
+            self._dihedral_type_map = value
+        else:
+            self._dihedral_type_map = None
+
+    def has_dihedral_type_map(self):
+        """Check if TypeMap has a dihedral type map.
+
+        Returns
+        -------
+        bool
+            True if dihedral type map has been initialized.
+
+        """
+        return self._dihedral_type_map is not None
+
+    @property
+    def improper_type_map(self):
+        """dict: A map from the :attr:`Snapshot.typeid` to a HOOMD improper type."""
+        return self._improper_type_map
+
+    @improper_type_map.setter
+    def improper_type_map(self, value):
+        if value is not None:
+            if not isinstance(value, dict):
+                raise TypeError("improper_type_map must be a dictionary")
+            self._improper_type_map = value
+        else:
+            self._improper_type_map = None
+
+    def has_improper_type_map(self):
+        """Check if TypeMap has an improper type map.
+
+        Returns
+        -------
+        bool
+            True if improper type map has been initialized.
+
+        """
+        return self._improper_type_map is not None
+
+    @property
+    def particle_types(self):
+        """Get the HOOMD types.
+
+        Returns
+        -------
+        list
+            List of HOOMD types.
+
+        """
+        return list(self._particle_type_map.values())
+
+    @property
+    def bond_types(self):
+        """Get the bond types.
+
+        Returns
+        -------
+        list
+            List of bond types.
+
+        """
+        if self.has_bond_type_map():
+            return list(self._bond_type_map.values())
+        else:
+            raise ValueError("No bond type map found")
+
+    @property
+    def angle_types(self):
+        """Get the angle types.
+
+        Returns
+        -------
+        list
+            List of angle types.
+
+        """
+        if self.has_type_map() and self.has_angle_type_map():
+            return list(self._angle_type_map.values())
+        else:
+            return []
+
+    @property
+    def dihedral_types(self):
+        """Get the dihedral types.
+
+        Returns
+        -------
+        list
+            List of dihedral types.
+
+        """
+        if self.has_type_map() and self.has_dihedral_type_map():
+            return list(self._dihedral_type_map.values())
+        else:
+            return []
+
+    @property
+    def improper_types(self):
+        """Get the improper types.
+
+        Returns
+        -------
+        list
+            List of improper types.
+
+        """
+        if self.has_type_map() and self.has_improper_type_map():
+            return list(self._improper_type_map.values())
+        else:
+            return []
