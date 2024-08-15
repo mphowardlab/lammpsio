@@ -260,142 +260,87 @@ class TypeMap:
 
     def __init__(
         self,
-        particle_type_map,
-        bond_type_map=None,
-        angle_type_map=None,
-        dihedral_type_map=None,
-        improper_type_map=None,
+        particle=None,
+        bond=None,
+        angle=None,
+        dihedral=None,
+        improper=None,
     ):
-        self._particle_type_map = particle_type_map
-        self._bond_type_map = bond_type_map
-        self._angle_type_map = angle_type_map
-        self._dihedral_type_map = dihedral_type_map
-        self._improper_type_map = improper_type_map
+        self._particle = particle
+        self._bond = bond
+        self._angle = angle
+        self._dihedral = dihedral
+        self._improper = improper
 
     @property
-    def particle_type_map(self):
+    def particle(self):
         """dict: A map from the :attr:`Snapshot.typeid` to a HOOMD type."""
-        return self._particle_type_map
+        return self._particle
 
-    @particle_type_map.setter
-    def particle_type_map(self, value):
+    @particle.setter
+    def particle(self, value):
         if value is not None:
             if not isinstance(value, dict):
                 raise TypeError("type_map must be a dictionary")
-            self._particle_type_map = value
+            self._particle = {value}
         else:
-            self._particle_type_map = None
-
-    def has_particle_type_map(self):
-        """Check if TypeMap has a type map.
-
-        Returns
-        -------
-        bool
-            True if type map has been initialized.
-
-        """
-        return self._particle_type_map is not None
+            self._particle = None
 
     @property
-    def bond_type_map(self):
+    def bond(self):
         """dict: A map from the :attr:`Snapshot.typeid` to a HOOMD bond type."""
-        return self._bond_type_map
+        return self._bond
 
-    @bond_type_map.setter
-    def bond_type_map(self, value):
+    @bond.setter
+    def bond(self, value):
         if value is not None:
             if not isinstance(value, dict):
                 raise TypeError("bond_type_map must be a dictionary")
-            self._bond_type_map = value
+            self._bond = {value}
         else:
-            self._bond_type_map = None
-
-    def has_bond_type_map(self):
-        """Check if TypeMap has a bond type map.
-
-        Returns
-        -------
-        bool
-            True if bond type map has been initialized.
-
-        """
-        return self._bond_type_map is not None
+            self._bond = None
 
     @property
-    def angle_type_map(self):
+    def angle(self):
         """dict: A map from the :attr:`Snapshot.typeid` to a HOOMD angle type."""
-        return self._angle_type_map
+        return self._angle
 
-    @angle_type_map.setter
-    def angle_type_map(self, value):
+    @angle.setter
+    def angle(self, value):
         if value is not None:
             if not isinstance(value, dict):
                 raise TypeError("angle_type_map must be a dictionary")
-            self._angle_type_map = value
+            self._angle = {value}
         else:
-            self._angle_type_map = None
-
-    def has_angle_type_map(self):
-        """Check if TypeMap has an angle type map.
-
-        Returns
-        -------
-        bool
-            True if angle type map has been initialized.
-
-        """
-        return self._angle_type_map is not None
+            self._angle = None
 
     @property
-    def dihedral_type_map(self):
+    def dihedral(self):
         """dict: A map from the :attr:`Snapshot.typeid` to a HOOMD dihedral type."""
-        return self._dihedral_type_map
+        return self._dihedral
 
-    @dihedral_type_map.setter
-    def dihedral_type_map(self, value):
+    @dihedral.setter
+    def dihedral(self, value):
         if value is not None:
             if not isinstance(value, dict):
                 raise TypeError("dihedral_type_map must be a dictionary")
-            self._dihedral_type_map = value
+            self._dihedral = {value}
         else:
-            self._dihedral_type_map = None
-
-    def has_dihedral_type_map(self):
-        """Check if TypeMap has a dihedral type map.
-
-        Returns
-        -------
-        bool
-            True if dihedral type map has been initialized.
-
-        """
-        return self._dihedral_type_map is not None
+            self._dihedral = None
 
     @property
-    def improper_type_map(self):
+    def improper(self):
         """dict: A map from the :attr:`Snapshot.typeid` to a HOOMD improper type."""
-        return self._improper_type_map
+        return self._improper
 
-    @improper_type_map.setter
-    def improper_type_map(self, value):
+    @improper.setter
+    def improper(self, value):
         if value is not None:
             if not isinstance(value, dict):
                 raise TypeError("improper_type_map must be a dictionary")
-            self._improper_type_map = value
+            self._improper = {value}
         else:
-            self._improper_type_map = None
-
-    def has_improper_type_map(self):
-        """Check if TypeMap has an improper type map.
-
-        Returns
-        -------
-        bool
-            True if improper type map has been initialized.
-
-        """
-        return self._improper_type_map is not None
+            self._improper = None
 
     @property
     def particle_types(self):
@@ -407,7 +352,7 @@ class TypeMap:
             List of HOOMD types.
 
         """
-        return list(self._particle_type_map.values())
+        return tuple(self._particle.values())
 
     @property
     def bond_types(self):
@@ -419,10 +364,10 @@ class TypeMap:
             List of bond types.
 
         """
-        if self.has_bond_type_map():
-            return list(self._bond_type_map.values())
+        if self.bond is not None:
+            return tuple(self._bond.values())
         else:
-            raise ValueError("No bond type map found")
+            return tuple()
 
     @property
     def angle_types(self):
@@ -434,10 +379,10 @@ class TypeMap:
             List of angle types.
 
         """
-        if self.has_type_map() and self.has_angle_type_map():
-            return list(self._angle_type_map.values())
+        if self.angle is not None:
+            return tuple(self._angle.values())
         else:
-            return []
+            return tuple()
 
     @property
     def dihedral_types(self):
@@ -449,10 +394,10 @@ class TypeMap:
             List of dihedral types.
 
         """
-        if self.has_type_map() and self.has_dihedral_type_map():
-            return list(self._dihedral_type_map.values())
+        if self.dihedral is not None:
+            return tuple(self._dihedral.values())
         else:
-            return []
+            return tuple()
 
     @property
     def improper_types(self):
@@ -464,7 +409,47 @@ class TypeMap:
             List of improper types.
 
         """
-        if self.has_type_map() and self.has_improper_type_map():
-            return list(self._improper_type_map.values())
+        if self.improper is not None:
+            return tuple(self._improper.values())
         else:
-            return []
+            return tuple()
+
+    @property
+    def reverse_particle(self):
+        """Reverse the particle type map."""
+        if self._particle is not None:
+            return {types: typeid for typeid, types in self._particle.items()}
+        else:
+            self._particle = None
+
+    @property
+    def reverse_bond(self):
+        """Reverse the bond type map."""
+        if self._bond is not None:
+            return {types: typeid for typeid, types in self._bond.items()}
+        else:
+            self._bond = None
+
+    @property
+    def reverse_angle(self):
+        """Reverse the angle type map."""
+        if self._angle is not None:
+            return {types: typeid for typeid, types in self._angle.items()}
+        else:
+            self._angle = None
+
+    @property
+    def reverse_dihedral(self):
+        """Reverse the dihedral type map."""
+        if self._dihedral is not None:
+            return {types: typeid for typeid, types in self._dihedral.items()}
+        else:
+            self._dihedral = None
+
+    @property
+    def reverse_improper(self):
+        """Reverse the improper type map."""
+        if self._improper is not None:
+            return {types: typeid for typeid, types in self._improper.items()}
+        else:
+            self._improper = None
