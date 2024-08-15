@@ -168,16 +168,17 @@ class Snapshot:
                     frame.particles.typeid[self.typeid == typeid] = typeidx
             else:
                 if isinstance(type_map, dict):
-                    type_map = TypeMap(particle_type_map=type_map)
+                    type_map = TypeMap(particle=type_map)
                     warnings.warn(
                         "Deprecation Warning: type_map should be a TypeMap object."
                     )
                 frame.particles.types = type_map.particle_types
+                print(type_map.particle, type_map.reverse_particle)
                 Snapshot._set_type_id(
                     self,
                     self.typeid,
                     frame.particles.typeid,
-                    type_map.particle_type_map,
+                    type_map.particle,
                 )
         if self.has_charge():
             frame.particles.charge = self.charge.copy()
@@ -191,13 +192,13 @@ class Snapshot:
             frame.bonds.group = self.bonds.members - 1
             if self.bonds.has_typeid():
                 frame.bonds.typeid = numpy.zeros(self.bonds.N, dtype=int)
-                if isinstance(type_map, TypeMap) and type_map.has_bond_type_map():
-                    frame.bonds.types = (TypeMap.bond_types,)
+                if isinstance(type_map, TypeMap) and type_map.bond is not None:
+                    frame.bonds.types = type_map.bond_types
                     Snapshot._set_type_id(
                         self,
                         self.bonds.typeid,
                         frame.bonds.typeid,
-                        type_map.bond_type_map,
+                        type_map.bond,
                     )
                 else:
                     sorted_typeids = numpy.sort(numpy.unique(self.bonds.typeid))
@@ -210,13 +211,13 @@ class Snapshot:
             frame.angles.group = self.angles.members - 1
             if self.angles.has_typeid():
                 frame.angles.typeid = numpy.zeros(self.angles.N, dtype=int)
-                if isinstance(type_map, TypeMap) and type_map.has_angle_type_map():
-                    frame.angles.types = (TypeMap.angle_types,)
+                if isinstance(type_map, TypeMap) and type_map.angle is not None:
+                    frame.angles.types = type_map.angle_types
                     Snapshot._set_type_id(
                         self,
                         self.angles.typeid,
                         frame.angles.typeid,
-                        type_map.angle_type_map,
+                        type_map.angle,
                     )
                 else:
                     sorted_typeids = numpy.sort(numpy.unique(self.angles.typeid))
@@ -230,13 +231,13 @@ class Snapshot:
             frame.dihedrals.group = self.dihedrals.members - 1
             if self.dihedrals.has_typeid():
                 frame.dihedrals.typeid = numpy.zeros(self.dihedrals.N, dtype=int)
-                if isinstance(type_map, TypeMap) and type_map.has_dihedral_type_map():
-                    frame.dihedrals.types = (TypeMap.dihedral_types,)
+                if isinstance(type_map, TypeMap) and type_map.dihedral is not None:
+                    frame.dihedrals.types = type_map.dihedral_types
                     Snapshot._set_type_id(
                         self,
                         self.dihedrals.typeid,
                         frame.dihedrals.typeid,
-                        type_map.dihedral_type_map,
+                        type_map.dihedral,
                     )
                 else:
                     sorted_typeids = numpy.sort(numpy.unique(self.dihedrals.typeid))
@@ -252,13 +253,13 @@ class Snapshot:
             frame.impropers.group = self.impropers.members - 1
             if self.impropers.has_typeid():
                 frame.impropers.typeid = numpy.zeros(self.impropers.N, dtype=int)
-                if isinstance(type_map, TypeMap) and type_map.has_improper_type_map():
-                    frame.impropers.types = (TypeMap.improper_types,)
+                if isinstance(type_map, TypeMap) and type_map.improper is not None:
+                    frame.impropers.types = type_map.improper_types
                     Snapshot._set_type_id(
                         self,
                         self.impropers.typeid,
                         frame.impropers.typeid,
-                        type_map.improper_type_map,
+                        type_map.improper,
                     )
 
                 else:
@@ -707,8 +708,8 @@ class Snapshot:
             type_map (dict): Dictionary mapping LAMMPS type IDs to GSD types.
         """
 
-        reverse_type_map = {
+        hoomd_type_map = {
             typeid: typeidx for typeidx, typeid in enumerate(type_map.keys())
         }
         for i, typeid in enumerate(lammps_typeid):
-            gsd_typeid[i] = reverse_type_map[typeid]
+            gsd_typeid[i] = hoomd_type_map[typeid]
