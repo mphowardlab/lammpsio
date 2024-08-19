@@ -61,7 +61,7 @@ def test_gsd_conversion():
     assert numpy.allclose(frame2.particles.position, frame.particles.position)
     assert numpy.all(frame2.particles.image == frame.particles.image)
     assert numpy.allclose(frame2.particles.velocity, frame.particles.velocity)
-    assert numpy.all(frame2.particles.types == frame.particles.types)
+    assert numpy.all(frame2.particles.types == tuple(frame.particles.types))
     assert numpy.all(frame2.particles.typeid == frame.particles.typeid)
     assert numpy.allclose(frame2.particles.mass, frame.particles.mass)
     assert numpy.allclose(frame2.particles.charge, frame.particles.charge)
