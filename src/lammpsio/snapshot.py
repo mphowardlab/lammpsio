@@ -96,42 +96,47 @@ class Snapshot:
         if numpy.any(snap.molecule < 0):
             warnings.warn("Some molecule IDs are negative, remapping needed.")
 
-        if frame.bonds.N is not None:
+        if frame.bonds.N != 0:
             snap.bonds = Bonds(N=frame.bonds.N)
             snap.bonds.id = frame.bonds.typeid
             snap.bonds.members = frame.bonds.group + 1
 
-        if frame.angles.N is not None:
+        if frame.angles.N != 0:
             snap.angles = Angles(N=frame.angles.N)
             snap.angles.id = frame.angles.typeid
             snap.angles.members = frame.angles.group + 1
 
-        if frame.dihedrals.N is not None:
+        if frame.dihedrals.N != 0:
             snap.dihedrals = Dihedrals(N=frame.dihedrals.N)
             snap.dihedrals.id = frame.dihedrals.typeid
             snap.dihedrals.members = frame.dihedrals.group + 1
 
-        if frame.impropers.N is not None:
+        if frame.impropers.N != 0:
             snap.impropers = Impropers(N=frame.impropers.N)
             snap.impropers.id = frame.impropers.typeid
             snap.impropers.members = frame.impropers.group + 1
 
+        type_map_particle = None
         if frame.particles.types is not None:
             type_map_particle = {
                 typeid + 1: i for typeid, i in enumerate(frame.particles.types)
             }
+        type_map_bond = None
         if frame.bonds.types is not None:
             type_map_bond = {
                 typeid + 1: i for typeid, i in enumerate(frame.bonds.types)
             }
+        type_map_angle = None
         if frame.angles.types is not None:
             type_map_angle = {
                 typeid + 1: i for typeid, i in enumerate(frame.angles.types)
             }
+        type_map_dihedral = None
         if frame.dihedrals.types is not None:
             type_map_dihedral = {
                 typeid + 1: i for typeid, i in enumerate(frame.dihedrals.types)
             }
+        type_map_improper = None
         if frame.impropers.types is not None:
             type_map_improper = {
                 typeid + 1: i for typeid, i in enumerate(frame.impropers.types)
