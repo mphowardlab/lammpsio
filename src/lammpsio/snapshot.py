@@ -47,7 +47,7 @@ class Snapshot:
         self._impropers = None
 
     @classmethod
-    def from_hoomd_gsd(cls, frame):
+    def from_hoomd_gsd(cls, frame, type_map=None):
         """Create from a HOOMD GSD frame.
 
         Parameters
@@ -91,7 +91,8 @@ class Snapshot:
         snap.charge = frame.particles.charge
         snap.mass = frame.particles.mass
 
-        snap.molecule = frame.particles.body + 1
+        if frame.particles.body is not None:
+            snap.molecule = frame.particles.body + 1
         if numpy.any(snap.molecule < 0):
             warnings.warn("Some molecule IDs are negative, remapping needed.")
 
@@ -102,7 +103,8 @@ class Snapshot:
             or frame.impropers.N > 0
         ):
             warnings.warn("Conversion of topology from gsd is not supported")
-        type_map = {typeid + 1: i for typeid, i in enumerate(frame.particles.types)}
+        if type_map is None:
+            type_map = {typeid + 1: i for typeid, i in enumerate(frame.particles.types)}
 
         return snap, type_map
 
@@ -173,7 +175,6 @@ class Snapshot:
                         "Deprecation Warning: type_map should be a TypeMap object."
                     )
                 frame.particles.types = type_map.particle_types
-                print(type_map.particle, type_map.reverse_particle)
                 Snapshot._set_type_id(
                     self,
                     self.typeid,
