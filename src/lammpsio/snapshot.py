@@ -216,7 +216,9 @@ class Snapshot:
                 if isinstance(type_map, dict):
                     type_map = TypeMap(particle=type_map)
                     warnings.warn(
-                        "Deprecation Warning: type_map should be a TypeMap object."
+                        "type_map should be a TypeMap object.",
+                        DeprecationWarning,
+                        stacklevel=2,
                     )
                 frame.particles.types = type_map.particle_types
                 Snapshot._set_type_id(
