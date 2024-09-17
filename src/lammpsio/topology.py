@@ -156,13 +156,8 @@ class Topology:
     @property
     def label(self):
         """int: LabelMap of connection types"""
-        if self._label is not None:
-            return self._label
-        else:
-            if self.has_typeid():
-                return numpy.amax(self.typeid)
-            else:
-                return 1
+
+        return self._label
 
     @label.setter
     def label(self, value):
