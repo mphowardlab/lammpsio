@@ -47,7 +47,7 @@ class Snapshot:
         self._impropers = None
 
     @classmethod
-    def from_hoomd_gsd(cls, frame, type_map=None):
+    def from_hoomd_gsd(cls, frame):
         """Create from a HOOMD GSD frame.
 
         Parameters
@@ -91,8 +91,7 @@ class Snapshot:
         snap.charge = frame.particles.charge
         snap.mass = frame.particles.mass
 
-        if frame.particles.body is not None:
-            snap.molecule = frame.particles.body + 1
+        snap.molecule = frame.particles.body + 1
         if numpy.any(snap.molecule < 0):
             warnings.warn("Some molecule IDs are negative, remapping needed.")
 
@@ -130,7 +129,7 @@ class Snapshot:
             label_map_bond = {
                 typeid + 1: i for typeid, i in enumerate(frame.bonds.types)
             }
-        frame.bonds.label = LabelMap(map=label_map_bond)
+        snap.bonds.label = LabelMap(map=label_map_bond)
 
         # set angle label
         label_map_angle = None
@@ -138,7 +137,7 @@ class Snapshot:
             label_map_angle = {
                 typeid + 1: i for typeid, i in enumerate(frame.angles.types)
             }
-        frame.angles.label = LabelMap(map=label_map_angle)
+        snap.angles.label = LabelMap(map=label_map_angle)
 
         # set dihedral label
         label_map_dihedral = None
@@ -146,7 +145,7 @@ class Snapshot:
             label_map_dihedral = {
                 typeid + 1: i for typeid, i in enumerate(frame.dihedrals.types)
             }
-        frame.dihedrals.label = LabelMap(map=label_map_dihedral)
+        snap.dihedrals.label = LabelMap(map=label_map_dihedral)
 
         # set improper label
         label_map_improper = None
@@ -154,9 +153,9 @@ class Snapshot:
             label_map_improper = {
                 typeid + 1: i for typeid, i in enumerate(frame.impropers.types)
             }
-        frame.impropers.label = LabelMap(map=label_map_improper)
+        snap.impropers.label = LabelMap(map=label_map_improper)
 
-        return snap, type_map
+        return snap, snap.label
 
     def to_hoomd_gsd(
         self,
