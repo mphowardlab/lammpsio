@@ -51,7 +51,7 @@ def test_gsd_conversion():
     assert numpy.all(snap.typeid == [2, 1])
     assert numpy.allclose(snap.mass, [3, 2])
     assert numpy.allclose(snap.charge, [-1, 1])
-    assert type_map.particle == {1: "A", 2: "B"}
+    assert type_map == {1: "A", 2: "B"}
 
     # go back to GSD frame
     frame2 = snap.to_hoomd_gsd(type_map)
