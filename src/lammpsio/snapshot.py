@@ -91,29 +91,10 @@ class Snapshot:
         snap.charge = frame.particles.charge
         snap.mass = frame.particles.mass
 
-        snap.molecule = frame.particles.body + 1
+        if frame.particles.body is not None:
+            snap.molecule = frame.particles.body + 1
         if numpy.any(snap.molecule < 0):
             warnings.warn("Some molecule IDs are negative, remapping needed.")
-
-        if frame.bonds.N != 0:
-            snap.bonds = Bonds(N=frame.bonds.N)
-            snap.bonds.id = frame.bonds.typeid
-            snap.bonds.members = frame.bonds.group + 1
-
-        if frame.angles.N != 0:
-            snap.angles = Angles(N=frame.angles.N)
-            snap.angles.id = frame.angles.typeid
-            snap.angles.members = frame.angles.group + 1
-
-        if frame.dihedrals.N != 0:
-            snap.dihedrals = Dihedrals(N=frame.dihedrals.N)
-            snap.dihedrals.id = frame.dihedrals.typeid
-            snap.dihedrals.members = frame.dihedrals.group + 1
-
-        if frame.impropers.N != 0:
-            snap.impropers = Impropers(N=frame.impropers.N)
-            snap.impropers.id = frame.impropers.typeid
-            snap.impropers.members = frame.impropers.group + 1
 
         # set particle label
         label_map_particle = None
@@ -123,37 +104,49 @@ class Snapshot:
             }
         snap.label = LabelMap(map=label_map_particle)
 
-        # set bond label
-        label_map_bond = None
-        if frame.bonds.types is not None:
+        if frame.bonds.N != 0:
+            snap.bonds = Bonds(N=frame.bonds.N)
+            snap.bonds.typeid = frame.bonds.typeid
+            snap.bonds.members = frame.bonds.group + 1
+
+            # set bond label
             label_map_bond = {
                 typeid + 1: i for typeid, i in enumerate(frame.bonds.types)
             }
-        snap.bonds.label = LabelMap(map=label_map_bond)
+            snap.bonds.label = LabelMap(map=label_map_bond)
 
-        # set angle label
-        label_map_angle = None
-        if frame.angles.types is not None:
+        if frame.angles.N != 0:
+            snap.angles = Angles(N=frame.angles.N)
+            snap.angles.typeid = frame.angles.typeid
+            snap.angles.members = frame.angles.group + 1
+
+            # set angle label
             label_map_angle = {
                 typeid + 1: i for typeid, i in enumerate(frame.angles.types)
             }
-        snap.angles.label = LabelMap(map=label_map_angle)
+            snap.angles.label = LabelMap(map=label_map_angle)
 
-        # set dihedral label
-        label_map_dihedral = None
-        if frame.dihedrals.types is not None:
+        if frame.dihedrals.N != 0:
+            snap.dihedrals = Dihedrals(N=frame.dihedrals.N)
+            snap.dihedrals.typeid = frame.dihedrals.typeid
+            snap.dihedrals.members = frame.dihedrals.group + 1
+
+            # set dihedral label
             label_map_dihedral = {
                 typeid + 1: i for typeid, i in enumerate(frame.dihedrals.types)
             }
-        snap.dihedrals.label = LabelMap(map=label_map_dihedral)
+            snap.dihedrals.label = LabelMap(map=label_map_dihedral)
 
-        # set improper label
-        label_map_improper = None
-        if frame.impropers.types is not None:
+        if frame.impropers.N != 0:
+            snap.impropers = Impropers(N=frame.impropers.N)
+            snap.impropers.typeid = frame.impropers.typeid
+            snap.impropers.members = frame.impropers.group + 1
+
+            # set improper label
             label_map_improper = {
                 typeid + 1: i for typeid, i in enumerate(frame.impropers.types)
             }
-        snap.impropers.label = LabelMap(map=label_map_improper)
+            snap.impropers.label = LabelMap(map=label_map_improper)
 
         return snap, snap.label
 
@@ -218,14 +211,16 @@ class Snapshot:
                 for typeidx, typeid in enumerate(sorted_typeids):
                     frame.particles.typeid[self.typeid == typeid] = typeidx
             else:
-                if isinstance(type_map, dict):
-                    self.label = LabelMap(map=type_map)
+                if type_map is not None:
                     warnings.warn(
-                        "type_map should be a TypeMap object.",
+                        "type_map will be deprecated, use label instead.",
                         DeprecationWarning,
                         stacklevel=2,
                     )
-                frame.particles.types = self.label.types
+                    type_label_map = LabelMap(map=type_map)
+                else:
+                    type_label_map = self.label
+                frame.particles.types = type_label_map.types
                 Snapshot._set_type_id(
                     self,
                     self.typeid,
@@ -245,18 +240,21 @@ class Snapshot:
             if self.bonds.has_typeid():
                 frame.bonds.typeid = numpy.zeros(self.bonds.N, dtype=int)
                 if self.bonds.label is not None:
-                    frame.bonds.types = self.bonds.label.types
-                    Snapshot._set_type_id(
-                        self,
-                        self.bonds.typeid,
-                        frame.bonds.typeid,
-                        self.bonds.label,
-                    )
+                    bond_label_map = self.bonds.label
                 else:
                     sorted_typeids = numpy.sort(numpy.unique(self.bonds.typeid))
-                    frame.bonds.types = [str(typeid) for typeid in sorted_typeids]
-                    for typeidx, typeid in enumerate(sorted_typeids):
-                        frame.bonds.typeid[self.bonds.typeid == typeid] = typeidx
+                    bond_label_map = {}
+                    for typeid in sorted_typeids:
+                        bond_label_map[typeid] = str(typeid)
+                    bond_label_map = LabelMap(map=bond_label_map)
+                # set bond types & typeid
+                frame.bonds.types = bond_label_map.types
+                Snapshot._set_type_id(
+                    self,
+                    self.bonds.typeid,
+                    frame.bonds.typeid,
+                    bond_label_map,
+                )
         if self.has_angles():
             frame.angles.N = self.angles.N
             frame.angles.types = self.angles.id
@@ -264,19 +262,21 @@ class Snapshot:
             if self.angles.has_typeid():
                 frame.angles.typeid = numpy.zeros(self.angles.N, dtype=int)
                 if self.angles.label is not None:
-                    frame.angles.types = self.angles.label.types
-                    Snapshot._set_type_id(
-                        self,
-                        self.angles.typeid,
-                        frame.angles.typeid,
-                        self.angles.label,
-                    )
+                    angle_label_map = self.angles.label
                 else:
                     sorted_typeids = numpy.sort(numpy.unique(self.angles.typeid))
-                    frame.angles.types = [str(typeid) for typeid in sorted_typeids]
-                    for typeidx, typeid in enumerate(sorted_typeids):
-                        frame.angles.typeid[self.angles.typeid == typeid] = typeidx
-
+                    angle_label_map = {}
+                    for typeid in sorted_typeids:
+                        angle_label_map[typeid] = str(typeid)
+                    angle_label_map = LabelMap(map=angle_label_map)
+                # set angle types & typeid
+                frame.angles.types = angle_label_map.types
+                Snapshot._set_type_id(
+                    self,
+                    self.angles.typeid,
+                    frame.angles.typeid,
+                    angle_label_map,
+                )
         if self.has_dihedrals():
             frame.dihedrals.N = self.dihedrals.N
             frame.dihedrals.types = self.dihedrals.id
@@ -284,20 +284,21 @@ class Snapshot:
             if self.dihedrals.has_typeid():
                 frame.dihedrals.typeid = numpy.zeros(self.dihedrals.N, dtype=int)
                 if self.dihedrals.label is not None:
-                    frame.dihedrals.types = self.dihedrals.label.types
-                    Snapshot._set_type_id(
-                        self,
-                        self.dihedrals.typeid,
-                        frame.dihedrals.typeid,
-                        self.dihedrals.label,
-                    )
+                    dihedral_label_map = self.dihedrals.label
                 else:
                     sorted_typeids = numpy.sort(numpy.unique(self.dihedrals.typeid))
-                    frame.dihedrals.types = [str(typeid) for typeid in sorted_typeids]
-                    for typeidx, typeid in enumerate(sorted_typeids):
-                        frame.dihedrals.typeid[self.dihedrals.typeid == typeid] = (
-                            typeidx
-                        )
+                    dihedral_label_map = {}
+                    for typeid in sorted_typeids:
+                        dihedral_label_map[typeid] = str(typeid)
+                    dihedral_label_map = LabelMap(map=dihedral_label_map)
+                # set dihedral types & typeid
+                frame.dihedrals.types = dihedral_label_map.types
+                Snapshot._set_type_id(
+                    self,
+                    self.dihedrals.typeid,
+                    frame.dihedrals.typeid,
+                    dihedral_label_map,
+                )
 
         if self.has_impropers():
             frame.impropers.N = self.impropers.N
@@ -306,21 +307,21 @@ class Snapshot:
             if self.impropers.has_typeid():
                 frame.impropers.typeid = numpy.zeros(self.impropers.N, dtype=int)
                 if self.impropers.label is not None:
-                    frame.impropers.types = self.impropers.label.types
-                    Snapshot._set_type_id(
-                        self,
-                        self.impropers.typeid,
-                        frame.impropers.typeid,
-                        self.impropers.label,
-                    )
-
+                    improper_label_map = self.impropers.label
                 else:
                     sorted_typeids = numpy.sort(numpy.unique(self.impropers.typeid))
-                    frame.impropers.types = [str(typeid) for typeid in sorted_typeids]
-                    for typeidx, typeid in enumerate(sorted_typeids):
-                        frame.impropers.typeid[self.impropers.typeid == typeid] = (
-                            typeidx
-                        )
+                    improper_label_map = {}
+                    for typeid in sorted_typeids:
+                        improper_label_map[typeid] = str(typeid)
+                    improper_label_map = LabelMap(map=improper_label_map)
+                # set improper types & typeid
+                frame.impropers.types = improper_label_map.types
+                Snapshot._set_type_id(
+                    self,
+                    self.impropers.typeid,
+                    frame.impropers.typeid,
+                    improper_label_map,
+                )
 
         # undo the sort so object goes back the way it was
         if reverse_order is not None:
@@ -751,7 +752,7 @@ class Snapshot:
             self._mass = self._mass[order]
 
     def _set_type_id(self, lammps_typeid, gsd_typeid, label_map):
-        """Maps LAMMPS type IDs to GSD type IDs using a given type map and
+        """Maps LAMMPS type IDs to GSD type IDs using a given label map and
         accounting for LAMMPS being one-indexed while GSD is zero-indexed.
 
         Parameters:
