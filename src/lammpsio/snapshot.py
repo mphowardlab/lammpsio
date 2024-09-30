@@ -91,8 +91,7 @@ class Snapshot:
         snap.charge = frame.particles.charge
         snap.mass = frame.particles.mass
 
-        if frame.particles.body is not None:
-            snap.molecule = frame.particles.body + 1
+        snap.molecule = frame.particles.body + 1
         if numpy.any(snap.molecule < 0):
             warnings.warn("Some molecule IDs are negative, remapping needed.")
 
