@@ -105,7 +105,7 @@ class Snapshot:
 
         if frame.bonds.N != 0:
             snap.bonds = Bonds(N=frame.bonds.N)
-            snap.bonds.typeid = frame.bonds.typeid
+            snap.bonds.typeid = frame.bonds.typeid + 1
             snap.bonds.members = frame.bonds.group + 1
 
             # set bond label
@@ -116,7 +116,7 @@ class Snapshot:
 
         if frame.angles.N != 0:
             snap.angles = Angles(N=frame.angles.N)
-            snap.angles.typeid = frame.angles.typeid
+            snap.angles.typeid = frame.angles.typeid + 1
             snap.angles.members = frame.angles.group + 1
 
             # set angle label
@@ -127,7 +127,7 @@ class Snapshot:
 
         if frame.dihedrals.N != 0:
             snap.dihedrals = Dihedrals(N=frame.dihedrals.N)
-            snap.dihedrals.typeid = frame.dihedrals.typeid
+            snap.dihedrals.typeid = frame.dihedrals.typeid + 1
             snap.dihedrals.members = frame.dihedrals.group + 1
 
             # set dihedral label
@@ -138,7 +138,7 @@ class Snapshot:
 
         if frame.impropers.N != 0:
             snap.impropers = Impropers(N=frame.impropers.N)
-            snap.impropers.typeid = frame.impropers.typeid
+            snap.impropers.typeid = frame.impropers.typeid + 1
             snap.impropers.members = frame.impropers.group + 1
 
             # set improper label
