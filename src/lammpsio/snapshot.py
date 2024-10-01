@@ -84,16 +84,28 @@ class Snapshot:
             box=box,
             step=frame.configuration.step,
         )
-        snap.position = frame.particles.position
-        snap.velocity = frame.particles.velocity
-        snap.image = frame.particles.image
-        snap.typeid = frame.particles.typeid + 1
-        snap.charge = frame.particles.charge
-        snap.mass = frame.particles.mass
+        if frame.particles.position is not None:
+            snap.position = frame.particles.position
 
-        snap.molecule = frame.particles.body + 1
-        if numpy.any(snap.molecule < 0):
-            warnings.warn("Some molecule IDs are negative, remapping needed.")
+        if frame.particles.velocity is not None:
+            snap.velocity = frame.particles.velocity
+
+        if frame.particles.image is not None:
+            snap.image = frame.particles.image
+
+        if frame.particles.typeid is not None:
+            snap.typeid = frame.particles.typeid + 1
+
+        if frame.particles.charge is not None:
+            snap.charge = frame.particles.charge
+
+        if frame.particles.mass is not None:
+            snap.mass = frame.particles.mass
+
+        if frame.particles.body is not None:
+            snap.molecule = frame.particles.body + 1
+            if numpy.any(snap.molecule < 0):
+                warnings.warn("Some molecule IDs are negative, remapping needed.")
 
         # set particle label
         label_map_particle = None

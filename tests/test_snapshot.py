@@ -91,6 +91,37 @@ def test_gsd_conversion():
         snap2.to_hoomd_gsd()
 
 
+def test_minimal_gsd_conversion():
+    # make a GSD frame
+    try:
+        gsd_version = gsd.version.version
+    except AttributeError:
+        gsd_version = gsd.__version__
+    if version.Version(gsd_version) >= version.Version("2.8.0"):
+        frame = gsd.hoomd.Frame()
+    else:
+        frame = gsd.hoomd.Snapshot()
+
+    frame.configuration.box = [4, 5, 6, 0.1, 0.2, 0.3]
+    frame.particles.N = 2
+    frame.particles.types = ["A", "B"]
+    frame.particles.typeid = [1, 0]
+    frame.particles.position = [[0.1, 0.2, 0.3], [-0.1, -0.2, -0.3]]
+
+    # make Snapshot from GSD with minimial information
+    snap, type_map = lammpsio.Snapshot.from_hoomd_gsd(frame)
+    # check that unspecified properties are not set
+    assert snap.has_velocity() is False
+    assert snap.has_image() is False
+    assert snap.has_charge() is False
+    assert snap.has_mass() is False
+    assert snap.has_molecule() is False
+    assert snap.has_bonds() is False
+    assert snap.has_angles() is False
+    assert snap.has_dihedrals() is False
+    assert snap.has_impropers() is False
+
+
 def test_gsd_conversion_topology():
     # make a GSD frame
     try:
