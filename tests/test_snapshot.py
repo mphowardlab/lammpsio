@@ -109,8 +109,16 @@ def test_minimal_gsd_conversion():
 
     # make Snapshot from GSD with minimial information
     snap, type_map = lammpsio.Snapshot.from_hoomd_gsd(frame)
-    # check that molecule defaults to initalized zeros
-    assert numpy.allclose(snap.molecule, [0, 0])
+    # check that unspecified properties are not set
+    assert snap.has_velocity() is False
+    assert snap.has_image() is False
+    assert snap.has_charge() is False
+    assert snap.has_mass() is False
+    assert snap.has_molecule() is False
+    assert snap.has_bonds() is False
+    assert snap.has_angles() is False
+    assert snap.has_dihedrals() is False
+    assert snap.has_impropers() is False
 
 
 def test_position(snap):
