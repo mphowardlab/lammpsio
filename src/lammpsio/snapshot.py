@@ -277,8 +277,6 @@ class Snapshot:
                     frame.bonds.typeid,
                     bond_label_map,
                 )
-            else:
-                warnings.warn("Bonds must have typeids to convert to GSD")
         if self.has_angles():
             if self.angles.has_typeid():
                 frame.angles.N = self.angles.N
@@ -300,8 +298,6 @@ class Snapshot:
                     frame.angles.typeid,
                     angle_label_map,
                 )
-            else:
-                warnings.warn("Angles must have typeids to convert to GSD")
         if self.has_dihedrals():
             if self.dihedrals.has_typeid():
                 frame.dihedrals.N = self.dihedrals.N
@@ -323,8 +319,6 @@ class Snapshot:
                     frame.dihedrals.typeid,
                     dihedral_label_map,
                 )
-            else:
-                warnings.warn("Dihedrals must have typeids to convert to GSD")
         if self.has_impropers():
             if self.impropers.has_typeid():
                 frame.impropers.N = self.impropers.N
@@ -346,13 +340,12 @@ class Snapshot:
                     frame.impropers.typeid,
                     improper_label_map,
                 )
-            else:
-                warnings.warn("Impropers must have typeids to convert to GSD")
 
         # undo the sort so object goes back the way it was
         if reverse_order is not None:
             self.reorder(reverse_order, check_order=False)
 
+        frame.validate()
         return frame
 
     @property
