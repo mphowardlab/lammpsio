@@ -230,20 +230,26 @@ class Snapshot:
         if self.has_typeid():
             frame.particles.typeid = numpy.zeros(self.N, dtype=int)
             if type_map is None:
-                sorted_typeids = numpy.sort(numpy.unique(self.typeid))
-                frame.particles.types = [str(typeid) for typeid in sorted_typeids]
-                for typeidx, typeid in enumerate(sorted_typeids):
-                    frame.particles.typeid[self.typeid == typeid] = typeidx
-            else:
-                if type_map is not None:
-                    warnings.warn(
-                        "type_map is deprecated, use label instead.",
-                        DeprecationWarning,
-                        stacklevel=2,
-                    )
-                    type_label_map = LabelMap(map=type_map)
-                else:
+                if self.type_label is not None:
                     type_label_map = self.type_label
+                    frame.particles.types = type_label_map.types
+                    _set_type_id(
+                        self.typeid,
+                        frame.particles.typeid,
+                        type_label_map,
+                    )
+                else:
+                    sorted_typeids = numpy.sort(numpy.unique(self.typeid))
+                    frame.particles.types = [str(typeid) for typeid in sorted_typeids]
+                    for typeidx, typeid in enumerate(sorted_typeids):
+                        frame.particles.typeid[self.typeid == typeid] = typeidx
+            else:
+                warnings.warn(
+                    "type_map is deprecated, use label instead.",
+                    DeprecationWarning,
+                    stacklevel=2,
+                )
+                type_label_map = LabelMap(map=type_map)
                 frame.particles.types = type_label_map.types
                 _set_type_id(
                     self.typeid,
