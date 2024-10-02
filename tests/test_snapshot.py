@@ -72,7 +72,7 @@ def test_gsd_conversion():
     assert numpy.all(frame3.particles.types == tuple(["A", "B"]))
     assert numpy.all(frame3.particles.typeid == [1, 0])
 
-    # do the same thing, but with different label_map
+    # do the same thing, but with different type_label
     snap.type_label = lammpsio.topology.LabelMap({1: "C", 2: "D"})
     frame4 = snap.to_hoomd_gsd()
     assert numpy.all(frame4.particles.types == tuple(["C", "D"]))
