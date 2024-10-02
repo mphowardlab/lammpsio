@@ -69,7 +69,7 @@ def test_gsd_conversion():
 
     # do the same thing, but lose the type map
     frame3 = snap.to_hoomd_gsd()
-    assert numpy.all(frame3.particles.types == ["A", "B"])
+    assert numpy.all(frame3.particles.types == tuple(["A", "B"]))
     assert numpy.all(frame3.particles.typeid == [1, 0])
 
     # check for warning on floppy molecules
