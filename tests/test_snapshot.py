@@ -201,31 +201,31 @@ def test_gsd_conversion_topology():
     assert numpy.allclose(snap.position, position)
     assert numpy.all(snap.typeid == [1, 1, 1, 1, 2, 2, 2, 2])
     assert type_map == {1: "A", 2: "B"}
-    assert snap.label == {1: "A", 2: "B"}
+    assert snap.type_label == {1: "A", 2: "B"}
     # bonds
     assert snap.bonds.N == 6
     assert numpy.all(snap.bonds.typeid == [1, 2, 1, 2, 1, 2])
     assert numpy.all(
         snap.bonds.members == [[1, 2], [2, 3], [3, 4], [5, 6], [6, 7], [7, 8]]
     )
-    assert snap.bonds.label == {1: "bondA", 2: "bondB"}
+    assert snap.bonds.type_label == {1: "bondA", 2: "bondB"}
     # angles
     assert snap.angles.N == 4
     assert numpy.all(snap.angles.typeid == [1, 2, 1, 2])
     assert numpy.all(
         snap.angles.members == [[1, 2, 3], [2, 3, 4], [5, 6, 7], [6, 7, 8]]
     )
-    assert snap.angles.label == {1: "angleA", 2: "angleB"}
+    assert snap.angles.type_label == {1: "angleA", 2: "angleB"}
     # dihedrals
     assert snap.dihedrals.N == 2
     assert numpy.all(snap.dihedrals.typeid == [1, 2])
     assert numpy.all(snap.dihedrals.members == [[1, 2, 3, 4], [5, 6, 7, 8]])
-    assert snap.dihedrals.label == {1: "dihedralA", 2: "dihedralB"}
+    assert snap.dihedrals.type_label == {1: "dihedralA", 2: "dihedralB"}
     # impropers
     assert snap.impropers.N == 2
     assert numpy.all(snap.impropers.typeid == [1, 2])
     assert numpy.all(snap.impropers.members == [[1, 2, 3, 4], [5, 6, 7, 8]])
-    assert snap.impropers.label == {1: "improperA", 2: "improperB"}
+    assert snap.impropers.type_label == {1: "improperA", 2: "improperB"}
 
     # go back to GSD frame
     frame2 = snap.to_hoomd_gsd(type_map)
