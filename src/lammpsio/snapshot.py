@@ -248,7 +248,7 @@ class Snapshot:
                 _set_type_id(
                     self.typeid,
                     frame.particles.typeid,
-                    self.type_label,
+                    type_label_map,
                 )
         if self.has_charge():
             frame.particles.charge = self.charge.copy()
