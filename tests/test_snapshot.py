@@ -69,7 +69,7 @@ def test_gsd_conversion():
 
     # do the same thing, but lose the type map
     frame3 = snap.to_hoomd_gsd()
-    assert numpy.all(frame3.particles.types == ["1", "2"])
+    assert numpy.all(frame3.particles.types == ["A", "B"])
     assert numpy.all(frame3.particles.typeid == [1, 0])
 
     # check for warning on floppy molecules
@@ -228,7 +228,7 @@ def test_gsd_conversion_topology():
     assert snap.impropers.type_label == {1: "improperA", 2: "improperB"}
 
     # go back to GSD frame
-    frame2 = snap.to_hoomd_gsd(type_map)
+    frame2 = snap.to_hoomd_gsd()
     assert numpy.allclose(frame2.configuration.box, frame.configuration.box)
     # particles
     assert frame2.particles.N == frame.particles.N
