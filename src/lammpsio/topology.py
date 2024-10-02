@@ -1,4 +1,4 @@
-from collections.abc import MutableMapping
+import collections.abc
 
 import numpy
 
@@ -29,7 +29,7 @@ class Topology:
         self._num_members = num_members
         self.num_types = num_types
 
-        self._label = None
+        self._type_label = None
         self._id = None
         self._typeid = None
         self._members = None
@@ -154,19 +154,19 @@ class Topology:
             self._num_types = None
 
     @property
-    def label(self):
+    def type_label(self):
         """int: LabelMap of connection types"""
 
-        return self._label
+        return self._type_label
 
-    @label.setter
-    def label(self, value):
+    @type_label.setter
+    def type_label(self, value):
         if value is not None:
             if not isinstance(value, LabelMap):
                 raise TypeError("label must be a LabelMap object")
-            self._label = value
+            self._type_label = value
         else:
-            self._label = None
+            self._type_label = None
 
     def reorder(self, order, check_order=True):
         """Reorder the connections in place.
@@ -261,11 +261,11 @@ class Impropers(Topology):
         super().__init__(N=N, num_members=4, num_types=num_types)
 
 
-class LabelMap(MutableMapping):
+class LabelMap(collections.abc.MutableMapping):
     def __init__(self, map=None):
         self._map = {}
         if map is not None:
-            self._map.update(map)
+            self.update(map)
 
     def __getitem__(self, key):
         return self._map[key]
