@@ -116,15 +116,17 @@ class Snapshot:
             }
             snap.type_label = LabelMap(map=label_map_particle)
 
-        if frame.bonds.N != 0:
-            snap.bonds = Bonds(N=frame.bonds.N)
+        if (frame.bonds.N is not None or frame.bonds.group is not None or frame.bonds.typeid is not None or frame.bonds.types is not None):
+            # always create a data container even if there are no bonds
+            snap.bonds = Bonds(N=frame.bonds.N if frame.bonds.N is not None else 0)
 
             if frame.bonds.group is not None:
                 snap.bonds.members = frame.bonds.group + 1
 
-            if frame.bonds.typeid is not None and frame.bonds.types is not None:
+            if frame.bonds.typeid is not None:
                 snap.bonds.typeid = frame.bonds.typeid + 1
-                # set bond label
+
+            if frame.bonds.types is not None:
                 label_map_bond = {
                     typeid + 1: i for typeid, i in enumerate(frame.bonds.types)
                 }
@@ -262,27 +264,21 @@ class Snapshot:
             frame.particles.mass = self.mass.copy()
         if self.has_molecule():
             frame.particles.body = self.molecule - 1
-        if self.has_bonds():
-            if self.bonds.has_typeid():
-                frame.bonds.N = self.bonds.N
-                frame.bonds.types = self.bonds.id
+        if self.bonds is not None:
+            frame.bonds.N = self.bonds.N
+
+            if self.bonds.has_members():
                 frame.bonds.group = self.bonds.members - 1
+
+            bond_label_map = self.bonds.type_label
+            if self.bonds.has_typeid():
                 frame.bonds.typeid = numpy.zeros(self.bonds.N, dtype=int)
-                if self.bonds.type_label is not None:
-                    bond_label_map = self.bonds.type_label
-                else:
-                    sorted_typeids = numpy.sort(numpy.unique(self.bonds.typeid))
-                    bond_label_map = {}
-                    for typeid in sorted_typeids:
-                        bond_label_map[typeid] = str(typeid)
-                    bond_label_map = LabelMap(map=bond_label_map)
-                # set bond types & typeid
-                frame.bonds.types = bond_label_map.types
-                _set_type_id(
+                bond_label_map = _set_type_id(
                     self.bonds.typeid,
                     frame.bonds.typeid,
                     bond_label_map,
                 )
+            frame.bonds.types = bond_label_map.types
         if self.has_angles():
             if self.angles.has_typeid():
                 frame.angles.N = self.angles.N
