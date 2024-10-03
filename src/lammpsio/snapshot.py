@@ -206,10 +206,7 @@ class Snapshot:
 
         return snap, label_map_particle
 
-    def to_hoomd_gsd(
-        self,
-        type_map=None,
-    ):
+    def to_hoomd_gsd(self, type_map=None):
         """Create a HOOMD GSD frame.
 
         Parameters
@@ -295,89 +292,57 @@ class Snapshot:
         if self.has_molecule():
             frame.particles.body = self.molecule - 1
         if self.has_bonds():
-            if self.bonds.has_typeid():
-                frame.bonds.N = self.bonds.N
-                frame.bonds.types = self.bonds.id
+            frame.bonds.N = self.bonds.N
+            if self.bonds.has_members():
                 frame.bonds.group = self.bonds.members - 1
+            bond_label_map = self.bonds.type_label
+            if self.bonds.has_typeid():
                 frame.bonds.typeid = numpy.zeros(self.bonds.N, dtype=int)
-                if self.bonds.type_label is not None:
-                    bond_label_map = self.bonds.type_label
-                else:
-                    sorted_typeids = numpy.sort(numpy.unique(self.bonds.typeid))
-                    bond_label_map = {}
-                    for typeid in sorted_typeids:
-                        bond_label_map[typeid] = str(typeid)
-                    bond_label_map = LabelMap(map=bond_label_map)
-                # set bond types & typeid
-                frame.bonds.types = bond_label_map.types
-                _set_type_id(
+                bond_label_map = _set_type_id(
                     self.bonds.typeid,
                     frame.bonds.typeid,
                     bond_label_map,
                 )
+            frame.bonds.types = bond_label_map.types
         if self.has_angles():
-            if self.angles.has_typeid():
-                frame.angles.N = self.angles.N
-                frame.angles.types = self.angles.id
+            frame.angles.N = self.angles.N
+            if self.angles.has_members():
                 frame.angles.group = self.angles.members - 1
+            bond_label_map = self.angles.type_label
+            if self.angles.has_typeid():
                 frame.angles.typeid = numpy.zeros(self.angles.N, dtype=int)
-                if self.angles.type_label is not None:
-                    angle_label_map = self.angles.type_label
-                else:
-                    sorted_typeids = numpy.sort(numpy.unique(self.angles.typeid))
-                    angle_label_map = {}
-                    for typeid in sorted_typeids:
-                        angle_label_map[typeid] = str(typeid)
-                    angle_label_map = LabelMap(map=angle_label_map)
-                # set angle types & typeid
-                frame.angles.types = angle_label_map.types
-                _set_type_id(
+                bond_label_map = _set_type_id(
                     self.angles.typeid,
                     frame.angles.typeid,
-                    angle_label_map,
+                    bond_label_map,
                 )
+            frame.angles.types = bond_label_map.types
         if self.has_dihedrals():
-            if self.dihedrals.has_typeid():
-                frame.dihedrals.N = self.dihedrals.N
-                frame.dihedrals.types = self.dihedrals.id
+            frame.dihedrals.N = self.dihedrals.N
+            if self.dihedrals.has_members():
                 frame.dihedrals.group = self.dihedrals.members - 1
+            bond_label_map = self.dihedrals.type_label
+            if self.dihedrals.has_typeid():
                 frame.dihedrals.typeid = numpy.zeros(self.dihedrals.N, dtype=int)
-                if self.dihedrals.type_label is not None:
-                    dihedral_label_map = self.dihedrals.type_label
-                else:
-                    sorted_typeids = numpy.sort(numpy.unique(self.dihedrals.typeid))
-                    dihedral_label_map = {}
-                    for typeid in sorted_typeids:
-                        dihedral_label_map[typeid] = str(typeid)
-                    dihedral_label_map = LabelMap(map=dihedral_label_map)
-                # set dihedral types & typeid
-                frame.dihedrals.types = dihedral_label_map.types
-                _set_type_id(
+                bond_label_map = _set_type_id(
                     self.dihedrals.typeid,
                     frame.dihedrals.typeid,
-                    dihedral_label_map,
+                    bond_label_map,
                 )
+            frame.dihedrals.types = bond_label_map.types
         if self.has_impropers():
-            if self.impropers.has_typeid():
-                frame.impropers.N = self.impropers.N
-                frame.impropers.types = self.impropers.id
+            frame.impropers.N = self.impropers.N
+            if self.impropers.has_members():
                 frame.impropers.group = self.impropers.members - 1
+            bond_label_map = self.impropers.type_label
+            if self.impropers.has_typeid():
                 frame.impropers.typeid = numpy.zeros(self.impropers.N, dtype=int)
-                if self.impropers.type_label is not None:
-                    improper_label_map = self.impropers.type_label
-                else:
-                    sorted_typeids = numpy.sort(numpy.unique(self.impropers.typeid))
-                    improper_label_map = {}
-                    for typeid in sorted_typeids:
-                        improper_label_map[typeid] = str(typeid)
-                    improper_label_map = LabelMap(map=improper_label_map)
-                # set improper types & typeid
-                frame.impropers.types = improper_label_map.types
-                _set_type_id(
+                bond_label_map = _set_type_id(
                     self.impropers.typeid,
                     frame.impropers.typeid,
-                    improper_label_map,
+                    bond_label_map,
                 )
+            frame.impropers.types = bond_label_map.types
 
         # undo the sort so object goes back the way it was
         if reverse_order is not None:
@@ -833,9 +798,17 @@ def _set_type_id(lammps_typeid, gsd_typeid, label_map):
         label_map (LabelMap): LabelMap for connection type mapping LAMMPS
         type IDs to GSD types.
     """
+    if label_map is None:
+        sorted_typeids = numpy.sort(numpy.unique(lammps_typeid))
+        label_map = {}
+        for typeid in sorted_typeids:
+            label_map[typeid] = str(typeid)
+        label_map = LabelMap(map=label_map)
 
     hoomd_type_map = {
         typeid: typeidx for typeidx, typeid in enumerate(label_map.keys())
     }
     for i, typeid in enumerate(lammps_typeid):
         gsd_typeid[i] = hoomd_type_map[typeid]
+
+    return label_map
