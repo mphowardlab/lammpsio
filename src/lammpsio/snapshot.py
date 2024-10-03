@@ -137,47 +137,72 @@ class Snapshot:
                 }
                 snap.bonds.type_label = LabelMap(map=label_map_bond)
 
-        if frame.angles.N != 0:
-            snap.angles = Angles(N=frame.angles.N)
+        if (
+            frame.angles.N is not None
+            or frame.angles.group is not None
+            or frame.angles.typeid is not None
+            or frame.angles.types is not None
+        ):
+            # always create a data container even if there are no angles
+            snap.angles = Angles(N=frame.angles.N if frame.angles.N is not None else 0)
 
             if frame.angles.group is not None:
                 snap.angles.members = frame.angles.group + 1
 
-            if frame.angles.typeid is not None and frame.angles.types is not None:
+            if frame.angles.typeid is not None:
                 snap.angles.typeid = frame.angles.typeid + 1
-                # set angle label
-                label_map_angle = {
+
+            if frame.angles.types is not None:
+                label_map_bond = {
                     typeid + 1: i for typeid, i in enumerate(frame.angles.types)
                 }
-                snap.angles.type_label = LabelMap(map=label_map_angle)
+                snap.angles.type_label = LabelMap(map=label_map_bond)
 
-        if frame.dihedrals.N != 0:
-            snap.dihedrals = Dihedrals(N=frame.dihedrals.N)
+        if (
+            frame.dihedrals.N is not None
+            or frame.dihedrals.group is not None
+            or frame.dihedrals.typeid is not None
+            or frame.dihedrals.types is not None
+        ):
+            # always create a data container even if there are no dihedrals
+            snap.dihedrals = Dihedrals(
+                N=frame.dihedrals.N if frame.dihedrals.N is not None else 0
+            )
 
             if frame.dihedrals.group is not None:
                 snap.dihedrals.members = frame.dihedrals.group + 1
 
-            if frame.dihedrals.typeid is not None and frame.dihedrals.types is not None:
+            if frame.dihedrals.typeid is not None:
                 snap.dihedrals.typeid = frame.dihedrals.typeid + 1
-                # set dihedral label
-                label_map_dihedral = {
+
+            if frame.dihedrals.types is not None:
+                label_map_bond = {
                     typeid + 1: i for typeid, i in enumerate(frame.dihedrals.types)
                 }
-                snap.dihedrals.type_label = LabelMap(map=label_map_dihedral)
+                snap.dihedrals.type_label = LabelMap(map=label_map_bond)
 
-        if frame.impropers.N != 0:
-            snap.impropers = Impropers(N=frame.impropers.N)
+        if (
+            frame.impropers.N is not None
+            or frame.impropers.group is not None
+            or frame.impropers.typeid is not None
+            or frame.impropers.types is not None
+        ):
+            # always create a data container even if there are no impropers
+            snap.impropers = Impropers(
+                N=frame.impropers.N if frame.impropers.N is not None else 0
+            )
 
             if frame.impropers.group is not None:
                 snap.impropers.members = frame.impropers.group + 1
 
-            if frame.impropers.typeid is not None and frame.impropers.types is not None:
+            if frame.impropers.typeid is not None:
                 snap.impropers.typeid = frame.impropers.typeid + 1
-            # set improper label
-            label_map_improper = {
-                typeid + 1: i for typeid, i in enumerate(frame.impropers.types)
-            }
-            snap.impropers.type_label = LabelMap(map=label_map_improper)
+
+            if frame.impropers.types is not None:
+                label_map_bond = {
+                    typeid + 1: i for typeid, i in enumerate(frame.impropers.types)
+                }
+                snap.impropers.type_label = LabelMap(map=label_map_bond)
 
         return snap, label_map_particle
 
@@ -269,21 +294,27 @@ class Snapshot:
             frame.particles.mass = self.mass.copy()
         if self.has_molecule():
             frame.particles.body = self.molecule - 1
-        if self.bonds is not None:
-            frame.bonds.N = self.bonds.N
-
-            if self.bonds.has_members():
-                frame.bonds.group = self.bonds.members - 1
-
-            bond_label_map = self.bonds.type_label
+        if self.has_bonds():
             if self.bonds.has_typeid():
+                frame.bonds.N = self.bonds.N
+                frame.bonds.types = self.bonds.id
+                frame.bonds.group = self.bonds.members - 1
                 frame.bonds.typeid = numpy.zeros(self.bonds.N, dtype=int)
-                bond_label_map = _set_type_id(
+                if self.bonds.type_label is not None:
+                    bond_label_map = self.bonds.type_label
+                else:
+                    sorted_typeids = numpy.sort(numpy.unique(self.bonds.typeid))
+                    bond_label_map = {}
+                    for typeid in sorted_typeids:
+                        bond_label_map[typeid] = str(typeid)
+                    bond_label_map = LabelMap(map=bond_label_map)
+                # set bond types & typeid
+                frame.bonds.types = bond_label_map.types
+                _set_type_id(
                     self.bonds.typeid,
                     frame.bonds.typeid,
                     bond_label_map,
                 )
-            frame.bonds.types = bond_label_map.types
         if self.has_angles():
             if self.angles.has_typeid():
                 frame.angles.N = self.angles.N
@@ -352,7 +383,6 @@ class Snapshot:
         if reverse_order is not None:
             self.reorder(reverse_order, check_order=False)
 
-        frame.validate()
         return frame
 
     @property
