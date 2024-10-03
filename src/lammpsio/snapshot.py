@@ -116,7 +116,12 @@ class Snapshot:
             }
             snap.type_label = LabelMap(map=label_map_particle)
 
-        if (frame.bonds.N is not None or frame.bonds.group is not None or frame.bonds.typeid is not None or frame.bonds.types is not None):
+        if (
+            frame.bonds.N is not None
+            or frame.bonds.group is not None
+            or frame.bonds.typeid is not None
+            or frame.bonds.types is not None
+        ):
             # always create a data container even if there are no bonds
             snap.bonds = Bonds(N=frame.bonds.N if frame.bonds.N is not None else 0)
 
