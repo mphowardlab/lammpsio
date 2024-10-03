@@ -153,10 +153,10 @@ class Snapshot:
                 snap.angles.typeid = frame.angles.typeid + 1
 
             if frame.angles.types is not None:
-                label_map_bond = {
+                label_map_angle = {
                     typeid + 1: i for typeid, i in enumerate(frame.angles.types)
                 }
-                snap.angles.type_label = LabelMap(map=label_map_bond)
+                snap.angles.type_label = LabelMap(map=label_map_angle)
 
         if (
             frame.dihedrals.N is not None
@@ -176,10 +176,10 @@ class Snapshot:
                 snap.dihedrals.typeid = frame.dihedrals.typeid + 1
 
             if frame.dihedrals.types is not None:
-                label_map_bond = {
+                label_map_dihedral = {
                     typeid + 1: i for typeid, i in enumerate(frame.dihedrals.types)
                 }
-                snap.dihedrals.type_label = LabelMap(map=label_map_bond)
+                snap.dihedrals.type_label = LabelMap(map=label_map_dihedral)
 
         if (
             frame.impropers.N is not None
@@ -199,10 +199,10 @@ class Snapshot:
                 snap.impropers.typeid = frame.impropers.typeid + 1
 
             if frame.impropers.types is not None:
-                label_map_bond = {
+                label_map_improper = {
                     typeid + 1: i for typeid, i in enumerate(frame.impropers.types)
                 }
-                snap.impropers.type_label = LabelMap(map=label_map_bond)
+                snap.impropers.type_label = LabelMap(map=label_map_improper)
 
         return snap, label_map_particle
 
@@ -296,41 +296,41 @@ class Snapshot:
             frame.angles.N = self.angles.N
             if self.angles.has_members():
                 frame.angles.group = self.angles.members - 1
-            bond_label_map = self.angles.type_label
+            angle_label_map = self.angles.type_label
             if self.angles.has_typeid():
                 frame.angles.typeid = numpy.zeros(self.angles.N, dtype=int)
-                bond_label_map = _set_type_id(
+                angle_label_map = _set_type_id(
                     self.angles.typeid,
                     frame.angles.typeid,
-                    bond_label_map,
+                    angle_label_map,
                 )
-            frame.angles.types = bond_label_map.types
+            frame.angles.types = angle_label_map.types
         if self.has_dihedrals():
             frame.dihedrals.N = self.dihedrals.N
             if self.dihedrals.has_members():
                 frame.dihedrals.group = self.dihedrals.members - 1
-            bond_label_map = self.dihedrals.type_label
+            dihedral_label_map = self.dihedrals.type_label
             if self.dihedrals.has_typeid():
                 frame.dihedrals.typeid = numpy.zeros(self.dihedrals.N, dtype=int)
-                bond_label_map = _set_type_id(
+                dihedral_label_map = _set_type_id(
                     self.dihedrals.typeid,
                     frame.dihedrals.typeid,
-                    bond_label_map,
+                    dihedral_label_map,
                 )
-            frame.dihedrals.types = bond_label_map.types
+            frame.dihedrals.types = dihedral_label_map.types
         if self.has_impropers():
             frame.impropers.N = self.impropers.N
             if self.impropers.has_members():
                 frame.impropers.group = self.impropers.members - 1
-            bond_label_map = self.impropers.type_label
+            improper_label_map = self.impropers.type_label
             if self.impropers.has_typeid():
                 frame.impropers.typeid = numpy.zeros(self.impropers.N, dtype=int)
-                bond_label_map = _set_type_id(
+                improper_label_map = _set_type_id(
                     self.impropers.typeid,
                     frame.impropers.typeid,
-                    bond_label_map,
+                    improper_label_map,
                 )
-            frame.impropers.types = bond_label_map.types
+            frame.impropers.types = improper_label_map.types
 
         # undo the sort so object goes back the way it was
         if reverse_order is not None:
