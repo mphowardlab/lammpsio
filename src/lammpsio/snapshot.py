@@ -117,7 +117,7 @@ class Snapshot:
             snap.type_label = LabelMap(map=label_map_particle)
 
         if (
-            frame.bonds.N is not None
+            frame.bonds.N != 0
             or frame.bonds.group is not None
             or frame.bonds.typeid is not None
             or frame.bonds.types is not None
@@ -138,7 +138,7 @@ class Snapshot:
                 snap.bonds.type_label = LabelMap(map=label_map_bond)
 
         if (
-            frame.angles.N is not None
+            frame.angles.N != 0
             or frame.angles.group is not None
             or frame.angles.typeid is not None
             or frame.angles.types is not None
@@ -159,7 +159,7 @@ class Snapshot:
                 snap.angles.type_label = LabelMap(map=label_map_angle)
 
         if (
-            frame.dihedrals.N is not None
+            frame.dihedrals.N != 0
             or frame.dihedrals.group is not None
             or frame.dihedrals.typeid is not None
             or frame.dihedrals.types is not None
@@ -182,7 +182,7 @@ class Snapshot:
                 snap.dihedrals.type_label = LabelMap(map=label_map_dihedral)
 
         if (
-            frame.impropers.N is not None
+            frame.impropers.N != 0
             or frame.impropers.group is not None
             or frame.impropers.typeid is not None
             or frame.impropers.types is not None
@@ -256,22 +256,20 @@ class Snapshot:
             frame.particles.velocity = self.velocity.copy()
         if self.has_image():
             frame.particles.image = self.image.copy()
+        if type_map is not None:
+            warnings.warn(
+                "type_map is deprecated, use Snapshot.type_label instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            type_label_map = LabelMap(map=type_map)
+        else:
+            type_label_map = self.type_label
         if self.has_typeid():
             frame.particles.typeid = numpy.zeros(self.N, dtype=int)
-            if type_map is not None:
-                warnings.warn(
-                    "type_map is deprecated, use Snapshot.type_label instead.",
-                    DeprecationWarning,
-                    stacklevel=2,
-                )
-                type_label_map = LabelMap(map=type_map)
-            else:
-                type_label_map = self.type_label
-            if self.has_typeid():
-                frame.particles.typeid = numpy.zeros(self.N, dtype=int)
-                type_label_map = _set_type_id(
-                    self.typeid, frame.particles.typeid, type_label_map
-                )
+            type_label_map = _set_type_id(
+                self.typeid, frame.particles.typeid, type_label_map
+            )
             frame.particles.types = type_label_map.types
         if self.has_charge():
             frame.particles.charge = self.charge.copy()
@@ -280,7 +278,7 @@ class Snapshot:
         if self.has_molecule():
             frame.particles.body = self.molecule - 1
 
-        if self.has_bonds():
+        if self.bonds is not None:
             frame.bonds.N = self.bonds.N
             if self.bonds.has_members():
                 frame.bonds.group = self.bonds.members - 1
@@ -294,7 +292,7 @@ class Snapshot:
                 )
             frame.bonds.types = bond_label_map.types
 
-        if self.has_angles():
+        if self.angles is not None:
             frame.angles.N = self.angles.N
             if self.angles.has_members():
                 frame.angles.group = self.angles.members - 1
@@ -308,7 +306,7 @@ class Snapshot:
                 )
             frame.angles.types = angle_label_map.types
 
-        if self.has_dihedrals():
+        if self.dihedrals is not None:
             frame.dihedrals.N = self.dihedrals.N
             if self.dihedrals.has_members():
                 frame.dihedrals.group = self.dihedrals.members - 1
@@ -322,7 +320,7 @@ class Snapshot:
                 )
             frame.dihedrals.types = dihedral_label_map.types
 
-        if self.has_impropers():
+        if self.impropers is not None:
             frame.impropers.N = self.impropers.N
             if self.impropers.has_members():
                 frame.impropers.group = self.impropers.members - 1
