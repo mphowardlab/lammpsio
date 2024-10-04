@@ -262,6 +262,21 @@ class Impropers(Topology):
 
 
 class LabelMap(collections.abc.MutableMapping):
+    """Label map between typeids and types.
+
+    Parameters
+    ----------
+    map : dict
+        Map of typeids to types.
+
+    Attributes
+    ----------
+    types : tuple
+        Types in label map.
+    typeid : tuple
+        Typeids in label map.
+    """
+
     def __init__(self, map=None):
         self._map = {}
         if map is not None:
@@ -284,24 +299,24 @@ class LabelMap(collections.abc.MutableMapping):
 
     @property
     def types(self):
-        """Get the label types.
+        """Types in label map.
 
         Returns
         -------
-        list
-            List of label types.
+        tuple
+            Label types.
 
         """
         return tuple(self._map.values())
 
     @property
     def typeid(self):
-        """Returns the typeid.
+        """Typeids in label map.
 
         Returns
         -------
-        list
-            List of label typeid.
+        tuple
+            Label typeids.
 
         """
         return tuple(self._map.keys())
