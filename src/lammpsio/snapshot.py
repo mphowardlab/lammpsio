@@ -780,14 +780,22 @@ class Snapshot:
 
 
 def _set_type_id(lammps_typeid, gsd_typeid, label_map):
-    """Maps LAMMPS type IDs to GSD type IDs using a given label map and
-    accounting for LAMMPS being one-indexed while GSD is zero-indexed.
+    """Maps LAMMPS type IDs to GSD type IDs using a given label map.
 
     Parameters:
-        lammps_typeid (list): List of LAMMPS type IDs to be mapped.
-        gsd_typeid (list): List of GSD type IDs to be updated.
-        label_map (LabelMap): LabelMap for connection type mapping LAMMPS
-        type IDs to GSD types.
+    ----------
+        lammps_typeid (list):
+            List of LAMMPS type IDs to be mapped (one-indexed).
+        gsd_typeid (list):
+            List of GSD type IDs to be updated (zero-indexed).
+        label_map (LabelMap):
+            LabelMap for connection type mapping LAMMPS type IDs to GSD types.
+
+    Returns:
+    -------
+        LabelMap:
+            LabelMap mapping LAMMPS type IDs to GSD types.
+            LabelMap is created mapping typeids to str(typeids) if not provided.
     """
     if label_map is None:
         sorted_typeids = numpy.sort(numpy.unique(lammps_typeid))
