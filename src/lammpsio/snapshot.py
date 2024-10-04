@@ -260,7 +260,7 @@ class Snapshot:
             frame.particles.typeid = numpy.zeros(self.N, dtype=int)
             if type_map is not None:
                 warnings.warn(
-                    "type_map is deprecated, use label instead.",
+                    "type_map is deprecated, use Snapshot.type_label instead.",
                     DeprecationWarning,
                     stacklevel=2,
                 )
@@ -279,6 +279,7 @@ class Snapshot:
             frame.particles.mass = self.mass.copy()
         if self.has_molecule():
             frame.particles.body = self.molecule - 1
+
         if self.has_bonds():
             frame.bonds.N = self.bonds.N
             if self.bonds.has_members():
@@ -292,6 +293,7 @@ class Snapshot:
                     bond_label_map,
                 )
             frame.bonds.types = bond_label_map.types
+
         if self.has_angles():
             frame.angles.N = self.angles.N
             if self.angles.has_members():
@@ -305,6 +307,7 @@ class Snapshot:
                     angle_label_map,
                 )
             frame.angles.types = angle_label_map.types
+
         if self.has_dihedrals():
             frame.dihedrals.N = self.dihedrals.N
             if self.dihedrals.has_members():
@@ -318,6 +321,7 @@ class Snapshot:
                     dihedral_label_map,
                 )
             frame.dihedrals.types = dihedral_label_map.types
+
         if self.has_impropers():
             frame.impropers.N = self.impropers.N
             if self.impropers.has_members():
@@ -624,15 +628,14 @@ class Snapshot:
 
     @property
     def type_label(self):
-        """int: LabelMap of connection types"""
-
+        """LabelMap: Labels for particle typeids."""
         return self._type_label
 
     @type_label.setter
     def type_label(self, value):
         if value is not None:
             if not isinstance(value, LabelMap):
-                raise TypeError("label must be a LabelMap object")
+                raise TypeError("type_label must be a LabelMap")
             self._type_label = value
         else:
             self._type_label = None

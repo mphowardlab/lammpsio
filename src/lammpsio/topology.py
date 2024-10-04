@@ -155,7 +155,7 @@ class Topology:
 
     @property
     def type_label(self):
-        """int: LabelMap of connection types"""
+        """LabelMap: Labels of connection typeids."""
 
         return self._type_label
 
@@ -163,7 +163,7 @@ class Topology:
     def type_label(self, value):
         if value is not None:
             if not isinstance(value, LabelMap):
-                raise TypeError("label must be a LabelMap object")
+                raise TypeError("type_label must be a LabelMap")
             self._type_label = value
         else:
             self._type_label = None
