@@ -780,21 +780,21 @@ class Snapshot:
 
 
 def _set_type_id(lammps_typeid, gsd_typeid, label_map):
-    """Maps LAMMPS type IDs to GSD type IDs using a given label map.
+    """Maps LAMMPS typeids to HOOMD GSD typeids using a given label map.
 
     Parameters:
     ----------
         lammps_typeid (list):
-            List of LAMMPS type IDs to be mapped (one-indexed).
+            List of LAMMPS typeids to be mapped (one-indexed).
         gsd_typeid (list):
-            List of GSD type IDs to be updated (zero-indexed).
+            List of HOOMD GSD typeids to be updated (zero-indexed).
         label_map (LabelMap):
-            LabelMap for connection type mapping LAMMPS type IDs to GSD types.
+            LabelMap for connection type mapping LAMMPS typeids to HOOMD GSD types.
 
     Returns:
     -------
         LabelMap:
-            LabelMap mapping LAMMPS type IDs to GSD types.
+            LabelMap mapping LAMMPS typeids to HOOMD GSD types.
             LabelMap is created mapping typeids to str(typeids) if not provided.
     """
     if label_map is None:
