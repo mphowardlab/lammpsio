@@ -4,7 +4,7 @@ import numpy
 
 from . import _compatibility
 from .box import Box
-from .topology import Angles, Bonds, Dihedrals, Impropers
+from .topology import Angles, Bonds, Dihedrals, Impropers, LabelMap
 
 
 class Snapshot:
@@ -41,6 +41,7 @@ class Snapshot:
         self._typeid = None
         self._charge = None
         self._mass = None
+        self._type_label = None
         self._bonds = None
         self._angles = None
         self._dihedrals = None
@@ -107,16 +108,99 @@ class Snapshot:
             if numpy.any(snap.molecule < 0):
                 warnings.warn("Some molecule IDs are negative, remapping needed.")
 
-        if (
-            frame.bonds.N > 0
-            or frame.angles.N > 0
-            or frame.dihedrals.N > 0
-            or frame.impropers.N > 0
-        ):
-            warnings.warn("Conversion of topology from gsd is not supported")
-        type_map = {typeid + 1: i for typeid, i in enumerate(frame.particles.types)}
+        # set particle label
+        label_map_particle = None
+        if frame.particles.types is not None:
+            label_map_particle = {
+                typeid + 1: i for typeid, i in enumerate(frame.particles.types)
+            }
+            snap.type_label = LabelMap(map=label_map_particle)
 
-        return snap, type_map
+        if (
+            frame.bonds.N != 0
+            or frame.bonds.group is not None
+            or frame.bonds.typeid is not None
+            or frame.bonds.types is not None
+        ):
+            # always create a data container even if there are no bonds
+            snap.bonds = Bonds(N=frame.bonds.N)
+
+            if frame.bonds.group is not None:
+                snap.bonds.members = frame.bonds.group + 1
+
+            if frame.bonds.typeid is not None:
+                snap.bonds.typeid = frame.bonds.typeid + 1
+
+            if frame.bonds.types is not None:
+                label_map_bond = {
+                    typeid + 1: i for typeid, i in enumerate(frame.bonds.types)
+                }
+                snap.bonds.type_label = LabelMap(map=label_map_bond)
+
+        if (
+            frame.angles.N != 0
+            or frame.angles.group is not None
+            or frame.angles.typeid is not None
+            or frame.angles.types is not None
+        ):
+            # always create a data container even if there are no angles
+            snap.angles = Angles(N=frame.angles.N)
+
+            if frame.angles.group is not None:
+                snap.angles.members = frame.angles.group + 1
+
+            if frame.angles.typeid is not None:
+                snap.angles.typeid = frame.angles.typeid + 1
+
+            if frame.angles.types is not None:
+                label_map_angle = {
+                    typeid + 1: i for typeid, i in enumerate(frame.angles.types)
+                }
+                snap.angles.type_label = LabelMap(map=label_map_angle)
+
+        if (
+            frame.dihedrals.N != 0
+            or frame.dihedrals.group is not None
+            or frame.dihedrals.typeid is not None
+            or frame.dihedrals.types is not None
+        ):
+            # always create a data container even if there are no dihedrals
+            snap.dihedrals = Dihedrals(N=frame.dihedrals.N)
+
+            if frame.dihedrals.group is not None:
+                snap.dihedrals.members = frame.dihedrals.group + 1
+
+            if frame.dihedrals.typeid is not None:
+                snap.dihedrals.typeid = frame.dihedrals.typeid + 1
+
+            if frame.dihedrals.types is not None:
+                label_map_dihedral = {
+                    typeid + 1: i for typeid, i in enumerate(frame.dihedrals.types)
+                }
+                snap.dihedrals.type_label = LabelMap(map=label_map_dihedral)
+
+        if (
+            frame.impropers.N != 0
+            or frame.impropers.group is not None
+            or frame.impropers.typeid is not None
+            or frame.impropers.types is not None
+        ):
+            # always create a data container even if there are no impropers
+            snap.impropers = Impropers(N=frame.impropers.N)
+
+            if frame.impropers.group is not None:
+                snap.impropers.members = frame.impropers.group + 1
+
+            if frame.impropers.typeid is not None:
+                snap.impropers.typeid = frame.impropers.typeid + 1
+
+            if frame.impropers.types is not None:
+                label_map_improper = {
+                    typeid + 1: i for typeid, i in enumerate(frame.impropers.types)
+                }
+                snap.impropers.type_label = LabelMap(map=label_map_improper)
+
+        return snap, label_map_particle
 
     def to_hoomd_gsd(self, type_map=None):
         """Create a HOOMD GSD frame.
@@ -168,20 +252,21 @@ class Snapshot:
             frame.particles.velocity = self.velocity.copy()
         if self.has_image():
             frame.particles.image = self.image.copy()
+        if type_map is not None:
+            warnings.warn(
+                "type_map is deprecated, use Snapshot.type_label instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            type_label_map = LabelMap(map=type_map)
+        else:
+            type_label_map = self.type_label
         if self.has_typeid():
             frame.particles.typeid = numpy.zeros(self.N, dtype=int)
-            if type_map is None:
-                sorted_typeids = numpy.sort(numpy.unique(self.typeid))
-                frame.particles.types = [str(typeid) for typeid in sorted_typeids]
-                for typeidx, typeid in enumerate(sorted_typeids):
-                    frame.particles.typeid[self.typeid == typeid] = typeidx
-            else:
-                frame.particles.types = list(type_map.values())
-                reverse_type_map = {
-                    typeid: typeidx for typeidx, typeid in enumerate(type_map.keys())
-                }
-                for i, typeid in enumerate(self.typeid):
-                    frame.particles.typeid[i] = reverse_type_map[typeid]
+            type_label_map = _set_type_id(
+                self.typeid, frame.particles.typeid, type_label_map
+            )
+            frame.particles.types = type_label_map.types
         if self.has_charge():
             frame.particles.charge = self.charge.copy()
         if self.has_mass():
@@ -189,17 +274,65 @@ class Snapshot:
         if self.has_molecule():
             frame.particles.body = self.molecule - 1
 
+        if self.bonds is not None:
+            frame.bonds.N = self.bonds.N
+            if self.bonds.has_members():
+                frame.bonds.group = self.bonds.members - 1
+            bond_label_map = self.bonds.type_label
+            if self.bonds.has_typeid():
+                frame.bonds.typeid = numpy.zeros(self.bonds.N, dtype=int)
+                bond_label_map = _set_type_id(
+                    self.bonds.typeid,
+                    frame.bonds.typeid,
+                    bond_label_map,
+                )
+            frame.bonds.types = bond_label_map.types
+
+        if self.angles is not None:
+            frame.angles.N = self.angles.N
+            if self.angles.has_members():
+                frame.angles.group = self.angles.members - 1
+            angle_label_map = self.angles.type_label
+            if self.angles.has_typeid():
+                frame.angles.typeid = numpy.zeros(self.angles.N, dtype=int)
+                angle_label_map = _set_type_id(
+                    self.angles.typeid,
+                    frame.angles.typeid,
+                    angle_label_map,
+                )
+            frame.angles.types = angle_label_map.types
+
+        if self.dihedrals is not None:
+            frame.dihedrals.N = self.dihedrals.N
+            if self.dihedrals.has_members():
+                frame.dihedrals.group = self.dihedrals.members - 1
+            dihedral_label_map = self.dihedrals.type_label
+            if self.dihedrals.has_typeid():
+                frame.dihedrals.typeid = numpy.zeros(self.dihedrals.N, dtype=int)
+                dihedral_label_map = _set_type_id(
+                    self.dihedrals.typeid,
+                    frame.dihedrals.typeid,
+                    dihedral_label_map,
+                )
+            frame.dihedrals.types = dihedral_label_map.types
+
+        if self.impropers is not None:
+            frame.impropers.N = self.impropers.N
+            if self.impropers.has_members():
+                frame.impropers.group = self.impropers.members - 1
+            improper_label_map = self.impropers.type_label
+            if self.impropers.has_typeid():
+                frame.impropers.typeid = numpy.zeros(self.impropers.N, dtype=int)
+                improper_label_map = _set_type_id(
+                    self.impropers.typeid,
+                    frame.impropers.typeid,
+                    improper_label_map,
+                )
+            frame.impropers.types = improper_label_map.types
+
         # undo the sort so object goes back the way it was
         if reverse_order is not None:
             self.reorder(reverse_order, check_order=False)
-
-        if (
-            self.has_bonds()
-            or self.has_angles()
-            or self.has_dihedrals()
-            or self.has_impropers()
-        ):
-            warnings.warn("Conversion of topology to gsd is not supported")
 
         return frame
 
@@ -488,6 +621,20 @@ class Snapshot:
         return self._mass is not None
 
     @property
+    def type_label(self):
+        """LabelMap: Labels for particle typeids."""
+        return self._type_label
+
+    @type_label.setter
+    def type_label(self, value):
+        if value is not None:
+            if not isinstance(value, LabelMap):
+                raise TypeError("type_label must be a LabelMap")
+            self._type_label = value
+        else:
+            self._type_label = None
+
+    @property
     def bonds(self):
         """Bonds: Bond data."""
         return self._bonds
@@ -624,3 +771,35 @@ class Snapshot:
             self._charge = self._charge[order]
         if self.has_mass():
             self._mass = self._mass[order]
+
+
+def _set_type_id(lammps_typeid, gsd_typeid, label_map):
+    """Maps LAMMPS typeids to HOOMD GSD typeids using a given label map.
+
+    Parameters:
+    ----------
+    lammps_typeid : list
+        List of LAMMPS typeids to be mapped (one-indexed).
+    gsd_typeid : list
+        List of HOOMD GSD typeids to be updated (zero-indexed).
+    label_map : :class:`LabelMap`
+        LabelMap for connection type mapping LAMMPS typeids to HOOMD GSD types.
+
+    Returns:
+    -------
+    :class:`LabelMap`
+        LabelMap mapping LAMMPS typeids to HOOMD GSD types.
+        LabelMap is created mapping typeids to str(typeids) if not provided.
+    """
+    if label_map is None:
+        sorted_typeids = numpy.sort(numpy.unique(lammps_typeid))
+        label_map = {typeid: str(typeid) for typeid in sorted_typeids}
+        label_map = LabelMap(map=label_map)
+
+    hoomd_type_map = {
+        typeid: typeidx for typeidx, typeid in enumerate(label_map.keys())
+    }
+    for i, typeid in enumerate(lammps_typeid):
+        gsd_typeid[i] = hoomd_type_map[typeid]
+
+    return label_map

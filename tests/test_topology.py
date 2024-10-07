@@ -199,3 +199,21 @@ def test_impropers_wrong_shape(snap_8):
     ]
     with pytest.raises(TypeError):
         snap_8.impropers.members = members
+
+
+def test_LabelMap():
+    # create a simple label map
+    label = lammpsio.topology.LabelMap({1: "typeA", 2: "typeB"})
+
+    # check the types
+    assert label.types == ("typeA", "typeB")
+    # check the typeids
+    assert label.typeid == (1, 2)
+    # get
+    assert label[2] == "typeB"
+    # set
+    label[3] = "typeC"
+    assert label[3] == "typeC"
+    # delete
+    del label[3]
+    assert 3 not in label

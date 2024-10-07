@@ -61,7 +61,7 @@ def test_gsd_conversion():
     assert numpy.allclose(frame2.particles.position, frame.particles.position)
     assert numpy.all(frame2.particles.image == frame.particles.image)
     assert numpy.allclose(frame2.particles.velocity, frame.particles.velocity)
-    assert numpy.all(frame2.particles.types == frame.particles.types)
+    assert numpy.all(frame2.particles.types == tuple(frame.particles.types))
     assert numpy.all(frame2.particles.typeid == frame.particles.typeid)
     assert numpy.allclose(frame2.particles.mass, frame.particles.mass)
     assert numpy.allclose(frame2.particles.charge, frame.particles.charge)
@@ -69,8 +69,14 @@ def test_gsd_conversion():
 
     # do the same thing, but lose the type map
     frame3 = snap.to_hoomd_gsd()
-    assert numpy.all(frame3.particles.types == ["1", "2"])
+    assert numpy.all(frame3.particles.types == tuple(["A", "B"]))
     assert numpy.all(frame3.particles.typeid == [1, 0])
+
+    # do the same thing, but with different type_label
+    snap.type_label = lammpsio.topology.LabelMap({1: "C", 2: "D"})
+    frame4 = snap.to_hoomd_gsd()
+    assert numpy.all(frame4.particles.types == tuple(["C", "D"]))
+    assert numpy.all(frame4.particles.typeid == [1, 0])
 
     # check for warning on floppy molecules
     frame.particles.body = [-2, -1]
@@ -101,6 +107,7 @@ def test_minimal_gsd_conversion():
         frame = gsd.hoomd.Frame()
     else:
         frame = gsd.hoomd.Snapshot()
+
     frame.configuration.box = [4, 5, 6, 0.1, 0.2, 0.3]
     frame.particles.N = 2
     frame.particles.types = ["A", "B"]
@@ -119,6 +126,141 @@ def test_minimal_gsd_conversion():
     assert snap.has_angles() is False
     assert snap.has_dihedrals() is False
     assert snap.has_impropers() is False
+
+
+def test_gsd_conversion_topology():
+    # make a GSD frame
+    try:
+        gsd_version = gsd.version.version
+    except AttributeError:
+        gsd_version = gsd.__version__
+    if version.Version(gsd_version) >= version.Version("2.8.0"):
+        frame = gsd.hoomd.Frame()
+    else:
+        frame = gsd.hoomd.Snapshot()
+
+    # set box
+    frame.configuration.box = [10, 10, 10, 1, 1, 1]
+
+    # particles
+    position = [
+        [0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0],
+        [1.0, 0.0, 0.0],
+        [1.0, 1.0, 0.0],
+        [3.0, 3.0, 0.0],
+        [3.0, 4.0, 0.0],
+        [4.0, 3.0, 0.0],
+        [4.0, 4.0, 0.0],
+    ]
+    frame.particles.N = 8
+    frame.particles.types = ["A", "B"]
+    frame.particles.typeid = [0, 0, 0, 0, 1, 1, 1, 1]
+    frame.particles.position = position
+
+    # bonds
+    frame.bonds.N = 6
+    frame.bonds.types = ["bondA", "bondB"]
+    frame.bonds.typeid = [0, 1, 0, 1, 0, 1]
+    frame.bonds.group = [
+        [0, 1],
+        [1, 2],
+        [2, 3],
+        [4, 5],
+        [5, 6],
+        [6, 7],
+    ]
+
+    # angles
+    frame.angles.N = 4
+    frame.angles.types = ["angleA", "angleB"]
+    frame.angles.typeid = [0, 1, 0, 1]
+    frame.angles.group = [
+        [0, 1, 2],
+        [1, 2, 3],
+        [4, 5, 6],
+        [5, 6, 7],
+    ]
+
+    # dihedrals
+    frame.dihedrals.N = 2
+    frame.dihedrals.types = ["dihedralA", "dihedralB"]
+    frame.dihedrals.typeid = [0, 1]
+    frame.dihedrals.group = [
+        [0, 1, 2, 3],
+        [4, 5, 6, 7],
+    ]
+
+    # impropers
+    frame.impropers.N = 2
+    frame.impropers.types = ["improperA", "improperB"]
+    frame.impropers.typeid = [0, 1]
+    frame.impropers.group = [
+        [0, 1, 2, 3],
+        [4, 5, 6, 7],
+    ]
+
+    # make Snapshot from GSD
+    snap, type_map = lammpsio.Snapshot.from_hoomd_gsd(frame)
+    # particles
+    assert snap.N == 8
+    assert numpy.allclose(snap.position, position)
+    assert numpy.all(snap.typeid == [1, 1, 1, 1, 2, 2, 2, 2])
+    assert type_map == {1: "A", 2: "B"}
+    assert snap.type_label == {1: "A", 2: "B"}
+    # bonds
+    assert snap.bonds.N == 6
+    assert numpy.all(snap.bonds.typeid == [1, 2, 1, 2, 1, 2])
+    assert numpy.all(
+        snap.bonds.members == [[1, 2], [2, 3], [3, 4], [5, 6], [6, 7], [7, 8]]
+    )
+    assert snap.bonds.type_label == {1: "bondA", 2: "bondB"}
+    # angles
+    assert snap.angles.N == 4
+    assert numpy.all(snap.angles.typeid == [1, 2, 1, 2])
+    assert numpy.all(
+        snap.angles.members == [[1, 2, 3], [2, 3, 4], [5, 6, 7], [6, 7, 8]]
+    )
+    assert snap.angles.type_label == {1: "angleA", 2: "angleB"}
+    # dihedrals
+    assert snap.dihedrals.N == 2
+    assert numpy.all(snap.dihedrals.typeid == [1, 2])
+    assert numpy.all(snap.dihedrals.members == [[1, 2, 3, 4], [5, 6, 7, 8]])
+    assert snap.dihedrals.type_label == {1: "dihedralA", 2: "dihedralB"}
+    # impropers
+    assert snap.impropers.N == 2
+    assert numpy.all(snap.impropers.typeid == [1, 2])
+    assert numpy.all(snap.impropers.members == [[1, 2, 3, 4], [5, 6, 7, 8]])
+    assert snap.impropers.type_label == {1: "improperA", 2: "improperB"}
+
+    # go back to GSD frame
+    frame2 = snap.to_hoomd_gsd()
+    assert numpy.allclose(frame2.configuration.box, frame.configuration.box)
+    # particles
+    assert frame2.particles.N == frame.particles.N
+    assert numpy.allclose(frame2.particles.position, frame.particles.position)
+    assert numpy.all(frame2.particles.types == tuple(frame.particles.types))
+    assert numpy.all(frame2.particles.typeid == frame.particles.typeid)
+    # bonds
+    assert frame2.bonds.N == frame.bonds.N
+    assert numpy.all(frame2.bonds.types == tuple(frame.bonds.types))
+    assert numpy.all(frame2.bonds.typeid == frame.bonds.typeid)
+    assert numpy.all(frame2.bonds.group == frame.bonds.group)
+    # angles
+    assert frame2.angles.N == frame.angles.N
+    assert numpy.all(frame2.angles.types == tuple(frame.angles.types))
+    assert numpy.all(frame2.angles.typeid == frame.angles.typeid)
+    assert numpy.all(frame2.angles.group == frame.angles.group)
+    # dihedrals
+    assert frame2.dihedrals.N == frame.dihedrals.N
+    assert numpy.all(frame2.dihedrals.types == tuple(frame.dihedrals.types))
+    assert numpy.all(frame2.dihedrals.typeid == frame.dihedrals.typeid)
+    assert numpy.all(frame2.dihedrals.group == frame.dihedrals.group)
+    # impropers
+    assert frame2.impropers.N == frame.impropers.N
+    assert numpy.all(frame2.impropers.types == tuple(frame.impropers.types))
+    assert numpy.all(frame2.impropers.typeid == frame.impropers.typeid)
+    assert numpy.all(frame2.impropers.group == frame.impropers.group)
 
 
 def test_position(snap):

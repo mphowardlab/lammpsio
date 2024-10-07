@@ -1,3 +1,5 @@
+import collections.abc
+
 import numpy
 
 from . import _compatibility
@@ -27,6 +29,7 @@ class Topology:
         self._num_members = num_members
         self.num_types = num_types
 
+        self._type_label = None
         self._id = None
         self._typeid = None
         self._members = None
@@ -150,6 +153,21 @@ class Topology:
         else:
             self._num_types = None
 
+    @property
+    def type_label(self):
+        """LabelMap: Labels of connection typeids."""
+
+        return self._type_label
+
+    @type_label.setter
+    def type_label(self, value):
+        if value is not None:
+            if not isinstance(value, LabelMap):
+                raise TypeError("type_label must be a LabelMap")
+            self._type_label = value
+        else:
+            self._type_label = None
+
     def reorder(self, order, check_order=True):
         """Reorder the connections in place.
 
@@ -241,3 +259,44 @@ class Impropers(Topology):
 
     def __init__(self, N, num_types=None):
         super().__init__(N=N, num_members=4, num_types=num_types)
+
+
+class LabelMap(collections.abc.MutableMapping):
+    """Label map between typeids and types.
+
+    Parameters
+    ----------
+    map : dict
+        Map of typeids to types.
+
+    """
+
+    def __init__(self, map=None):
+        self._map = {}
+        if map is not None:
+            self.update(map)
+
+    def __getitem__(self, key):
+        return self._map[key]
+
+    def __setitem__(self, key, value):
+        self._map[key] = value
+
+    def __delitem__(self, key):
+        del self._map[key]
+
+    def __iter__(self):
+        return iter(self._map)
+
+    def __len__(self):
+        return len(self._map)
+
+    @property
+    def types(self):
+        """tuple: Types in label map."""
+        return tuple(self._map.values())
+
+    @property
+    def typeid(self):
+        """tuple: Typeids in label map."""
+        return tuple(self._map.keys())
