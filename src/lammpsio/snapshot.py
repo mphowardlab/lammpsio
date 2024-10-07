@@ -778,24 +778,22 @@ def _set_type_id(lammps_typeid, gsd_typeid, label_map):
 
     Parameters:
     ----------
-        lammps_typeid (list):
-            List of LAMMPS typeids to be mapped (one-indexed).
-        gsd_typeid (list):
-            List of HOOMD GSD typeids to be updated (zero-indexed).
-        label_map (LabelMap):
-            LabelMap for connection type mapping LAMMPS typeids to HOOMD GSD types.
+    lammps_typeid : list
+        List of LAMMPS typeids to be mapped (one-indexed).
+    gsd_typeid : list
+        List of HOOMD GSD typeids to be updated (zero-indexed).
+    label_map : :class:`LabelMap`
+        LabelMap for connection type mapping LAMMPS typeids to HOOMD GSD types.
 
     Returns:
     -------
-        LabelMap:
-            LabelMap mapping LAMMPS typeids to HOOMD GSD types.
-            LabelMap is created mapping typeids to str(typeids) if not provided.
+    :class:`LabelMap`
+        LabelMap mapping LAMMPS typeids to HOOMD GSD types.
+        LabelMap is created mapping typeids to str(typeids) if not provided.
     """
     if label_map is None:
         sorted_typeids = numpy.sort(numpy.unique(lammps_typeid))
-        label_map = {}
-        for typeid in sorted_typeids:
-            label_map[typeid] = str(typeid)
+        label_map = {typeid: str(typeid) for typeid in sorted_typeids}
         label_map = LabelMap(map=label_map)
 
     hoomd_type_map = {

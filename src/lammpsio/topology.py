@@ -269,12 +269,6 @@ class LabelMap(collections.abc.MutableMapping):
     map : dict
         Map of typeids to types.
 
-    Attributes
-    ----------
-    types : tuple
-        Types in label map.
-    typeid : tuple
-        Typeids in label map.
     """
 
     def __init__(self, map=None):
@@ -299,24 +293,10 @@ class LabelMap(collections.abc.MutableMapping):
 
     @property
     def types(self):
-        """Types in label map.
-
-        Returns
-        -------
-        tuple
-            Label types.
-
-        """
+        """tuple: Types in label map."""
         return tuple(self._map.values())
 
     @property
     def typeid(self):
-        """Typeids in label map.
-
-        Returns
-        -------
-        tuple
-            Label typeids.
-
-        """
+        """tuple: Typeids in label map."""
         return tuple(self._map.keys())
