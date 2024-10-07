@@ -123,7 +123,7 @@ class Snapshot:
             or frame.bonds.types is not None
         ):
             # always create a data container even if there are no bonds
-            snap.bonds = Bonds(N=frame.bonds.N if frame.bonds.N is not None else 0)
+            snap.bonds = Bonds(N=frame.bonds.N)
 
             if frame.bonds.group is not None:
                 snap.bonds.members = frame.bonds.group + 1
@@ -144,7 +144,7 @@ class Snapshot:
             or frame.angles.types is not None
         ):
             # always create a data container even if there are no angles
-            snap.angles = Angles(N=frame.angles.N if frame.angles.N is not None else 0)
+            snap.angles = Angles(N=frame.angles.N)
 
             if frame.angles.group is not None:
                 snap.angles.members = frame.angles.group + 1
@@ -165,9 +165,7 @@ class Snapshot:
             or frame.dihedrals.types is not None
         ):
             # always create a data container even if there are no dihedrals
-            snap.dihedrals = Dihedrals(
-                N=frame.dihedrals.N if frame.dihedrals.N is not None else 0
-            )
+            snap.dihedrals = Dihedrals(N=frame.dihedrals.N)
 
             if frame.dihedrals.group is not None:
                 snap.dihedrals.members = frame.dihedrals.group + 1
@@ -188,9 +186,7 @@ class Snapshot:
             or frame.impropers.types is not None
         ):
             # always create a data container even if there are no impropers
-            snap.impropers = Impropers(
-                N=frame.impropers.N if frame.impropers.N is not None else 0
-            )
+            snap.impropers = Impropers(N=frame.impropers.N)
 
             if frame.impropers.group is not None:
                 snap.impropers.members = frame.impropers.group + 1
