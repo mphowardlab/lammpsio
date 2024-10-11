@@ -41,6 +41,7 @@ The data contained in a `Snapshot` per particle is:
 - `typeid`: (*N*,) array of type indexes (dtype: `int`, default: `1`)
 - `mass`: (*N*,) array of masses (dtype: `float`, default: `1`)
 - `charge`: (*N*,) array of charges (dtype: `float`, default: `0`)
+- `type_label`: Labels of particle typeids. (dtype: `LabelMap`, default: `None`)
 - `bonds`: Bond data (dtype: `Bonds`, default: `None`)
 - `angles`: Angle data (dtype: `Angles`, default: `None`)
 - `dihedrals`: Dihedral data (dtype: `Dihedrals`, default: `None`)
@@ -80,9 +81,24 @@ The data contained per connection is:
 where *M* is the number of particles in a connection.
 - `id`: (*N*,) array topology IDs (dtype: `int`, default: runs from 1 to *N*)
 - `typeid`: (*N*,) array of type indexes (dtype: `int`, default: `1`)
+- `type_label`: Labels of connection typeids. (dtype: `LabelMap`, default: `None`)
 
 All values of indexes will follow the LAMMPS 1-indexed convention, but the
 arrays themselves are 0-indexed. Lazy array initialization is used as for the `Snapshot`.
+
+## Label maps
+
+A `LabelMap` is effectivley a dictionary associating a labels (types) with a particle's
+typeids in a `Snapshot` or a connection's typeids in `Bonds`, `Angles`, `Dihedrals`,
+and `Impropers` objects. By setting the corresponding `.type_label` attribute with a
+`LabelMap`, the types specified are used when converting to HOOMD GSD files.
+
+These constructor arguments are available as attributes:
+- `map`: Map of typeids to types. (dict)
+
+The data contained in a `LabelMap` is:
+- `types`: Types in label map. (dtype: `tuple`, default: `()`)
+- `typeids`: Typeids in label map. (dtype: `tuple`, default: `()`)
 
 ## Data files
 
