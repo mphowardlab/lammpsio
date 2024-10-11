@@ -126,10 +126,10 @@ class DataFile:
             # LAMMPS header
             f.write(f"LAMMPS {filename}\n\n" f"{snapshot.N} atoms\n")
 
-            if snapshot.bonds != 0:
+            if snapshot.bonds.N != 0:
                 f.write(f"{snapshot.bonds.N} bonds\n")
 
-            if snapshot.angles != 0:
+            if snapshot.angles.N != 0:
                 f.write(f"{snapshot.angles.N} angles\n")
 
             if snapshot.dihedrals.N != 0:
@@ -162,12 +162,18 @@ class DataFile:
 
             # Atoms section
             # determine style if it is not given
+            has_topology = (
+                snapshot.bonds.N != 0
+                or snapshot.angles.N != 0
+                or snapshot.dihedrals.N != 0
+                or snapshot.impropers.N != 0
+            )
             if atom_style is None:
-                if snapshot.has_charge() and snapshot.has_molecule():
+                if snapshot.has_charge() and snapshot.has_molecule() and has_topology:
                     style = "full"
-                elif snapshot.has_charge():
+                elif snapshot.has_charge() and has_topology:
                     style = "charge"
-                elif snapshot.has_molecule():
+                elif snapshot.has_molecule() or has_topology:
                     style = "molecular"
                 else:
                     style = "atomic"
