@@ -163,10 +163,10 @@ class DataFile:
             # Atoms section
             # determine style if it is not given
             has_topology = (
-                snapshot.bonds.N != 0
-                or snapshot.angles.N != 0
-                or snapshot.dihedrals.N != 0
-                or snapshot.impropers.N != 0
+                snapshot.has_bonds()
+                or snapshot.has_angles()
+                or snapshot.has_dihedrals()
+                or snapshot.has_impropers()
             )
             if atom_style is None:
                 if snapshot.has_molecule() or has_topology:
