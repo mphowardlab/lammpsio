@@ -126,30 +126,30 @@ class DataFile:
             # LAMMPS header
             f.write(f"LAMMPS {filename}\n\n" f"{snapshot.N} atoms\n")
 
-            if snapshot.bonds.N != 0:
+            if snapshot.has_bonds():
                 f.write(f"{snapshot.bonds.N} bonds\n")
 
-            if snapshot.angles.N != 0:
+            if snapshot.has_angles():
                 f.write(f"{snapshot.angles.N} angles\n")
 
-            if snapshot.dihedrals.N != 0:
+            if snapshot.has_dihedrals():
                 f.write(f"{snapshot.dihedrals.N} dihedrals\n")
 
-            if snapshot.impropers.N != 0:
+            if snapshot.has_impropers():
                 f.write(f"{snapshot.impropers.N} impropers\n")
 
             f.write(f"{snapshot.num_types} atom types\n")
 
-            if snapshot.bonds.N != 0:
+            if snapshot.has_bonds():
                 f.write(f"{snapshot.bonds.num_types} bond types\n")
 
-            if snapshot.angles.N != 0:
+            if snapshot.has_angles():
                 f.write(f"{snapshot.angles.num_types} angle types\n")
 
-            if snapshot.dihedrals.N != 0:
+            if snapshot.has_dihedrals():
                 f.write(f"{snapshot.dihedrals.num_types} dihedral types\n")
 
-            if snapshot.impropers.N != 0:
+            if snapshot.has_impropers():
                 f.write(f"{snapshot.impropers.num_types} improper types\n")
 
             f.write(
