@@ -169,14 +169,16 @@ class DataFile:
                 or snapshot.impropers.N != 0
             )
             if atom_style is None:
-                if snapshot.has_charge() and snapshot.has_molecule() and has_topology:
-                    style = "full"
-                elif snapshot.has_charge() and has_topology:
-                    style = "charge"
-                elif snapshot.has_molecule() or has_topology:
-                    style = "molecular"
+                if snapshot.has_molecule() or has_topology:
+                    if snapshot.has_charge():
+                        style = "full"
+                    else:
+                        style = "molecular"
                 else:
-                    style = "atomic"
+                    if snapshot.has_charge():
+                        style = "charge"
+                    else:
+                        style = "atomic"
             else:
                 style = atom_style
             # set format string based on style
