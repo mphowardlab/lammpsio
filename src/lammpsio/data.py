@@ -126,30 +126,30 @@ class DataFile:
             # LAMMPS header
             f.write(f"LAMMPS {filename}\n\n" f"{snapshot.N} atoms\n")
 
-            if snapshot.bonds is not None:
+            if snapshot.has_bonds():
                 f.write(f"{snapshot.bonds.N} bonds\n")
 
-            if snapshot.angles is not None:
+            if snapshot.has_angles():
                 f.write(f"{snapshot.angles.N} angles\n")
 
-            if snapshot.dihedrals is not None:
+            if snapshot.has_dihedrals():
                 f.write(f"{snapshot.dihedrals.N} dihedrals\n")
 
-            if snapshot.impropers is not None:
+            if snapshot.has_impropers():
                 f.write(f"{snapshot.impropers.N} impropers\n")
 
             f.write(f"{snapshot.num_types} atom types\n")
 
-            if snapshot.bonds is not None:
+            if snapshot.has_bonds():
                 f.write(f"{snapshot.bonds.num_types} bond types\n")
 
-            if snapshot.angles is not None:
+            if snapshot.has_angles():
                 f.write(f"{snapshot.angles.num_types} angle types\n")
 
-            if snapshot.dihedrals is not None:
+            if snapshot.has_dihedrals():
                 f.write(f"{snapshot.dihedrals.num_types} dihedral types\n")
 
-            if snapshot.impropers is not None:
+            if snapshot.has_impropers():
                 f.write(f"{snapshot.impropers.num_types} improper types\n")
 
             f.write(
@@ -162,15 +162,23 @@ class DataFile:
 
             # Atoms section
             # determine style if it is not given
+            has_topology = (
+                snapshot.has_bonds()
+                or snapshot.has_angles()
+                or snapshot.has_dihedrals()
+                or snapshot.has_impropers()
+            )
             if atom_style is None:
-                if snapshot.has_charge() and snapshot.has_molecule():
-                    style = "full"
-                elif snapshot.has_charge():
-                    style = "charge"
-                elif snapshot.has_molecule():
-                    style = "molecular"
+                if snapshot.has_molecule() or has_topology:
+                    if snapshot.has_charge():
+                        style = "full"
+                    else:
+                        style = "molecular"
                 else:
-                    style = "atomic"
+                    if snapshot.has_charge():
+                        style = "charge"
+                    else:
+                        style = "atomic"
             else:
                 style = atom_style
             # set format string based on style
