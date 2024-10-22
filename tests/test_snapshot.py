@@ -1,12 +1,17 @@
 import copy
 
-import gsd
-import gsd.hoomd
 import numpy
 import pytest
 from packaging import version
 
 import lammpsio
+
+try:
+    import gsd.hoomd
+
+    has_gsd = True
+except ModuleNotFoundError:
+    has_gsd = False
 
 
 def test_create(snap):
@@ -15,6 +20,7 @@ def test_create(snap):
     assert snap.step == 10
 
 
+@pytest.mark.skipif(not has_gsd, reason="gsd not installed")
 def test_gsd_conversion():
     # make a GSD frame
     try:
@@ -49,12 +55,13 @@ def test_gsd_conversion():
     assert numpy.allclose(snap.velocity, [[1, 2, 3], [-4, -5, -6]])
     assert numpy.all(snap.molecule == [1, 0])
     assert numpy.all(snap.typeid == [2, 1])
+    assert snap.type_label == {1: "A", 2: "B"}
     assert numpy.allclose(snap.mass, [3, 2])
     assert numpy.allclose(snap.charge, [-1, 1])
     assert type_map == {1: "A", 2: "B"}
 
     # go back to GSD frame
-    frame2 = snap.to_hoomd_gsd(type_map)
+    frame2 = snap.to_hoomd_gsd()
     assert frame2.configuration.step == frame.configuration.step
     assert numpy.allclose(frame2.configuration.box, frame.configuration.box)
     assert frame2.particles.N == frame.particles.N
@@ -67,9 +74,10 @@ def test_gsd_conversion():
     assert numpy.allclose(frame2.particles.charge, frame.particles.charge)
     assert numpy.all(frame2.particles.body == frame.particles.body)
 
-    # do the same thing, but lose the type map
-    frame3 = snap.to_hoomd_gsd()
-    assert numpy.all(frame3.particles.types == tuple(["A", "B"]))
+    # do the same thing, but use explicit type map (should give warning)
+    with pytest.warns(DeprecationWarning):
+        frame3 = snap.to_hoomd_gsd({1: "C", 2: "D"})
+    assert numpy.all(frame3.particles.types == ("C", "D"))
     assert numpy.all(frame3.particles.typeid == [1, 0])
 
     # do the same thing, but with different type_label
@@ -97,6 +105,7 @@ def test_gsd_conversion():
         snap2.to_hoomd_gsd()
 
 
+@pytest.mark.skipif(not has_gsd, reason="gsd not installed")
 def test_minimal_gsd_conversion():
     # make a GSD frame
     try:
@@ -128,6 +137,7 @@ def test_minimal_gsd_conversion():
     assert snap.has_impropers() is False
 
 
+@pytest.mark.skipif(not has_gsd, reason="gsd not installed")
 def test_gsd_conversion_topology():
     # make a GSD frame
     try:

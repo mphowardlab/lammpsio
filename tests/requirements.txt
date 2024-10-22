@@ -1,3 +1,2 @@
-gsd
-pytest<8
-pytest-lazy-fixture
+pytest>=8
+pytest-lazy-fixtures>=1.1.1
