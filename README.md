@@ -45,10 +45,10 @@ The data contained in a `Snapshot` per particle is:
 The optional topology data is:
 
 - `type_label`: Labels of particle typeids. (`LabelMap`, default: `None`)
-- `bonds`: Bond data (dtype: `Bonds`, default: `None`)
-- `angles`: Angle data (dtype: `Angles`, default: `None`)
-- `dihedrals`: Dihedral data (dtype: `Dihedrals`, default: `None`)
-- `impropers`: Improper data (dtype: `Impropers`, default: `None`)
+- `bonds`: Bond data (`Bonds`, default: `None`)
+- `angles`: Angle data (`Angles`, default: `None`)
+- `dihedrals`: Dihedral data (`Dihedrals`, default: `None`)
+- `impropers`: Improper data (`Impropers`, default: `None`)
 
 All values of indexes will follow the LAMMPS 1-indexed convention, but the
 arrays themselves are 0-indexed.
@@ -84,7 +84,9 @@ The data contained per connection is:
 where *M* is the number of particles in a connection.
 - `id`: (*N*,) array topology IDs (dtype: `int`, default: runs from 1 to *N*)
 - `typeid`: (*N*,) array of type indexes (dtype: `int`, default: `1`)
-- `type_label`: Labels of connection typeids. (dtype: `LabelMap`, default: `None`)
+
+A label (type) can be associated with a connection's typeid using a `type_label`.
+- `type_label`: Labels of connection typeids. (`LabelMap`, default: `None`)
 
 All values of indexes will follow the LAMMPS 1-indexed convention, but the
 arrays themselves are 0-indexed. Lazy array initialization is used as for the `Snapshot`.
