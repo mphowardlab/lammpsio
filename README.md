@@ -41,10 +41,14 @@ The data contained in a `Snapshot` per particle is:
 - `typeid`: (*N*,) array of type indexes (dtype: `int`, default: `1`)
 - `mass`: (*N*,) array of masses (dtype: `float`, default: `1`)
 - `charge`: (*N*,) array of charges (dtype: `float`, default: `0`)
-- `bonds`: Bond data (dtype: `Bonds`, default: `None`)
-- `angles`: Angle data (dtype: `Angles`, default: `None`)
-- `dihedrals`: Dihedral data (dtype: `Dihedrals`, default: `None`)
-- `impropers`: Improper data (dtype: `Impropers`, default: `None`)
+
+The optional topology data is:
+
+- `type_label`: Labels of particle typeids. (`LabelMap`, default: `None`)
+- `bonds`: Bond data (`Bonds`, default: `None`)
+- `angles`: Angle data (`Angles`, default: `None`)
+- `dihedrals`: Dihedral data (`Dihedrals`, default: `None`)
+- `impropers`: Improper data (`Impropers`, default: `None`)
 
 All values of indexes will follow the LAMMPS 1-indexed convention, but the
 arrays themselves are 0-indexed.
@@ -76,13 +80,29 @@ These constructor arguments are available as attributes:
 - `num_types`: number of connection types (int). If `num_types is None`, then the number of types is deduced from `typeid`.
 
 The data contained per connection is:
-- `num_members`: (*N*, *M*) array of particles IDs in each topology (dtype: `int`, default: `1`),
+- `members`: (*N*, *M*) array of particles IDs in each topology (dtype: `int`, default: `1`),
 where *M* is the number of particles in a connection.
 - `id`: (*N*,) array topology IDs (dtype: `int`, default: runs from 1 to *N*)
 - `typeid`: (*N*,) array of type indexes (dtype: `int`, default: `1`)
 
+A label (type) can be associated with a connection's typeid using a `type_label`.
+- `type_label`: Labels of connection typeids. (`LabelMap`, default: `None`)
+
 All values of indexes will follow the LAMMPS 1-indexed convention, but the
 arrays themselves are 0-indexed. Lazy array initialization is used as for the `Snapshot`.
+
+## Label maps
+
+A `LabelMap` is effectively a dictionary associating a label (type) with a particle's
+or connection's typeid. These labels can be useful for tracking the meaning of
+typeids. They are also automatically used when interconverting with
+HOOMD GSD files that require such labels.
+
+The keys of the `LabelMap` are the typeids, and the values are the labels. A
+`LabelMap` additionally has the following attributes:
+
+- `types`: Types in label map. (dtype: `tuple`, default: `()`)
+- `typeids`: Typeids in label map. (dtype: `tuple`, default: `()`)
 
 ## Data files
 
