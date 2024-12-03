@@ -407,6 +407,14 @@ class DumpFile:
                             snap.charge = self._copy_from.charge[copy_id]
                         if not snap.has_mass() and self._copy_from.has_mass():
                             snap.mass = self._copy_from.mass[copy_id]
+                        if self._copy_from.has_bonds():
+                            snap.bonds = self._copy_from.bonds
+                        if self._copy_from.has_angles():
+                            snap.angles = self._copy_from.angles
+                        if self._copy_from.has_dihedrals():
+                            snap.dihedrals = self._copy_from.dihedrals
+                        if self._copy_from.has_impropers():
+                            snap.impropers = self._copy_from.impropers
 
                     yield snap
                     del snap, N, box, step

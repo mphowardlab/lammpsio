@@ -198,6 +198,91 @@ def test_copy_from(snap, tmp_path):
     assert numpy.allclose(read_snap.charge, [0, 1, -1])
 
 
+def test_copy_from_topology(snap_8, tmp_path):
+    # particle information
+    snap_8.id = [1, 2, 3, 4, 5, 6, 7, 8]
+    snap_8.typeid = [1, 1, 1, 1, 2, 2, 2, 2]
+    snap_8.position = [
+        [0, 0, 0],
+        [0.1, 0.1, 0.1],
+        [0.2, 0.2, 0.2],
+        [0.3, 0.3, 0.3],
+        [1, 1, 1],
+        [1.1, 1.1, 1.1],
+        [1.2, 1.2, 1.2],
+        [1.3, 1.3, 1.3],
+    ]
+    # bonds information
+    snap_8.bonds = lammpsio.topology.Bonds(N=6, num_types=2)
+    snap_8.bonds.id = [1, 2, 3, 4, 5, 6]
+    snap_8.bonds.typeid = [1, 2, 1, 2, 1, 2]
+    snap_8.bonds.members = [
+        [1, 2],
+        [2, 3],
+        [3, 4],
+        [5, 6],
+        [6, 7],
+        [7, 8],
+    ]
+    # angles information
+    snap_8.angles = lammpsio.topology.Angles(N=4, num_types=2)
+    snap_8.angles.id = [1, 2, 3, 4]
+    snap_8.angles.typeid = [1, 2, 1, 2]
+    snap_8.angles.members = [
+        [1, 2, 3],
+        [2, 3, 4],
+        [5, 6, 7],
+        [6, 7, 8],
+    ]
+    # dihedrals information
+    snap_8.dihedrals = lammpsio.topology.Dihedrals(N=2, num_types=2)
+    snap_8.dihedrals.id = [1, 2]
+    snap_8.dihedrals.typeid = [1, 2]
+    snap_8.dihedrals.members = [
+        [1, 2, 3, 4],
+        [5, 6, 7, 8],
+    ]
+    # impropers information
+    snap_8.impropers = lammpsio.topology.Impropers(N=2, num_types=2)
+    snap_8.impropers.id = [1, 2]
+    snap_8.impropers.typeid = [1, 2]
+    snap_8.impropers.members = [
+        [1, 2, 3, 4],
+        [5, 6, 7, 8],
+    ]
+    # create reference snapshot
+    ref_snap_8 = copy.deepcopy(snap_8)
+
+    filename = tmp_path / "atoms.lammpstrj"
+    schema = {"id": 0, "position": (1, 2, 3)}
+    lammpsio.DumpFile.create(filename, schema, snap_8)
+    assert filename.exists
+
+    f = lammpsio.DumpFile(filename, schema, copy_from=ref_snap_8)
+    read_snap_8 = [s for s in f][0]
+
+    # test bonds
+    assert read_snap_8.has_bonds()
+    assert numpy.allclose(read_snap_8.bonds.id, snap_8.bonds.id)
+    assert numpy.allclose(read_snap_8.bonds.typeid, snap_8.bonds.typeid)
+    assert numpy.allclose(read_snap_8.bonds.members, snap_8.bonds.members)
+    # test angles
+    assert read_snap_8.has_angles()
+    assert numpy.allclose(read_snap_8.angles.id, snap_8.angles.id)
+    assert numpy.allclose(read_snap_8.angles.typeid, snap_8.angles.typeid)
+    assert numpy.allclose(read_snap_8.angles.members, snap_8.angles.members)
+    # test dihedrals
+    assert read_snap_8.has_dihedrals()
+    assert numpy.allclose(read_snap_8.dihedrals.id, snap_8.dihedrals.id)
+    assert numpy.allclose(read_snap_8.dihedrals.typeid, snap_8.dihedrals.typeid)
+    assert numpy.allclose(read_snap_8.dihedrals.members, snap_8.dihedrals.members)
+    # test impropers
+    assert read_snap_8.has_impropers()
+    assert numpy.allclose(read_snap_8.impropers.id, snap_8.impropers.id)
+    assert numpy.allclose(read_snap_8.impropers.typeid, snap_8.impropers.typeid)
+    assert numpy.allclose(read_snap_8.impropers.members, snap_8.impropers.members)
+
+
 @pytest.mark.parametrize(
     "schema",
     ["x", "x y", "vx", "vx vy", "ix", "ix iy"],
