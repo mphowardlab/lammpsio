@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2024-12-10
+### Added
+- Initial support for type labels of particle and topology data through the
+  `LabelMap` object.
+- Interconversion of topology data with GSD `Frame`.
+- Support for Python 3.13.
+- Copying of topology data from an existing `Snapshot` when reading a dump file.
+
+### Fixed
+- Only GSD properties that have been assigned are converted to a `Snapshot`.
+- Issues with writing topology information to data files.
+- Deduction of atom type from information in `Snapshot`.
+
+### Removed
+- Support for Python 3.8.
+
 ## [0.6.1] - 2024-06-24
 ### Added
 - Backwards compatible support for NumPy 2.0.
@@ -84,7 +100,8 @@ have been updated to include this option.
 ### Changed
 - The package has been renamed `lammpsio` for consistency with PyPI.
 
-[Unreleased]: https://github.com/mphowardlab/lammpsio/compare/v0.6.1...HEAD
+[Unreleased]: https://github.com/mphowardlab/lammpsio/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/mphowardlab/lammpsio/compare/v0.6.0...v0.7.0
 [0.6.1]: https://github.com/mphowardlab/lammpsio/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/mphowardlab/lammpsio/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/mphowardlab/lammpsio/compare/v0.4.1...v0.5.0
