@@ -65,3 +65,10 @@ html_theme_options = {
 autosummary_generate = True
 
 autodoc_default_options = {"inherited-members": None, "special-members": False}
+
+# -- Options for intersphinx -------------------------------------------------
+
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3", None),
+    "numpy": ("https://numpy.org/doc/stable", None),
+}
