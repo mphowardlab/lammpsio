@@ -1,5 +1,0 @@
-=======
-Release
-=======
-
-.. include:: ../../../CHANGELOG.rst

@@ -1,5 +1,6 @@
 furo
 ipython==8.10.0
+MyST-Parser
 nbsphinx==0.8.12
 sphinx==6.1.3
 sphinx_design==0.4.1
