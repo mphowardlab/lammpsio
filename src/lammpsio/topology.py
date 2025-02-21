@@ -15,12 +15,8 @@ class Topology:
     num_members : int
         Number of members in a connection.
     num_types : int
-        Number of connection types.
-
-    Attributes
-    ----------
-    num_types : int
-        Number of connection types.
+        Number of connection types. Default of ``None`` means
+        the number of types is determined from the unique typeids.
 
     """
 
