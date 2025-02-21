@@ -26,7 +26,7 @@ You should then also install the developer tools:
     pip install -r requirements-dev.txt -r doc/requirements.txt
 
 A suite of unit tests is provided with the source code and can be run with
-``unittest``:
+``pytest``:
 
 .. code:: bash
 
