@@ -1,5 +1,5 @@
-lammpsio.topology module
-------------------------
+topology
+--------
 
 .. automodule:: lammpsio.topology
    :members:

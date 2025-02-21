@@ -1,5 +1,5 @@
-lammpsio.snapshot module
-------------------------
+snapshot
+--------
 
 .. automodule:: lammpsio.snapshot
    :members:

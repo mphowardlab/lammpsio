@@ -1,5 +1,5 @@
-lammpsio.dump module
---------------------
+dump
+----
 
 .. automodule:: lammpsio.dump
    :members:

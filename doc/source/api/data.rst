@@ -1,5 +1,5 @@
-lammpsio.data module
---------------------
+data
+----
 
 .. automodule:: lammpsio.data
    :members:

@@ -1,5 +1,5 @@
-lammpsio.box module
--------------------
+box
+---
 
 .. automodule:: lammpsio.box
    :members:
