@@ -53,7 +53,7 @@ class Snapshot:
 
         Parameters
         ----------
-        frame : :class:`gsd.hoomd.Frame` or `gsd.hoomd.Snapshot`
+        frame : :class:`gsd.hoomd.Frame`
             HOOMD GSD frame to convert.
 
         Returns
@@ -213,7 +213,7 @@ class Snapshot:
 
         Returns
         -------
-        :class:`gsd.hoomd.Frame` or :class:`gsd.hoomd.Snapshot`
+        :class:`gsd.hoomd.Frame`
             Converted HOOMD GSD frame.
 
         """
