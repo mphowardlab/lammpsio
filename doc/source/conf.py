@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.abspath("../../src"))
 
 # -- Project information -----------------------------------------------------
 
-project = "lammmpsio"
+project = "lammpsio"
 year = datetime.date.today().year
 copyright = f"2021-{year}, Auburn University"
 author = "Michael P. Howard"
