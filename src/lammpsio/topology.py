@@ -62,7 +62,7 @@ class Topology:
         Returns
         -------
         bool
-            True if connection IDs have been initialized.
+            ``True`` if connection IDs have been initialized.
 
         """
         return self._id is not None
@@ -94,7 +94,7 @@ class Topology:
         Returns
         -------
         bool
-            True if connection typeids have been initialized.
+            ``True`` if connection typeids have been initialized.
 
         """
         return self._typeid is not None
@@ -126,7 +126,7 @@ class Topology:
         Returns
         -------
         bool
-            True if particle members have been initialized.
+            ``True`` if particle members have been initialized.
 
         """
         return self._members is not None
@@ -172,7 +172,7 @@ class Topology:
         order : list
             New order of indexes.
         check_order : bool
-            If true, validate the new ``order`` before applying it.
+            If ``True``, validate the new ``order`` before applying it.
 
         """
         # sanity check the sorting order before applying it
@@ -201,7 +201,8 @@ class Bonds(Topology):
     N : int
         Number of bonds.
     num_types : int
-        Number of bond types.
+        Number of bond types. Default of ``None`` means
+        the number of types is determined from the unique typeids.
 
     """
 
@@ -217,7 +218,8 @@ class Angles(Topology):
     N : int
         Number of angles.
     num_types : int
-        Number of angle types.
+        Number of Angle types. Default of ``None`` means
+        the number of types is determined from the unique typeids.
 
     """
 
@@ -233,7 +235,8 @@ class Dihedrals(Topology):
     N : int
         Number of diehdrals.
     num_types : int
-        Number of dihedral types.
+        Number of Dihedral types. Default of ``None`` means
+        the number of types is determined from the unique typeids.
 
     """
 
@@ -249,7 +252,8 @@ class Impropers(Topology):
     N : int
         Number of improper dihedrals.
     num_types : int
-        Number of improper dihedral types.
+        Number of improper dihedral types. Default of ``None`` means
+        the number of types is determined from the unique typeids.
 
     """
 

@@ -373,7 +373,7 @@ class Snapshot:
         Returns
         -------
         bool
-            True if particle IDs have been initialized.
+            ``True`` if particle IDs have been initialized.
 
         """
         return self._id is not None
@@ -405,7 +405,7 @@ class Snapshot:
         Returns
         -------
         bool
-            True if positions have been initialized.
+            ``True`` if positions have been initialized.
 
         """
         return self._position is not None
@@ -437,7 +437,7 @@ class Snapshot:
         Returns
         -------
         bool
-            True if images have been initialized.
+            ``True`` if images have been initialized.
 
         """
         return self._image is not None
@@ -469,7 +469,7 @@ class Snapshot:
         Returns
         -------
         bool
-            True if velocities have been initialized.
+            ``True`` if velocities have been initialized.
 
         """
         return self._velocity is not None
@@ -501,7 +501,7 @@ class Snapshot:
         Returns
         -------
         bool
-            True if molecule tags have been initialized.
+            ``True`` if molecule tags have been initialized.
 
         """
         return self._molecule is not None
@@ -551,7 +551,7 @@ class Snapshot:
         Returns
         -------
         bool
-            True if types have been initialized.
+            ``True`` if types have been initialized.
 
         """
         return self._typeid is not None
@@ -583,7 +583,7 @@ class Snapshot:
         Returns
         -------
         bool
-            True if charges have been initialized.
+            ``True`` if charges have been initialized.
 
         """
         return self._charge is not None
@@ -615,7 +615,7 @@ class Snapshot:
         Returns
         -------
         bool
-            True if masses have been initialized.
+            ``True`` if masses have been initialized.
 
         """
         return self._mass is not None
@@ -654,7 +654,7 @@ class Snapshot:
         Returns
         -------
         bool
-            True if bonds is initialized and there is at least one bond.
+            ``True`` if bonds is initialized and there is at least one bond.
 
         """
         return self._bonds is not None and self._bonds.N > 0
@@ -679,7 +679,7 @@ class Snapshot:
         Returns
         -------
         bool
-            True if angles is initialized and there is at least one angle.
+            ``True`` if angles is initialized and there is at least one angle.
 
         """
         return self._angles is not None and self._angles.N > 0
@@ -704,7 +704,7 @@ class Snapshot:
         Returns
         -------
         bool
-            True if dihedrals is initialized and there is at least one dihedral.
+            ``True`` if dihedrals is initialized and there is at least one dihedral.
 
         """
         return self._dihedrals is not None and self._dihedrals.N > 0
@@ -729,7 +729,7 @@ class Snapshot:
         Returns
         -------
         bool
-            True if impropers is initialized and there is at least one improper.
+            ``True`` if impropers is initialized and there is at least one improper.
 
         """
         return self._impropers is not None and self._impropers.N > 0
@@ -742,7 +742,7 @@ class Snapshot:
         order : list
             New order of indexes.
         check_order : bool
-            If true, validate the new ``order`` before applying it.
+            If ``True``, validate the new ``order`` before applying it.
 
         """
         # sanity check the sorting order before applying it

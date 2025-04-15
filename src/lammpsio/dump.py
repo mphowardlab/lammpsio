@@ -35,7 +35,7 @@ class DumpFile:
         Schema for the contents of the file. Defaults to ``None``, which means to read
         it from the file.
     sort_ids : bool
-        If true, sort the particles by ID in each snapshot.
+        If ``True``, sort the particles by ID in each snapshot.
     copy_from : :class:`Snapshot`
         If specified, copy fields that are missing in the dump file but are set in
         a reference :class:`Snapshot`. The fields that can be copied are ``typeid``,
