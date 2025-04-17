@@ -14,7 +14,7 @@ class Snapshot:
     ----------
     N : int
         Number of particles in configuration.
-    box : :class:`Box`
+    box : `Box`
         Simulation box.
     step : int
         Simulation time step counter. Default of ``None`` means
@@ -58,7 +58,7 @@ class Snapshot:
 
         Returns
         -------
-        :class:`Snapshot`
+        `Snapshot`
             Snapshot created from HOOMD GSD frame.
         dict
             A map from the :attr:`Snapshot.typeid` to the HOOMD type.
@@ -343,7 +343,7 @@ class Snapshot:
 
     @property
     def box(self):
-        """:class:`Box`: Simulation box."""
+        """`Box`: Simulation box."""
         return self._box
 
     @property
@@ -782,12 +782,12 @@ def _set_type_id(lammps_typeid, gsd_typeid, label_map):
         List of LAMMPS typeids to be mapped (one-indexed).
     gsd_typeid : list
         List of HOOMD GSD typeids to be updated (zero-indexed).
-    label_map : :class:`LabelMap`
+    label_map : `LabelMap`
         LabelMap for connection type mapping LAMMPS typeids to HOOMD GSD types.
 
     Returns:
     -------
-    :class:`LabelMap`
+    `LabelMap`
         LabelMap mapping LAMMPS typeids to HOOMD GSD types.
         LabelMap is created mapping typeids to str(typeids) if not provided.
     """

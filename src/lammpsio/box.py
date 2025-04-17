@@ -45,7 +45,7 @@ class Box:
 
     @classmethod
     def cast(cls, value):
-        """Cast an array to a :class:`Box`.
+        """Cast an array to a `Box`.
 
         If ``value`` has 6 elements, it is unpacked as an orthorhombic box::
 
@@ -62,7 +62,7 @@ class Box:
 
         Returns
         -------
-        :class:`Box`
+        `Box`
             A simulation box matching the array.
 
         Examples

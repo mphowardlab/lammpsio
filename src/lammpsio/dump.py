@@ -36,9 +36,9 @@ class DumpFile:
         it from the file.
     sort_ids : bool
         If ``True``, sort the particles by ID in each snapshot.
-    copy_from : :class:`Snapshot`
+    copy_from : `Snapshot`
         If specified, copy fields that are missing in the dump file but are set in
-        a reference :class:`Snapshot`. The fields that can be copied are ``typeid``,
+        a reference `Snapshot`. The fields that can be copied are ``typeid``,
         ``molecule``, ``charge``, and ``mass``.
 
     """
@@ -60,12 +60,12 @@ class DumpFile:
             Path to dump file.
         schema : dict
             Schema for the contents of the file.
-        snapshots : :class:`Snapshot` or list
+        snapshots : `Snapshot` or list
             One or more snapshots to write to the dump file.
 
         Returns
         -------
-        :class:`DumpFile`
+        `DumpFile`
             The object representing the new dump file.
 
         """
