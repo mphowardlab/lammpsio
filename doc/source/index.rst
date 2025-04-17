@@ -9,7 +9,6 @@ in a variety of ways that improve workflow efficiency and reproducibility.
 
 .. toctree::
     :maxdepth: 1
-    :caption: User guide
 
     guide/install
     guide/examples/index
@@ -17,13 +16,4 @@ in a variety of ways that improve workflow efficiency and reproducibility.
     guide/guidelines
     guide/license
     guide/credits
-
-.. toctree::
-    :maxdepth: 1
-    :caption: API reference
-
-    api/box
-    api/data
-    api/dump
-    api/snapshot
-    api/topology
+    api/api.rst
