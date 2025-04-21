@@ -12,8 +12,4 @@ Overview
     lammpsio.DataFile
     lammpsio.DumpFile
     lammpsio.Snapshot
-    lammpsio.Angles
-    lammpsio.Bonds
-    lammpsio.Dihedrals
-    lammpsio.Impropers
-    lammpsio.LabelMap
+    lammpsio.topology
