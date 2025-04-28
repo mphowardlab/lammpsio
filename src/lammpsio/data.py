@@ -91,7 +91,7 @@ class DataFile:
         ----------
         filename : str
             Path to data file.
-        snapshot : :class:`Snapshot`
+        snapshot : `Snapshot`
             Snapshot to write to file.
         atom_style : str
             Atom style to use for data file. Defaults to ``None``, which means the
@@ -99,7 +99,7 @@ class DataFile:
 
         Returns
         -------
-        :class:`DataFile`
+        `DataFile`
             The object representing the new data file.
 
         Raises
@@ -300,7 +300,7 @@ class DataFile:
 
         Returns
         -------
-        :class:`Snapshot`
+        `Snapshot`
             Snapshot from the data file.
 
         Raises
