@@ -264,6 +264,7 @@ def test_data_file_min_lammps(snap, atom_style, shuffle_ids):
     _tmp = tempfile.TemporaryDirectory()
     directory = _tmp.name
     filename = directory + "/atoms.data"
+
     # create the data file using lammpsio
     lammpsio.DataFile.create(filename, snap, atom_style)
     assert os.path.isfile(filename)
@@ -332,6 +333,7 @@ def test_data_file_all_lammps(snap, atom_style, set_style, shuffle_ids, tmp_path
     _tmp = tempfile.TemporaryDirectory()
     directory = _tmp.name
     filename = directory + "/atoms.data"
+
     # create the data file using lammpsio
     lammpsio.DataFile.create(filename, snap, atom_style if set_style else None)
     assert os.path.isfile(filename)
@@ -378,11 +380,10 @@ def test_data_file_all_lammps(snap, atom_style, set_style, shuffle_ids, tmp_path
         assert numpy.allclose(snap_2.charge, snap.charge)
     else:
         assert not snap_2.has_charge()
-
     _tmp.cleanup()
 
 
-@pytest.mark.parametrize("shuffle_ids", [False])  # , True])
+@pytest.mark.parametrize("shuffle_ids", [False])
 def test_data_file_topology_lammps(snap_8, tmp_path, shuffle_ids):
     # set ids to be assigned
     if shuffle_ids:
