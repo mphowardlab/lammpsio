@@ -328,6 +328,7 @@ def test_faulty_dump_schema(tmp_path, schema):
             pass
 
 
+@pytest.mark.skipif(not has_lammps, reason="lammps not installed")
 def test_copy_from_lammps(snap, tmp_path):
     ref_snap = copy.deepcopy(snap)
     ref_snap.id = [12, 1, 2]
@@ -388,6 +389,7 @@ def test_copy_from_lammps(snap, tmp_path):
     assert numpy.allclose(read_snap.charge, [0, 1, -1])
 
 
+@pytest.mark.skipif(not has_lammps, reason="lammps not installed")
 def test_copy_from_topology_lammps(snap_8, tmp_path):
     # particle information
     snap_8.id = [1, 2, 3, 4, 5, 6, 7, 8]
