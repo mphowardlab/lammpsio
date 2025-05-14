@@ -1,11 +1,17 @@
 import os
 import tempfile
 
-import lammps
 import numpy
 import pytest
 
 import lammpsio
+
+try:
+    import lammps
+
+    has_lammps = True
+except ImportError:
+    has_lammps = False
 
 
 @pytest.mark.parametrize("shuffle_ids", [False, True])
@@ -260,13 +266,13 @@ def test_data_file_topology(snap_8, tmp_path, shuffle_ids):
 def test_data_file_min_lammps(snap, atom_style, shuffle_ids):
     if shuffle_ids:
         snap.id = [3, 1, 2]
-    # write the data file with default values
+
+    # write the data file with default values using lammpsio
     _tmp = tempfile.TemporaryDirectory()
     directory = _tmp.name
     filename = directory + "/atoms.data"
     assert not snap.has_image()
     assert not snap.has_velocity()
-    # create the data file using lammpsio
     lammpsio.DataFile.create(filename, snap, atom_style)
     assert os.path.isfile(filename)
 
@@ -318,7 +324,8 @@ def test_data_file_min_lammps(snap, atom_style, shuffle_ids):
 def test_data_file_all_lammps(snap, atom_style, set_style, shuffle_ids, tmp_path):
     if shuffle_ids:
         snap.id = [3, 1, 2]
-    # write the data file with nondefault values
+
+    # write the data file with nondefault values using lammpsio
     snap.position = [[0.1, 0.2, 0.3], [-0.4, -0.5, -0.6], [0.7, 0.8, 0.9]]
     snap.image = [[1, 2, 3], [-4, -5, -6], [7, 8, 9]]
     snap.velocity = [[-3, -2, -1], [6, 5, 4], [9, 8, 7]]
@@ -391,7 +398,7 @@ def test_data_file_topology_lammps(snap_8, tmp_path, shuffle_ids):
         angle_id = [1, 3, 2, 4]
         # Dihedral ids are automatically sorted by LAMMPS
         dihedral_id = [1, 2]
-        # Improper ids are automatically sorted by LAMMPS
+        # LAMMPS sorts
         improper_id = [1, 2]
     else:
         particle_id = [1, 2, 3, 4, 5, 6, 7, 8]
@@ -470,7 +477,6 @@ def test_data_file_topology_lammps(snap_8, tmp_path, shuffle_ids):
     filename = directory + "/atoms.data"
     # create the data file using lammpsio
     lammpsio.DataFile.create(filename, snap_8)
-    assert os.path.isfile(filename)
 
     # read it in LAMMPS and write it out
     lmps = lammps.lammps(cmdargs=["-log", f"{directory}/log.lammps"])
@@ -489,6 +495,7 @@ def test_data_file_topology_lammps(snap_8, tmp_path, shuffle_ids):
         assert numpy.allclose(snap_2.id, snap_8.id)
     else:
         assert not snap_2.has_id()
+
     assert numpy.allclose(snap_2.id, snap_8.id)
     assert snap_2.has_typeid()
     assert numpy.allclose(snap_2.typeid, snap_8.typeid)
@@ -500,12 +507,14 @@ def test_data_file_topology_lammps(snap_8, tmp_path, shuffle_ids):
     # test bonds
     assert snap_2.bonds.N == snap_8.bonds.N
 
-    # Commented tests seem unnecesary
-    # if shuffle_ids:
-    #     assert snap_2.bonds.has_id()
-    #     assert numpy.allclose(snap_2.bonds.id, snap_8.bonds.id)
-    # else:
-    #     assert not snap_2.bonds.has_id()
+    # Create arrays with bond members and typeid
+    snap_8_bond_data = numpy.column_stack((snap_8.bonds.members, snap_8.bonds.typeid))
+    snap_2_bond_data = numpy.column_stack((snap_2.bonds.members, snap_2.bonds.typeid))
+    assert numpy.allclose(
+        snap_2_bond_data[snap_2_bond_data[:, 0].argsort()],
+        snap_8_bond_data[snap_8_bond_data[:, 0].argsort()],
+    )
+
     assert numpy.allclose(snap_2.bonds.id, numpy.sort(snap_8.bonds.id))
     assert snap_2.bonds.has_typeid()
     assert numpy.allclose(snap_2.bonds.typeid, snap_8.bonds.typeid)
@@ -513,14 +522,8 @@ def test_data_file_topology_lammps(snap_8, tmp_path, shuffle_ids):
     assert numpy.allclose(snap_2.bonds.members, snap_8.bonds.members)
 
     # test angles
-    # Same here
-    # assert snap_2.angles.N == snap_8.angles.N
-    # if shuffle_ids:
-    #     assert snap_2.angles.has_id()
-    #     assert numpy.allclose(snap_2.angles.id, snap_8.angles.id)
-    # else:
-    #     assert not snap_2.angles.has_id()
-
+    assert snap_2.angles.has_typeid()
+    assert snap_2.angles.has_members()
     # LAMMPS sorts the angle id
     assert numpy.allclose(snap_2.angles.id, numpy.sort(snap_8.angles.id))
     assert snap_2.angles.has_typeid()
@@ -529,14 +532,6 @@ def test_data_file_topology_lammps(snap_8, tmp_path, shuffle_ids):
     assert numpy.allclose(snap_2.angles.members, snap_8.angles.members)
 
     # test dihedrals
-    # Same
-    # assert snap_2.dihedrals.N == snap_8.dihedrals.N
-    # if shuffle_ids:
-    #     assert snap_2.dihedrals.has_id()
-    #     assert numpy.allclose(snap_2.dihedrals.id, snap_8.dihedrals.id)
-    # else:
-    #     assert not snap_2.dihedrals.has_id()
-
     # LAMMPS sorts the dihedral ID automatically
     assert numpy.allclose(snap_2.dihedrals.id, snap_8.dihedrals.id)
     assert snap_2.dihedrals.has_typeid()
@@ -546,14 +541,6 @@ def test_data_file_topology_lammps(snap_8, tmp_path, shuffle_ids):
     assert numpy.allclose(snap_2.dihedrals.members, snap_8.dihedrals.members)
 
     # test impropers
-    # Same
-    # assert snap_2.impropers.N == snap_8.impropers.N
-    # if shuffle_ids:
-    #     assert snap_2.impropers.has_id()
-    #     assert numpy.allclose(snap_2.impropers.id, snap_8.impropers.id)
-    # else:
-    #     assert not snap_2.impropers.has_id()
-
     # LAMMPS sorts the improper ID automatically
     assert numpy.allclose(snap_2.impropers.id, numpy.sort(snap_8.impropers.id))
     assert snap_2.impropers.has_typeid()
