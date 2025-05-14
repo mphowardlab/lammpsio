@@ -261,6 +261,7 @@ def test_data_file_topology(snap_8, tmp_path, shuffle_ids):
     assert numpy.allclose(snap_2.impropers.members, snap_8.impropers.members)
 
 
+@pytest.mark.skipif(not has_lammps, reason="lammps not installed")
 @pytest.mark.parametrize("shuffle_ids", [False, True])
 @pytest.mark.parametrize("atom_style", ["atomic", "molecular", "charge", "full"])
 def test_data_file_min_lammps(snap, atom_style, shuffle_ids):
@@ -318,6 +319,7 @@ def test_data_file_min_lammps(snap, atom_style, shuffle_ids):
     _tmp.cleanup()
 
 
+@pytest.mark.skipif(not has_lammps, reason="lammps not installed")
 @pytest.mark.parametrize("shuffle_ids", [False, True])
 @pytest.mark.parametrize("set_style", [True, False])
 @pytest.mark.parametrize("atom_style", ["atomic", "molecular", "charge", "full"])
@@ -389,6 +391,7 @@ def test_data_file_all_lammps(snap, atom_style, set_style, shuffle_ids, tmp_path
     _tmp.cleanup()
 
 
+@pytest.mark.skipif(not has_lammps, reason="lammps not installed")
 @pytest.mark.parametrize("shuffle_ids", [False, True])
 def test_data_file_topology_lammps(snap_8, tmp_path, shuffle_ids):
     # set ids to be assigned
@@ -504,48 +507,74 @@ def test_data_file_topology_lammps(snap_8, tmp_path, shuffle_ids):
     assert snap_2.has_mass()
     assert numpy.allclose(snap_2.mass, snap_8.mass)
 
+    # LAMMPS reorders the ids of topology objects when particle ids are shuffled
+    # We check that topology objects typeid and members survive the round trip
+
     # test bonds
     assert snap_2.bonds.N == snap_8.bonds.N
 
     # Create arrays with bond members and typeid
+    assert snap_2.bonds.has_typeid()
+    assert snap_2.bonds.has_members()
     snap_8_bond_data = numpy.column_stack((snap_8.bonds.members, snap_8.bonds.typeid))
     snap_2_bond_data = numpy.column_stack((snap_2.bonds.members, snap_2.bonds.typeid))
+    # test that types and bond members survive round trip
     assert numpy.allclose(
         snap_2_bond_data[snap_2_bond_data[:, 0].argsort()],
         snap_8_bond_data[snap_8_bond_data[:, 0].argsort()],
     )
 
-    assert numpy.allclose(snap_2.bonds.id, numpy.sort(snap_8.bonds.id))
-    assert snap_2.bonds.has_typeid()
-    assert numpy.allclose(snap_2.bonds.typeid, snap_8.bonds.typeid)
-    assert snap_2.bonds.has_members()
-    assert numpy.allclose(snap_2.bonds.members, snap_8.bonds.members)
-
     # test angles
+    assert snap_2.angles.N == snap_8.angles.N
+
+    # Create arrays with angle members and typeid
     assert snap_2.angles.has_typeid()
     assert snap_2.angles.has_members()
-    # LAMMPS sorts the angle id
-    assert numpy.allclose(snap_2.angles.id, numpy.sort(snap_8.angles.id))
-    assert snap_2.angles.has_typeid()
-    assert numpy.allclose(snap_2.angles.typeid, snap_8.angles.typeid)
-    assert snap_2.angles.has_members()
-    assert numpy.allclose(snap_2.angles.members, snap_8.angles.members)
+    snap_8_angle_data = numpy.column_stack(
+        (snap_8.angles.members, snap_8.angles.typeid)
+    )
+    snap_2_angle_data = numpy.column_stack(
+        (snap_2.angles.members, snap_2.angles.typeid)
+    )
+    # test that types and angle members survive round trip
+    assert numpy.allclose(
+        snap_2_angle_data[snap_2_angle_data[:, 0].argsort()],
+        snap_8_angle_data[snap_8_angle_data[:, 0].argsort()],
+    )
 
     # test dihedrals
-    # LAMMPS sorts the dihedral ID automatically
-    assert numpy.allclose(snap_2.dihedrals.id, snap_8.dihedrals.id)
+    assert snap_2.dihedrals.N == snap_8.dihedrals.N
+
+    # Create arrays with dihedral members and typeid
     assert snap_2.dihedrals.has_typeid()
-    # LAMMPS sorts the dihedral type ID automatically
-    assert numpy.allclose(snap_2.dihedrals.typeid, snap_8.dihedrals.typeid)
     assert snap_2.dihedrals.has_members()
-    assert numpy.allclose(snap_2.dihedrals.members, snap_8.dihedrals.members)
+    snap_8_dihedral_data = numpy.column_stack(
+        (snap_8.dihedrals.members, snap_8.dihedrals.typeid)
+    )
+    snap_2_dihedral_data = numpy.column_stack(
+        (snap_2.dihedrals.members, snap_2.dihedrals.typeid)
+    )
+    # test that types and dihedral members survive round trip
+    assert numpy.allclose(
+        snap_2_dihedral_data[snap_2_dihedral_data[:, 0].argsort()],
+        snap_8_dihedral_data[snap_8_dihedral_data[:, 0].argsort()],
+    )
 
     # test impropers
-    # LAMMPS sorts the improper ID automatically
-    assert numpy.allclose(snap_2.impropers.id, numpy.sort(snap_8.impropers.id))
+    assert snap_2.impropers.N == snap_8.impropers.N
+
+    # Create arrays with improper members and typeid
     assert snap_2.impropers.has_typeid()
-    # LAMMPS sorts the improper type ID automatically
-    assert numpy.allclose(snap_2.impropers.typeid, numpy.sort(snap_8.impropers.typeid))
     assert snap_2.impropers.has_members()
-    assert numpy.allclose(snap_2.impropers.members, snap_8.impropers.members)
+    snap_8_improper_data = numpy.column_stack(
+        (snap_8.impropers.members, snap_8.impropers.typeid)
+    )
+    snap_2_improper_data = numpy.column_stack(
+        (snap_2.impropers.members, snap_2.impropers.typeid)
+    )
+    # test that types and improper members survive round trip
+    assert numpy.allclose(
+        snap_2_improper_data[snap_2_improper_data[:, 0].argsort()],
+        snap_8_improper_data[snap_8_improper_data[:, 0].argsort()],
+    )
     _tmp.cleanup()
