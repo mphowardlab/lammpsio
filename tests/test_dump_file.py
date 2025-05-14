@@ -1,4 +1,5 @@
 import copy
+import tempfile
 
 import numpy
 import pytest
@@ -11,6 +12,13 @@ try:
     has_pyzstd = True
 except ModuleNotFoundError:
     has_pyzstd = False
+
+try:
+    import lammps
+
+    has_lammps = True
+except ImportError:
+    has_lammps = False
 
 
 @pytest.mark.parametrize("sort_ids", [False, True])
@@ -318,3 +326,162 @@ def test_faulty_dump_schema(tmp_path, schema):
     with pytest.raises(IOError):
         for snap in traj:
             pass
+
+
+def test_copy_from_lammps(snap, tmp_path):
+    ref_snap = copy.deepcopy(snap)
+    ref_snap.id = [12, 1, 2]
+    ref_snap.typeid = [2, 1, 2]
+    ref_snap.mass = [3, 2, 3]
+    ref_snap.molecule = [2, 0, 1]
+    ref_snap.charge = [-1, 0, 1]
+
+    # create snapshot with LAMMPS
+    _tmp = tempfile.TemporaryDirectory()
+    directory = _tmp.name
+    filename = directory + "/atoms.data"
+    # create the data file using lammpsio
+    lammpsio.DataFile.create(filename, ref_snap)
+
+    # read it in LAMMPS and write it out
+    lmps = lammps.lammps(cmdargs=["-log", f"{directory}/log.lammps"])
+    cmds = ["atom_style full"]
+    cmds += [f"read_data {filename}"]
+    cmds += [f"write_data {filename}"]
+    lmps.commands_list(cmds)
+    lmps.close()
+
+    ref_snap = lammpsio.DataFile(filename).read()
+
+    snap.id = [1, 2, 12]
+    snap.position = [[0.1, 0.2, 0.3], [-0.4, -0.5, -0.6], [0.7, 0.8, 0.9]]
+
+    filename = tmp_path / "atoms.lammpstrj"
+    schema = {"id": 0, "position": (1, 2, 3)}
+    lammpsio.DumpFile.create(filename, schema, snap)
+    assert filename.exists
+
+    f = lammpsio.DumpFile(filename, schema, copy_from=ref_snap)
+    read_snap = [s for s in f][0]
+
+    assert read_snap.N == snap.N
+    assert read_snap.step == snap.step
+    assert numpy.allclose(read_snap.box.low, snap.box.low)
+    assert numpy.allclose(read_snap.box.high, snap.box.high)
+    if snap.box.tilt is not None:
+        assert numpy.allclose(read_snap.box.tilt, snap.box.tilt)
+    else:
+        assert read_snap.box.tilt is None
+    assert read_snap.has_id()
+    assert numpy.allclose(read_snap.id, snap.id)
+    assert read_snap.has_position()
+    assert numpy.allclose(read_snap.position, snap.position)
+    assert not read_snap.has_image()
+    assert not read_snap.has_velocity()
+    assert read_snap.has_typeid()
+    assert numpy.all(read_snap.typeid == [1, 2, 2])
+    assert read_snap.has_mass()
+    assert numpy.allclose(read_snap.mass, [2, 3, 3])
+    assert read_snap.has_molecule()
+    assert numpy.all(read_snap.molecule == [0, 1, 2])
+    assert read_snap.has_charge()
+    assert numpy.allclose(read_snap.charge, [0, 1, -1])
+
+
+def test_copy_from_topology_lammps(snap_8, tmp_path):
+    # particle information
+    snap_8.id = [1, 2, 3, 4, 5, 6, 7, 8]
+    snap_8.typeid = [1, 1, 1, 1, 2, 2, 2, 2]
+    snap_8.position = [
+        [0, 0, 0],
+        [0.1, 0.1, 0.1],
+        [0.2, 0.2, 0.2],
+        [0.3, 0.3, 0.3],
+        [1, 1, 1],
+        [1.1, 1.1, 1.1],
+        [1.2, 1.2, 1.2],
+        [1.3, 1.3, 1.3],
+    ]
+    snap_8.mass = [1, 1, 1, 1, 2, 2, 2, 2]
+    # bonds information
+    snap_8.bonds = lammpsio.topology.Bonds(N=6, num_types=2)
+    snap_8.bonds.id = [1, 2, 3, 4, 5, 6]
+    snap_8.bonds.typeid = [1, 2, 1, 2, 1, 2]
+    snap_8.bonds.members = [
+        [1, 2],
+        [2, 3],
+        [3, 4],
+        [5, 6],
+        [6, 7],
+        [7, 8],
+    ]
+    # angles information
+    snap_8.angles = lammpsio.topology.Angles(N=4, num_types=2)
+    snap_8.angles.id = [1, 2, 3, 4]
+    snap_8.angles.typeid = [1, 2, 1, 2]
+    snap_8.angles.members = [
+        [1, 2, 3],
+        [2, 3, 4],
+        [5, 6, 7],
+        [6, 7, 8],
+    ]
+    # dihedrals information
+    snap_8.dihedrals = lammpsio.topology.Dihedrals(N=2, num_types=2)
+    snap_8.dihedrals.id = [1, 2]
+    snap_8.dihedrals.typeid = [1, 2]
+    snap_8.dihedrals.members = [
+        [1, 2, 3, 4],
+        [5, 6, 7, 8],
+    ]
+    # impropers information
+    snap_8.impropers = lammpsio.topology.Impropers(N=2, num_types=2)
+    snap_8.impropers.id = [1, 2]
+    snap_8.impropers.typeid = [1, 2]
+    snap_8.impropers.members = [
+        [1, 2, 3, 4],
+        [5, 6, 7, 8],
+    ]
+    # create snapshot with LAMMPS
+    _tmp = tempfile.TemporaryDirectory()
+    directory = _tmp.name
+    filename = directory + "/atoms.data"
+    # create the data file using lammpsio
+    lammpsio.DataFile.create(filename, snap_8)
+
+    # read it in LAMMPS and write it out
+    lmps = lammps.lammps(cmdargs=["-log", f"{directory}/log.lammps"])
+    cmds = ["atom_style molecular"]
+    cmds += [f"read_data {filename}"]
+    cmds += [f"write_data {filename}"]
+    lmps.commands_list(cmds)
+    lmps.close()
+    ref_snap_8 = lammpsio.DataFile(filename).read()
+
+    filename = tmp_path / "atoms.lammpstrj"
+    schema = {"id": 0, "position": (1, 2, 3)}
+    lammpsio.DumpFile.create(filename, schema, snap_8)
+    assert filename.exists
+
+    f = lammpsio.DumpFile(filename, schema, copy_from=ref_snap_8)
+    read_snap_8 = [s for s in f][0]
+
+    # test bonds
+    assert read_snap_8.has_bonds()
+    assert numpy.allclose(read_snap_8.bonds.id, snap_8.bonds.id)
+    assert numpy.allclose(read_snap_8.bonds.typeid, snap_8.bonds.typeid)
+    assert numpy.allclose(read_snap_8.bonds.members, snap_8.bonds.members)
+    # test angles
+    assert read_snap_8.has_angles()
+    assert numpy.allclose(read_snap_8.angles.id, snap_8.angles.id)
+    assert numpy.allclose(read_snap_8.angles.typeid, snap_8.angles.typeid)
+    assert numpy.allclose(read_snap_8.angles.members, snap_8.angles.members)
+    # test dihedrals
+    assert read_snap_8.has_dihedrals()
+    assert numpy.allclose(read_snap_8.dihedrals.id, snap_8.dihedrals.id)
+    assert numpy.allclose(read_snap_8.dihedrals.typeid, snap_8.dihedrals.typeid)
+    assert numpy.allclose(read_snap_8.dihedrals.members, snap_8.dihedrals.members)
+    # test impropers
+    assert read_snap_8.has_impropers()
+    assert numpy.allclose(read_snap_8.impropers.id, snap_8.impropers.id)
+    assert numpy.allclose(read_snap_8.impropers.typeid, snap_8.impropers.typeid)
+    assert numpy.allclose(read_snap_8.impropers.members, snap_8.impropers.members)
