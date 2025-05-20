@@ -11,7 +11,7 @@ def orthorhombic():
 
 @pytest.fixture
 def triclinic():
-    return lammpsio.Box([-5.0, -10.0, -1.0], [1.0, 10.0, 8.0], [2, -2.0, 0.5])
+    return lammpsio.Box([-5.0, -10.0, -1.0], [2.0, 10.0, 8.0], [2, -2.0, 0.5])
 
 
 @pytest.fixture(params=[lf("orthorhombic"), lf("triclinic")])

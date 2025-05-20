@@ -22,7 +22,7 @@ def test_orthorhombic(orthorhombic):
 def test_triclinic(triclinic):
     box = triclinic
     assert numpy.allclose(box.low, [-5, -10, -1])
-    assert numpy.allclose(box.high, [1, 10, 8])
+    assert numpy.allclose(box.high, [2, 10, 8])
     assert numpy.allclose(box.tilt, [2.0, -2.0, 0.5])
 
     box.low = [0, 0, 0]
