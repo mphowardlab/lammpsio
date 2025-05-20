@@ -330,6 +330,7 @@ def test_faulty_dump_schema(tmp_path, schema):
 @pytest.mark.parametrize("sort_ids", [False, True])
 @pytest.mark.parametrize("shuffle_ids", [False, True])
 @pytest.mark.parametrize("compression_extension", ["", ".gz", ".zst"])
+@pytest.mark.skipif(not has_lammps, reason="lammps not installed")
 def test_dump_file_all_lammps(
     snap, compression_extension, shuffle_ids, sort_ids, tmp_path
 ):
