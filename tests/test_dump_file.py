@@ -327,6 +327,149 @@ def test_faulty_dump_schema(tmp_path, schema):
             pass
 
 
+@pytest.mark.parametrize("sort_ids", [False, True])
+@pytest.mark.parametrize("shuffle_ids", [False, True])
+@pytest.mark.parametrize("compression_extension", ["", ".gz", ".zst"])
+def test_dump_file_all_lammps(
+    snap, compression_extension, shuffle_ids, sort_ids, tmp_path
+):
+    if not has_pyzstd and compression_extension == ".zst":
+        pytest.skip("pyzstd not installed")
+
+    snap.step = 0
+    snap.position = [[0.1, 0.2, 0.3], [-0.4, -0.5, -0.6], [0.7, 0.8, 0.9]]
+    snap.image = [[1, 2, 3], [-4, -5, -6], [7, 8, 9]]
+    snap.velocity = [[-3, -2, -1], [6, 5, 4], [9, 8, 7]]
+    snap.typeid = [2, 1, 2]
+    snap.mass = [3, 2, 3]
+    snap.molecule = [1, 2, 3]
+    snap.charge = [-1, 0, 1]
+    filename_data = tmp_path / "atoms.data"
+    lammpsio.DataFile.create(filename_data, snap)
+
+    snap_2 = lammpsio.Snapshot(snap.N, snap.box, snap.step + 1)
+    snap.step = 1
+    snap_2.position = snap.position[::-1]
+    snap_2.image = snap.image[::-1]
+    snap_2.velocity = snap.velocity[::-1]
+    snap_2.typeid = snap.typeid[::-1]
+    snap_2.mass = snap.mass[::-1]
+    snap_2.molecule = snap.molecule[::-1]
+    snap_2.charge = snap.charge[::-1]
+    snaps = [snap, snap_2]
+
+    if shuffle_ids:
+        for s in snaps:
+            s.id = s.id[::-1]
+        if sort_ids:
+            order = numpy.arange(snap.N)[::-1]
+        else:
+            order = numpy.arange(snap.N)
+    else:
+        order = numpy.arange(snap.N)
+
+    # create file with 2 snapshots
+    schema = {
+        "id": 13,
+        "position": (11, 10, 12),
+        "image": (9, 8, 7),
+        "velocity": (4, 5, 6),
+        "typeid": 3,
+        "mass": 2,
+        "molecule": 1,
+        "charge": 0,
+    }
+
+    filename = tmp_path / f"atoms.lammpstrj{compression_extension}"
+
+    lmps = lammps.lammps(cmdargs=["-log", f"{tmp_path}/log.lammps"])
+
+    cmds = []
+    cmds += ["units lj"]
+    cmds += ["atom_style full"]
+    cmds += ["boundary p p p"]
+    cmds += [f"read_data {filename_data}"]
+    cmds += ["timestep 1.0"]
+
+    # Dump setup to capture both frames
+    cmds += [
+        f"dump dmp all custom 1 {filename} id type x y z ix iy iz vx vy vz mass mol q"
+    ]
+    cmds += ["dump_modify dmp first yes"]
+
+    # Dump initial state (frame 0)
+    cmds += ["run 0"]
+
+    # Manually reverse all atom data to match snap_2
+    cmds += ["set atom 1 x 0.7 y 0.8 z 0.9"]
+    cmds += ["set atom 1 vx 9 vy 8 vz 7"]
+    cmds += ["set atom 1 mol 3"]
+    cmds += ["set atom 1 type 2"]
+    cmds += ["set atom 1 charge 1.0"]
+    cmds += ["set atom 1 image 7 8 9"]
+
+    cmds += ["set atom 2 x -0.4 y -0.5 z -0.6"]
+    cmds += ["set atom 2 vx 6 vy 5 vz 4"]
+    cmds += ["set atom 2 mol 2"]
+    cmds += ["set atom 2 type 1"]
+    cmds += ["set atom 2 charge 0.0"]
+    cmds += ["set atom 2 image -4 -5 -6"]
+
+    cmds += ["set atom 3 x 0.1 y 0.2 z 0.3"]
+    cmds += ["set atom 3 vx -3 vy -2 vz -1"]
+    cmds += ["set atom 3 mol 1"]
+    cmds += ["set atom 3 type 2"]
+    cmds += ["set atom 3 charge -1.0"]
+    cmds += ["set atom 3 image 1 2 3"]
+
+    # Dump reversed state (frame 1)
+    cmds += ["run 1"]
+
+    lmps.commands_list(cmds)
+    lmps.close()
+
+    f = lammpsio.DumpFile.create(filename, schema, snaps)
+    assert filename.exists
+    assert len(f) == 2
+
+    # read it back in and check snapshots
+    f2 = lammpsio.DumpFile(filename, sort_ids=sort_ids)
+    read_snaps = [s for s in f2]
+    for i, s in enumerate(f2):
+        assert read_snaps[i].N == snaps[i].N
+        assert read_snaps[i].step == snaps[i].step
+        assert numpy.allclose(read_snaps[i].box.low, snaps[i].box.low)
+        assert numpy.allclose(read_snaps[i].box.high, snaps[i].box.high)
+        if snaps[i].box.tilt is not None:
+            assert numpy.allclose(read_snaps[i].box.tilt, snaps[i].box.tilt)
+        else:
+            assert read_snaps[i].box.tilt is None
+        if shuffle_ids:
+            assert read_snaps[i].has_id()
+            if sort_ids:
+                assert numpy.allclose(read_snaps[i].id, numpy.arange(1, snaps[i].N + 1))
+            else:
+                assert numpy.allclose(
+                    read_snaps[i].id, numpy.arange(1, snaps[i].N + 1)[::-1]
+                )
+        else:
+            assert not read_snaps[i].has_id()
+        assert read_snaps[i].has_position()
+        assert numpy.allclose(read_snaps[i].position, snaps[i].position[order])
+        assert read_snaps[i].has_image()
+        assert numpy.allclose(read_snaps[i].image, snaps[i].image[order])
+        assert read_snaps[i].has_velocity()
+        assert numpy.allclose(read_snaps[i].velocity, snaps[i].velocity[order])
+        assert read_snaps[i].has_typeid()
+        assert numpy.allclose(read_snaps[i].typeid, snaps[i].typeid[order])
+        assert read_snaps[i].has_mass()
+        assert numpy.allclose(read_snaps[i].mass, snaps[i].mass[order])
+        assert read_snaps[i].has_molecule()
+        assert numpy.allclose(read_snaps[i].molecule, snaps[i].molecule[order])
+        assert read_snaps[i].has_charge()
+        assert numpy.allclose(read_snaps[i].charge, snaps[i].charge[order])
+
+
 @pytest.mark.skipif(not has_lammps, reason="lammps not installed")
 def test_copy_from_lammps(snap, tmp_path):
     # take dump round trip through LAMMPS
