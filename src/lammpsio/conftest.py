@@ -1,6 +1,11 @@
 import numpy
-import sybil
-import sybil.parsers.rest
+
+try:
+    import sybil
+    import sybil.parsers.rest
+
+except ImportError:
+    sybil = None
 
 import lammpsio
 
