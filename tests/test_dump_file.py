@@ -1,5 +1,4 @@
 import copy
-import tempfile
 
 import numpy
 import pytest
@@ -330,6 +329,7 @@ def test_faulty_dump_schema(tmp_path, schema):
 
 @pytest.mark.skipif(not has_lammps, reason="lammps not installed")
 def test_copy_from_lammps(snap, tmp_path):
+    # take dump round trip through LAMMPS
     ref_snap = copy.deepcopy(snap)
     ref_snap.id = [12, 1, 2]
     ref_snap.typeid = [2, 1, 2]
@@ -337,32 +337,32 @@ def test_copy_from_lammps(snap, tmp_path):
     ref_snap.molecule = [2, 0, 1]
     ref_snap.charge = [-1, 0, 1]
 
-    # create snapshot with LAMMPS
-    _tmp = tempfile.TemporaryDirectory()
-    directory = _tmp.name
-    filename = directory + "/atoms.data"
-    # create the data file using lammpsio
-    lammpsio.DataFile.create(filename, ref_snap)
-
-    # read it in LAMMPS and write it out
-    lmps = lammps.lammps(cmdargs=["-log", f"{directory}/log.lammps"])
-    cmds = ["atom_style full"]
-    cmds += [f"read_data {filename}"]
-    cmds += [f"write_data {filename}"]
-    lmps.commands_list(cmds)
-    lmps.close()
-
-    ref_snap = lammpsio.DataFile(filename).read()
-
     snap.id = [1, 2, 12]
     snap.position = [[0.1, 0.2, 0.3], [-0.4, -0.5, -0.6], [0.7, 0.8, 0.9]]
 
-    filename = tmp_path / "atoms.lammpstrj"
-    schema = {"id": 0, "position": (1, 2, 3)}
-    lammpsio.DumpFile.create(filename, schema, snap)
-    assert filename.exists
+    # create data and dump file using lammpsio
+    filename_data = tmp_path / "atoms.data"
+    lammpsio.DataFile.create(filename_data, ref_snap)
+    assert filename_data.exists
 
-    f = lammpsio.DumpFile(filename, schema, copy_from=ref_snap)
+    filename_dump = tmp_path / "atoms.lammpstrj"
+    schema = {"id": 0, "position": (1, 2, 3)}
+    lammpsio.DumpFile.create(filename_dump, schema, snap)
+    assert filename_dump.exists
+
+    # read dump and data file into LAMMPS
+    lmps = lammps.lammps(cmdargs=["-log", f"{tmp_path}/log.lammps"])
+    cmds = ["atom_style full"]
+    cmds += [f"read_data {filename_data}"]
+    cmds += [f"read_dump {filename_dump} 10 x y z"]
+
+    # write dump file out of LAMMPS
+    cmds += [f"dump mydump all custom 1 {filename_dump} id x y z"]
+    cmds += ["run 0"]
+    lmps.commands_list(cmds)
+    lmps.close()
+
+    f = lammpsio.DumpFile(filename_dump, schema, copy_from=ref_snap)
     read_snap = [s for s in f][0]
 
     assert read_snap.N == snap.N
@@ -405,6 +405,7 @@ def test_copy_from_topology_lammps(snap_8, tmp_path):
         [1.3, 1.3, 1.3],
     ]
     snap_8.mass = [1, 1, 1, 1, 2, 2, 2, 2]
+    snap_8.molecule = [1, 1, 1, 1, 2, 2, 2, 2]
     # bonds information
     snap_8.bonds = lammpsio.topology.Bonds(N=6, num_types=2)
     snap_8.bonds.id = [1, 2, 3, 4, 5, 6]
@@ -443,21 +444,31 @@ def test_copy_from_topology_lammps(snap_8, tmp_path):
         [1, 2, 3, 4],
         [5, 6, 7, 8],
     ]
-    # create snapshot with LAMMPS
-    _tmp = tempfile.TemporaryDirectory()
-    directory = _tmp.name
-    filename = directory + "/atoms.data"
-    # create the data file using lammpsio
-    lammpsio.DataFile.create(filename, snap_8)
 
-    # read it in LAMMPS and write it out
-    lmps = lammps.lammps(cmdargs=["-log", f"{directory}/log.lammps"])
+    # create reference snapshot
+    ref_snap_8 = copy.deepcopy(snap_8)
+
+    # create data and dump file using lammpsio
+    filename_data = tmp_path / "atoms.data"
+    lammpsio.DataFile.create(filename_data, ref_snap_8)
+    assert filename_data.exists
+
+    filename_dump = tmp_path / "atoms.lammpstrj"
+    schema = {"id": 0, "position": (1, 2, 3)}
+    lammpsio.DumpFile.create(filename_dump, schema, snap_8)
+    assert filename_dump.exists
+
+    # read dump and data file into LAMMPS
+    lmps = lammps.lammps(cmdargs=["-log", f"{tmp_path}/log.lammps"])
     cmds = ["atom_style molecular"]
-    cmds += [f"read_data {filename}"]
-    cmds += [f"write_data {filename}"]
+    cmds += [f"read_data {filename_data}"]
+    cmds += [f"read_dump {filename_dump} 10 x y z"]
+
+    # write dump file out of LAMMPS
+    cmds += [f"dump mydump all custom 1 {filename_dump} id x y z"]
+    cmds += ["run 0"]
     lmps.commands_list(cmds)
     lmps.close()
-    ref_snap_8 = lammpsio.DataFile(filename).read()
 
     filename = tmp_path / "atoms.lammpstrj"
     schema = {"id": 0, "position": (1, 2, 3)}
