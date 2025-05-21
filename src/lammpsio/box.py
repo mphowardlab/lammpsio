@@ -67,7 +67,9 @@ class Box:
 
         Examples
         --------
-        Construct an orthorhombic simulation box by casting an array::
+        Construct an orthorhombic simulation box by casting an array:
+
+        .. code-block:: python
 
             box = lammpsio.Box.cast([-5.0, -10.0, 0.0, 1.0, 10.0, 8.0])
 
