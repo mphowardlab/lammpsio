@@ -41,6 +41,31 @@ class DumpFile:
         a reference `Snapshot`. The fields that can be copied are ``typeid``,
         ``molecule``, ``charge``, and ``mass``.
 
+    Example
+    -------
+
+    Create and read a dump file:
+
+    .. code-block:: python
+
+        filename = tmp_path / "atoms.data"
+
+        box = lammpsio.Box([-5.0, -10.0, 0.0], [1.0, 10.0, 8.0], [1.0, -2.0, 0.5])
+
+        snap = lammpsio.Snapshot(3, box, 10)
+
+        schema = {"id": 0, "position": (1, 2, 3)}
+
+        f = lammpsio.DumpFile.create(filename, schema, snap)
+
+        assert filename.exists
+
+        f = lammpsio.DumpFile(filename, schema)
+
+        read_snap = [s for s in f]
+
+        assert read_snap[0].N == snap.N
+
     """
 
     def __init__(self, filename, schema=None, sort_ids=True, copy_from=None):
