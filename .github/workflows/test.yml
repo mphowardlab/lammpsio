@@ -44,7 +44,14 @@ jobs:
           python -m pytest
   test-lammps:
     name: unit test lammps [python-${{ matrix.python-version }}]
+    needs: test
     runs-on: ubuntu-latest
+    env:
+      MPIEXEC_TIMEOUT: 300
+      RDMAV_FORK_SAFE: 1
+    defaults:
+      run:
+        shell: bash -el {0}
     strategy:
       fail-fast: false
       matrix:
