@@ -1,4 +1,3 @@
-import gsd
 import numpy
 
 try:
@@ -10,13 +9,23 @@ except ImportError:
 
 import lammpsio
 
+try:
+    import gsd.hoomd
+
+    has_gsd = True
+except ModuleNotFoundError:
+    has_gsd = False
+
 
 def setup_sybil_tests(namespace):
     """Sybil setup function."""
     # Common imports.
     namespace["numpy"] = numpy
     namespace["lammpsio"] = lammpsio
-    namespace["gsd"] = gsd
+    if has_gsd:
+        namespace["frame"] = gsd.hoomd.Frame()
+    else:
+        namespace["frame"] = 0
 
 
 if sybil is not None:
