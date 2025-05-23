@@ -39,26 +39,13 @@ class DataFile:
     unknown_bodies : list
         Data file body sections that will be ignored.
 
+
     Example
     -------
 
-    Create and read a data file:
-
     .. code-block:: python
 
-        filename = tmp_path / "atoms.data"
-
-        box = lammpsio.Box([-5.0, -10.0, 0.0], [1.0, 10.0, 8.0], [1.0, -2.0, 0.5])
-
-        snap = lammpsio.Snapshot(3, box, 10)
-
-        data = lammpsio.DataFile.create(filename, snap, "atomic")
-
-        assert filename.exists
-
-        snap_2 = data.read()
-
-        assert snap_2.N == snap.N
+        data = lammpsio.DataFile(tmp_path / "atoms.data", atom_style="atomic")
 
     """
 
@@ -127,6 +114,22 @@ class DataFile:
         ------
         ValueError
             If all masses are not the same for a given type.
+
+        Example
+        -------
+
+        Create a data file:
+
+        .. code-block:: python
+
+            box = lammpsio.Box([-5.0, -10.0, 0.0],
+                               [1.0, 10.0, 8.0],
+                               [1.0, -2.0, 0.5])
+
+            snap = lammpsio.Snapshot(3, box, 10)
+
+            data = lammpsio.DataFile.create(tmp_path / "atoms.data",
+                                            snap, atom_style="atomic")
 
         """
 
@@ -330,6 +333,15 @@ class DataFile:
             If :attr:`atom_style` is set but does not match file contents.
         ValueError
             If :attr:`atom_style` is not specified and not set in file.
+
+        Example
+        -------
+
+        Read a data file:
+
+        .. code-block:: python
+
+            snap = data.read()
 
         """
         with open(self.filename) as f:
