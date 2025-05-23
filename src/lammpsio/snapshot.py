@@ -25,6 +25,17 @@ class Snapshot:
     step : int
         Simulation time step counter.
 
+    Example
+    -------
+
+    Create snapshot using a triclinic box:
+
+    .. code-block:: python
+
+        box = lammpsio.Box([-5.0, -10.0, 0.0], [1.0, 10.0, 8.0], [1.0, -2.0, 0.5])
+
+        snap = lammpsio.Snapshot(3, box, 10)
+
     """
 
     def __init__(self, N, box, step=None, num_types=None):
@@ -62,6 +73,23 @@ class Snapshot:
             Snapshot created from HOOMD GSD frame.
         dict
             A map from the :attr:`Snapshot.typeid` to the HOOMD type.
+
+        Example
+        -------
+
+        Create snapshot from a GSD file:
+
+        .. code-block:: python
+
+            import gsd.hoomd
+
+            frame = gsd.hoomd.Frame()
+
+            frame.configuration.box = [4, 5, 6, 0.1, 0.2, 0.3]
+
+            frame.particles.N = 3
+
+            snap_2, type_map = lammpsio.Snapshot.from_hoomd_gsd(frame)
 
         """
         # ensures frame is well formed and that we have NumPy arrays
@@ -216,6 +244,15 @@ class Snapshot:
         :class:`gsd.hoomd.Frame`
             Converted HOOMD GSD frame.
 
+        Example
+        -------
+
+        Convert snapshot to a GSD file:
+
+        .. code-block:: python
+
+            frame = snap_2.to_hoomd_gsd()
+
         """
         if _compatibility.gsd_version is None:
             raise ImportError("GSD package not found")
@@ -338,17 +375,42 @@ class Snapshot:
 
     @property
     def N(self):
-        """int: Number of particles."""
+        """int: Number of particles.
+
+        Example
+        -------
+        .. code-block:: python
+
+            num_particles = snap.N
+
+        """
         return self._N
 
     @property
     def box(self):
-        """`Box`: Simulation box."""
+        """`Box`: Simulation box.
+
+        Example
+        -------
+        .. code-block:: python
+
+            snap.box
+
+        """
         return self._box
 
     @property
     def id(self):
-        """:class:`numpy.ndarray`: Particle IDs."""
+        """:class:`numpy.ndarray`: Particle IDs.
+
+        Example
+        -------
+
+        .. code-block:: python
+
+             snap.id = [2, 0, 1]
+
+        """
         if not self.has_id():
             self._id = numpy.arange(1, self.N + 1)
         return self._id
@@ -375,12 +437,29 @@ class Snapshot:
         bool
             ``True`` if particle IDs have been initialized.
 
+        Example
+        -------
+        .. code-block:: python
+
+            snap.has_id()
+
         """
         return self._id is not None
 
     @property
     def position(self):
-        """:class:`numpy.ndarray`: Positions."""
+        """:class:`numpy.ndarray`: Positions.
+
+        Example
+        -------
+
+        .. code-block:: python
+
+            snap.position = [[0.1, 0.2, 0.3],
+                             [-0.4, -0.5, -0.6],
+                             [0.7, 0.8, 0.9]]
+
+        """
         if not self.has_position():
             self._position = numpy.zeros((self.N, 3), dtype=float)
         return self._position
@@ -407,12 +486,28 @@ class Snapshot:
         bool
             ``True`` if positions have been initialized.
 
+        Example
+        -------
+
+        .. code-block:: python
+
+            snap.has_position()
+
         """
         return self._position is not None
 
     @property
     def image(self):
-        """:class:`numpy.ndarray`: Images."""
+        """:class:`numpy.ndarray`: Images.
+
+        Example
+        -------
+
+        .. code-block:: python
+
+            snap.image = [[1, 2, 3], [-4, -5, -6], [7, 8, 9]]
+
+        """
         if not self.has_image():
             self._image = numpy.zeros((self.N, 3), dtype=int)
         return self._image
@@ -439,12 +534,30 @@ class Snapshot:
         bool
             ``True`` if images have been initialized.
 
+        Example
+        -------
+
+        .. code-block:: python
+
+            snap.has_image()
+
         """
         return self._image is not None
 
     @property
     def velocity(self):
-        """:class:`numpy.ndarray`: Velocities."""
+        """:class:`numpy.ndarray`: Velocities.
+
+        Example
+        -------
+
+        .. code-block:: python
+
+            snap.velocity = [[-3, -2, -1],
+                             [6, 5, 4],
+                             [9, 8, 7]]
+
+        """
         if not self.has_velocity():
             self._velocity = numpy.zeros((self.N, 3), dtype=float)
         return self._velocity
@@ -470,6 +583,13 @@ class Snapshot:
         -------
         bool
             ``True`` if velocities have been initialized.
+
+        Example
+        -------
+
+        .. code-block:: python
+
+            snap.has_velocity()
 
         """
         return self._velocity is not None
@@ -503,6 +623,13 @@ class Snapshot:
         bool
             ``True`` if molecule tags have been initialized.
 
+        Example
+        -------
+
+        .. code-block:: python
+
+            snap.has_molecule()
+
         """
         return self._molecule is not None
 
@@ -526,7 +653,16 @@ class Snapshot:
 
     @property
     def typeid(self):
-        """:class:`numpy.ndarray`: Types."""
+        """:class:`numpy.ndarray`: Types.
+
+        Example
+        -------
+
+        .. code-block:: python
+
+            snap.typeid = [2, 1, 2]
+
+        """
         if not self.has_typeid():
             self._typeid = numpy.ones(self.N, dtype=int)
         return self._typeid
@@ -553,12 +689,28 @@ class Snapshot:
         bool
             ``True`` if types have been initialized.
 
+        Example
+        -------
+
+        .. code-block:: python
+
+            snap.has_typeid()
+
         """
         return self._typeid is not None
 
     @property
     def charge(self):
-        """:class:`numpy.ndarray`: Charges."""
+        """:class:`numpy.ndarray`: Charges.
+
+        Example
+        -------
+
+        .. code-block:: python
+
+            snap.charge = [-1, 0, 1]
+
+        """
         if not self.has_charge():
             self._charge = numpy.zeros(self.N, dtype=float)
         return self._charge
@@ -585,12 +737,28 @@ class Snapshot:
         bool
             ``True`` if charges have been initialized.
 
+        Example
+        -------
+
+        .. code-block:: python
+
+            snap.has_charge()
+
         """
         return self._charge is not None
 
     @property
     def mass(self):
-        """:class:`numpy.ndarray`: Masses."""
+        """:class:`numpy.ndarray`: Masses.
+
+        Example
+        -------
+
+        .. code-block:: python
+
+            snap.mass = [3, 2, 3]
+
+        """
         if not self.has_mass():
             self._mass = numpy.ones(self.N, dtype=float)
         return self._mass
@@ -617,12 +785,31 @@ class Snapshot:
         bool
             ``True`` if masses have been initialized.
 
+        Example
+        -------
+
+        .. code-block:: python
+
+            snap.has_mass()
+
         """
         return self._mass is not None
 
     @property
     def type_label(self):
-        """LabelMap: Labels for particle typeids."""
+        """LabelMap: Labels for particle typeids.
+
+        Example
+        -------
+
+        .. code-block ::python
+
+            label_map = lammpsio.topology.LabelMap({1: "typeA", 2: "typeB"})
+
+            snap.type_label = LabelMap(map=label_map)
+
+
+        """
         return self._type_label
 
     @type_label.setter
@@ -636,7 +823,16 @@ class Snapshot:
 
     @property
     def bonds(self):
-        """Bonds: Bond data."""
+        """Bonds: Bond data.
+
+        Example
+        -------
+
+        .. code-block:: python
+
+            snap.bonds = lammpsio.topology.Bonds(N=6, num_types=2)
+
+        """
         return self._bonds
 
     @bonds.setter
@@ -656,12 +852,30 @@ class Snapshot:
         bool
             ``True`` if bonds is initialized and there is at least one bond.
 
+
+        Example
+        -------
+
+        .. code-block:: python
+
+            snap.has_bonds()
+
         """
         return self._bonds is not None and self._bonds.N > 0
 
     @property
     def angles(self):
-        """Angles: Angle data."""
+        """Angles: Angle data.
+
+
+        Example
+        -------
+
+        .. code-block:: python
+
+            snap.angles = lammpsio.topology.Angles(N=4, num_types=2)
+
+        """
         return self._angles
 
     @angles.setter
@@ -681,12 +895,28 @@ class Snapshot:
         bool
             ``True`` if angles is initialized and there is at least one angle.
 
+        Example
+        -------
+
+        .. code-block:: python
+
+            snap.has_angles()
+
         """
         return self._angles is not None and self._angles.N > 0
 
     @property
     def dihedrals(self):
-        """Dihedrals: Dihedral data."""
+        """Dihedrals: Dihedral data.
+
+        Example
+        -------
+
+        .. code-block:: python
+
+            snap.dihedrals = lammpsio.topology.Dihedrals(N=2, num_types=2)
+
+        """
         return self._dihedrals
 
     @dihedrals.setter
@@ -706,12 +936,28 @@ class Snapshot:
         bool
             ``True`` if dihedrals is initialized and there is at least one dihedral.
 
+        Example
+        -------
+
+        .. code-block:: python
+
+            snap.has_dihedrals()
+
         """
         return self._dihedrals is not None and self._dihedrals.N > 0
 
     @property
     def impropers(self):
-        """Impropers: Improper data."""
+        """Impropers: Improper data.
+
+        Example
+        -------
+
+        .. code-block:: python
+
+            snap.impropers = lammpsio.topology.Impropers(N=2, num_types=2)
+
+        """
         return self._impropers
 
     @impropers.setter
@@ -731,6 +977,13 @@ class Snapshot:
         bool
             ``True`` if impropers is initialized and there is at least one improper.
 
+        Example
+        -------
+
+        .. code-block:: python
+
+            snap.has_impropers()
+
         """
         return self._impropers is not None and self._impropers.N > 0
 
@@ -743,6 +996,15 @@ class Snapshot:
             New order of indexes.
         check_order : bool
             If ``True``, validate the new ``order`` before applying it.
+
+        Example
+        -------
+
+        .. code-block:: python
+
+            bond_id = [0, 3, 1, 4, 2, 5]
+
+            snap.bonds.reorder(numpy.sort(bond_id), check_order=True)
 
         """
         # sanity check the sorting order before applying it
