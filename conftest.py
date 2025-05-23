@@ -1,3 +1,4 @@
+import gsd
 import numpy
 
 try:
@@ -15,11 +16,7 @@ def setup_sybil_tests(namespace):
     # Common imports.
     namespace["numpy"] = numpy
     namespace["lammpsio"] = lammpsio
-
-    try:
-        import gsd.hoomd
-    except ImportError:
-        gsd.hoomd = None
+    namespace["gsd"] = gsd
 
 
 if sybil is not None:

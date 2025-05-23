@@ -81,8 +81,6 @@ class Snapshot:
 
         .. code-block:: python
 
-            import gsd.hoomd
-
             frame = gsd.hoomd.Frame()
 
             frame.configuration.box = [4, 5, 6, 0.1, 0.2, 0.3]
