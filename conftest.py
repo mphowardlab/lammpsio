@@ -16,6 +16,11 @@ def setup_sybil_tests(namespace):
     namespace["numpy"] = numpy
     namespace["lammpsio"] = lammpsio
 
+    try:
+        import gsd.hoomd
+    except ImportError:
+        gsd.hoomd = None
+
 
 if sybil is not None:
     pytest_collect_file = sybil.Sybil(
