@@ -30,12 +30,6 @@ class Box:
 
         box = lammpsio.Box([-5.0, -10.0, 0.0], [1.0, 10.0, 8.0], [1.0, -2.0, 0.5])
 
-        assert numpy.allclose(box.low, [-5.0, -10.0, 0.0])
-
-        assert numpy.allclose(box.high, [1.0, 10.0, 8.0])
-
-        assert numpy.allclose(box.tilt, [1.0, -2.0, 0.5])
-
     """
 
     def __init__(self, low, high, tilt=None):
@@ -72,10 +66,6 @@ class Box:
         .. code-block:: python
 
             box = lammpsio.Box.cast([-5.0, -10.0, 0.0, 1.0, 10.0, 8.0])
-
-            assert numpy.allclose(box.low, [-5.0, -10.0, 0.0])
-
-            assert numpy.allclose(box.high, [1.0, 10.0, 8.0])
 
         """
         if isinstance(value, Box):
