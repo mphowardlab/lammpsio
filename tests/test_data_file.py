@@ -1,5 +1,4 @@
 import os
-import tempfile
 
 import numpy
 import pytest
@@ -264,21 +263,19 @@ def test_data_file_topology(snap_8, tmp_path, shuffle_ids):
 @pytest.mark.skipif(not has_lammps, reason="lammps not installed")
 @pytest.mark.parametrize("shuffle_ids", [False, True])
 @pytest.mark.parametrize("atom_style", ["atomic", "molecular", "charge", "full"])
-def test_data_file_min_lammps(snap, atom_style, shuffle_ids):
+def test_data_file_min_lammps(tmp_path, snap, atom_style, shuffle_ids):
     if shuffle_ids:
         snap.id = [3, 1, 2]
 
     # write the data file with default values using lammpsio
-    _tmp = tempfile.TemporaryDirectory()
-    directory = _tmp.name
-    filename = directory + "/atoms.data"
+    filename = tmp_path / "atoms.data"
     assert not snap.has_image()
     assert not snap.has_velocity()
     lammpsio.DataFile.create(filename, snap, atom_style)
     assert os.path.isfile(filename)
 
     # read it in LAMMPS and write it out
-    lmps = lammps.lammps(cmdargs=["-log", f"{directory}/log.lammps"])
+    lmps = lammps.lammps(cmdargs=["-log", "none"])
     cmds = [f"atom_style {atom_style}"]
     cmds += [f"read_data {filename}"]
     cmds += ["mass 1 1.0"]
@@ -316,7 +313,6 @@ def test_data_file_min_lammps(snap, atom_style, shuffle_ids):
         assert numpy.allclose(snap_2.charge, 0)
     else:
         assert not snap_2.has_charge()
-    _tmp.cleanup()
 
 
 @pytest.mark.skipif(not has_lammps, reason="lammps not installed")
@@ -338,15 +334,13 @@ def test_data_file_all_lammps(snap, atom_style, set_style, shuffle_ids, tmp_path
     if atom_style in ("charge", "full"):
         snap.charge = [-1, 0, 1]
 
-    _tmp = tempfile.TemporaryDirectory()
-    directory = _tmp.name
-    filename = directory + "/atoms.data"
+    filename = tmp_path / "atoms.data"
 
     # create the data file using lammpsio
     lammpsio.DataFile.create(filename, snap, atom_style if set_style else None)
     assert os.path.isfile(filename)
 
-    lmps = lammps.lammps(cmdargs=["-log", f"{directory}/log.lammps"])
+    lmps = lammps.lammps(cmdargs=["-log", "none"])
     cmds = [f"atom_style {atom_style}"]
     cmds += [f"read_data {filename}"]
     cmds += [f"write_data {filename}"]
@@ -388,7 +382,6 @@ def test_data_file_all_lammps(snap, atom_style, set_style, shuffle_ids, tmp_path
         assert numpy.allclose(snap_2.charge, snap.charge)
     else:
         assert not snap_2.has_charge()
-    _tmp.cleanup()
 
 
 @pytest.mark.skipif(not has_lammps, reason="lammps not installed")
@@ -475,14 +468,12 @@ def test_data_file_topology_lammps(snap_8, tmp_path, shuffle_ids):
         snap_8.bonds.reorder(bond_id_lammpsio, check_order=True)
         snap_8.angles.reorder(angle_id_lammpsio, check_order=True)
 
-    _tmp = tempfile.TemporaryDirectory()
-    directory = _tmp.name
-    filename = directory + "/atoms.data"
+    filename = tmp_path / "atoms.data"
     # create the data file using lammpsio
     lammpsio.DataFile.create(filename, snap_8)
 
     # read it in LAMMPS and write it out
-    lmps = lammps.lammps(cmdargs=["-log", f"{directory}/log.lammps"])
+    lmps = lammps.lammps(cmdargs=["-log", "none"])
     cmds = ["atom_style molecular"]
     cmds += [f"read_data {filename}"]
     cmds += [f"write_data {filename}"]
@@ -577,4 +568,3 @@ def test_data_file_topology_lammps(snap_8, tmp_path, shuffle_ids):
         snap_2_improper_data[snap_2_improper_data[:, 0].argsort()],
         snap_8_improper_data[snap_8_improper_data[:, 0].argsort()],
     )
-    _tmp.cleanup()
