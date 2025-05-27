@@ -8,7 +8,10 @@ from .topology import Angles, Bonds, Dihedrals, Impropers, LabelMap
 
 
 class Snapshot:
-    """Particle configuration.
+    """
+    The particle configuration is stored in a `Snapshot`. A `Snapshot` holds the
+    data for *N* particles, the simulation `Box`, and the timestep. The `Box` follows
+    the LAMMPS conventions for its shape and bounds.
 
     Parameters
     ----------
@@ -19,16 +22,15 @@ class Snapshot:
     step : int
         Simulation time step counter. Default of ``None`` means
         time step is not specified.
-
-    Attributes
-    ----------
-    step : int
-        Simulation time step counter.
+    num_types : int
+            Number of particle types. If `num_types is None`,
+            then the number of types is deduced from `typeid`.
 
     Example
     -------
 
-    Create snapshot using a triclinic box:
+    Here is a 3-particle configuration in an triclinic box
+    centered at the origin at step 10:
 
     .. code-block:: python
 
