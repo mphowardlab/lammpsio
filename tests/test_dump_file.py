@@ -327,6 +327,7 @@ def test_faulty_dump_schema(tmp_path, schema):
             pass
 
 
+@pytest.mark.lammps
 @pytest.mark.parametrize("sort_ids", [False, True])
 @pytest.mark.parametrize("shuffle_ids", [False, True])
 @pytest.mark.parametrize("compression_extension", ["", ".gz", ".zst"])

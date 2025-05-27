@@ -260,6 +260,7 @@ def test_data_file_topology(snap_8, tmp_path, shuffle_ids):
     assert numpy.allclose(snap_2.impropers.members, snap_8.impropers.members)
 
 
+@pytest.mark.lammps
 @pytest.mark.skipif(not has_lammps, reason="lammps not installed")
 @pytest.mark.parametrize("shuffle_ids", [False, True])
 @pytest.mark.parametrize("atom_style", ["atomic", "molecular", "charge", "full"])
@@ -315,6 +316,7 @@ def test_data_file_min_lammps(tmp_path, snap, atom_style, shuffle_ids):
         assert not snap_2.has_charge()
 
 
+@pytest.mark.lammps
 @pytest.mark.skipif(not has_lammps, reason="lammps not installed")
 @pytest.mark.parametrize("shuffle_ids", [False, True])
 @pytest.mark.parametrize("set_style", [True, False])
@@ -384,6 +386,7 @@ def test_data_file_all_lammps(snap, atom_style, set_style, shuffle_ids, tmp_path
         assert not snap_2.has_charge()
 
 
+@pytest.mark.lammps
 @pytest.mark.skipif(not has_lammps, reason="lammps not installed")
 @pytest.mark.parametrize("shuffle_ids", [False, True])
 def test_data_file_topology_lammps(snap_8, tmp_path, shuffle_ids):
