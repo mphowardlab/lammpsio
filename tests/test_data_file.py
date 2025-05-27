@@ -1,5 +1,3 @@
-import os
-
 import numpy
 import pytest
 
@@ -273,7 +271,7 @@ def test_data_file_min_lammps(tmp_path, snap, atom_style, shuffle_ids):
     assert not snap.has_image()
     assert not snap.has_velocity()
     lammpsio.DataFile.create(filename, snap, atom_style)
-    assert os.path.isfile(filename)
+    assert filename.exists
 
     # read it in LAMMPS and write it out
     lmps = lammps.lammps(cmdargs=["-log", "none"])
@@ -340,7 +338,7 @@ def test_data_file_all_lammps(snap, atom_style, set_style, shuffle_ids, tmp_path
 
     # create the data file using lammpsio
     lammpsio.DataFile.create(filename, snap, atom_style if set_style else None)
-    assert os.path.isfile(filename)
+    assert filename.exists
 
     lmps = lammps.lammps(cmdargs=["-log", "none"])
     cmds = [f"atom_style {atom_style}"]
