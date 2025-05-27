@@ -346,6 +346,7 @@ def test_dump_file_min_lammps(
     snaps = [snap, snap_2]
     if shuffle_ids:
         snap.id = snap.id[::-1]
+        # LAMMPS create_atoms gives atom smallest available id
         snap_2.id = [3, 2, 1, 4, 5]
 
     # create file with first snapshot
