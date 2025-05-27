@@ -372,7 +372,8 @@ def test_dump_file_min_lammps(
     cmds += ["run 0"]
 
     # Add two atoms of type 1 at 0, 0, 0
-    cmds += ["create_atoms 1 single 0.0 0.0 0.0", "create_atoms 1 single 0.0 0.0 0.0"]
+    cmds += ["create_atoms 1 single 0.0 0.0 0.0"]
+    cmds += ["create_atoms 1 single 0.0 0.0 0.0"]
 
     # dump frame 1
     cmds += ["run 1"]
