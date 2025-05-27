@@ -35,7 +35,7 @@ jobs:
           pip install .
       - name: Test
         run: |
-          python -m pytest
+          python -m pytest -m "not lammps"
       - name: Install optional dependencies
         run: |
           pip install -r tests/requirements-optin.txt
@@ -86,4 +86,4 @@ jobs:
           pip install -r tests/requirements-optin.txt
       - name: Test (optin)
         run: |
-          python -m pytest
+          python -m pytest -m lammps
