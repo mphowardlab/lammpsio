@@ -14,7 +14,35 @@ def _readline(file_, require=False):
 
 
 class DataFile:
-    """LAMMPS data file.
+    """A LAMMPS data file is represented by a `DataFile`.
+    It can be created by the following syntax:
+
+    .. code-block:: python
+
+        box = lammpsio.Box([-5.0, -10.0, 0.0],
+                            [1.0, 10.0, 8.0],
+                            [1.0, -2.0, 0.5])
+
+        snap = lammpsio.Snapshot(3, box, 10)
+
+        data = lammpsio.DataFile.create(tmp_path / "atoms.data",
+                                            snap, atom_style="atomic")
+
+    The file must be explicitly `read()` to get a `Snapshot`:
+
+    .. code-block:: python
+
+        snap = data.read()
+
+    The `atom_style` will be read from the comment in the Atoms section
+    of the file. If it is not present, it must be specified in the `DataFile`.
+    If `atom_style` is specified and also present in the file, the two must match
+    or an error will be raised.
+
+    There are many sections that can be stored in a data file, but `lammpsio` does
+    not currently understand all of them. You can check `DataFile.known_headers`,
+    `DataFile.unknown_headers`, `DataFile.known_bodies` and `DataFile.unknown_bodies`
+    for lists of what is currently supported.
 
     Parameters
     ----------
@@ -38,14 +66,6 @@ class DataFile:
         Data file body sections that can be processed.
     unknown_bodies : list
         Data file body sections that will be ignored.
-
-
-    Example
-    -------
-
-    .. code-block:: python
-
-        data = lammpsio.DataFile(tmp_path / "atoms.data", atom_style="atomic")
 
     """
 
@@ -114,22 +134,6 @@ class DataFile:
         ------
         ValueError
             If all masses are not the same for a given type.
-
-        Example
-        -------
-
-        Create a data file:
-
-        .. code-block:: python
-
-            box = lammpsio.Box([-5.0, -10.0, 0.0],
-                               [1.0, 10.0, 8.0],
-                               [1.0, -2.0, 0.5])
-
-            snap = lammpsio.Snapshot(3, box, 10)
-
-            data = lammpsio.DataFile.create(tmp_path / "atoms.data",
-                                            snap, atom_style="atomic")
 
         """
 
@@ -333,15 +337,6 @@ class DataFile:
             If :attr:`atom_style` is set but does not match file contents.
         ValueError
             If :attr:`atom_style` is not specified and not set in file.
-
-        Example
-        -------
-
-        Read a data file:
-
-        .. code-block:: python
-
-            snap = data.read()
 
         """
         with open(self.filename) as f:
