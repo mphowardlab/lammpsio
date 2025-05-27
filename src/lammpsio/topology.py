@@ -6,7 +6,11 @@ from . import _compatibility
 
 
 class Topology:
-    """Particle topology.
+    """
+    The topology (bond information) can be stored in `Bonds`, `Angles`, `Dihedrals`,
+    and `Impropers` objects. All these objects function similarly, differing only in the
+    number of particles that are included in a connection (2 for a bond, 3 for an angle,
+    4 for a dihedral or improper). Each connection has an associated `id` and `typeid`.
 
     Parameters
     ----------
@@ -204,6 +208,14 @@ class Bonds(Topology):
         Number of bond types. Default of ``None`` means
         the number of types is determined from the unique typeids.
 
+    Example
+    -------
+    Create bonds:
+
+    .. code-block:: python
+
+        bonds = lammpsio.topology.Bonds(N=2, num_types=2)
+
     """
 
     def __init__(self, N, num_types=None):
@@ -221,6 +233,14 @@ class Angles(Topology):
         Number of Angle types. Default of ``None`` means
         the number of types is determined from the unique typeids.
 
+    Example
+    -------
+    Create angles:
+
+    .. code-block:: python
+
+        angles = lammpsio.topology.Angles(N=2, num_types=2)
+
     """
 
     def __init__(self, N, num_types=None):
@@ -233,10 +253,18 @@ class Dihedrals(Topology):
     Parameters
     ----------
     N : int
-        Number of diehdrals.
+        Number of dihedrals.
     num_types : int
         Number of Dihedral types. Default of ``None`` means
         the number of types is determined from the unique typeids.
+
+    Example
+    -------
+    Create dihedrals:
+
+    .. code-block:: python
+
+        dihedrals = lammpsio.topology.Dihedrals(N=2, num_types=2)
 
     """
 
@@ -255,6 +283,15 @@ class Impropers(Topology):
         Number of improper dihedral types. Default of ``None`` means
         the number of types is determined from the unique typeids.
 
+
+    Example
+    -------
+    Create dihedrals:
+
+    .. code-block:: python
+
+        impropers = lammpsio.topology.Impropers(N=2, num_types=2)
+
     """
 
     def __init__(self, N, num_types=None):
@@ -262,12 +299,24 @@ class Impropers(Topology):
 
 
 class LabelMap(collections.abc.MutableMapping):
-    """Label map between typeids and types.
+    """
+    A `LabelMap` is effectively a dictionary associating a label (type) with a
+    particle's or connection's typeid. These labels can be useful for tracking
+    the meaning of typeids. They are also automatically used when interconverting
+    with HOOMD GSD files that require such labels.
 
     Parameters
     ----------
     map : dict
         Map of typeids to types.
+
+    Example
+    -------
+    Create `LabelMaps`:
+
+    .. code-block:: python
+
+        label = lammpsio.topology.LabelMap({1: "typeA", 2: "typeB"})
 
     """
 

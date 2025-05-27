@@ -65,6 +65,8 @@ html_theme_options = {
 
 autosummary_generate = True
 
+autodoc_member_order = "bysource"
+
 autodoc_default_options = {"inherited-members": None, "special-members": False}
 
 # -- Options for intersphinx -------------------------------------------------
