@@ -332,7 +332,98 @@ def test_faulty_dump_schema(tmp_path, schema):
 @pytest.mark.parametrize("shuffle_ids", [False, True])
 @pytest.mark.parametrize("compression_extension", ["", ".gz", ".zst"])
 @pytest.mark.skipif(not has_lammps, reason="lammps not installed")
-def test_dump_file_all_lammps(
+def test_dump_file_min_lammps(
+    snap, compression_extension, shuffle_ids, sort_ids, tmp_path
+):
+    if not has_pyzstd and compression_extension == ".zst":
+        pytest.skip("pyzstd not installed")
+
+    # create file with 2 snapshots with defaults, changing N & step
+    snap.mass = [1, 1, 1]
+    snap.step = 0
+    snap_2 = lammpsio.Snapshot(snap.N + 2, snap.box, snap.step + 1)
+    snap_2.mass = [1, 1, 1, 1, 1]
+    snaps = [snap, snap_2]
+    if shuffle_ids:
+        snap.id = snap.id[::-1]
+        snap_2.id = [3, 2, 1, 4, 5]
+
+    # create file with first snapshot
+    filename_data = tmp_path / f"atoms.data{compression_extension}"
+    lammpsio.DataFile.create(filename_data, snap)
+    assert filename_data.exists
+
+    # create dump with 2 snapshots in LAMMPS
+    filename = tmp_path / f"atoms.lammpstrj{compression_extension}"
+    lmps = lammps.lammps(cmdargs=["-log", f"{tmp_path}/log.lammps"])
+
+    cmds = []
+    cmds += ["units lj"]
+    cmds += ["atom_style atomic"]
+    cmds += ["boundary p p p"]
+    cmds += [f"read_data {filename_data}"]
+    cmds += ["timestep 1.0"]
+
+    # Dump setup to capture both frames
+    cmds += [f"dump dmp all custom 1 {filename} id x y z"]
+    cmds += ["dump_modify dmp first yes"]
+
+    # Dump initial state frame 0
+    cmds += ["run 0"]
+
+    # Add two atoms of type 1 at 0, 0, 0
+    cmds += ["create_atoms 1 single 0.0 0.0 0.0", "create_atoms 1 single 0.0 0.0 0.0"]
+
+    # dump frame 1
+    cmds += ["run 1"]
+
+    lmps.commands_list(cmds)
+    lmps.close()
+
+    assert filename.exists
+
+    # read it back in and check snapshots
+    f = lammpsio.DumpFile(filename, sort_ids=sort_ids)
+    assert filename.exists
+    assert len(f) == 2
+    for read_snap, snap in zip(f, snaps):
+        assert read_snap.N == snap.N
+        assert read_snap.step == snap.step
+        assert numpy.allclose(read_snap.box.low, snap.box.low)
+        assert numpy.allclose(read_snap.box.high, snap.box.high)
+        if snap.box.tilt is not None:
+            assert numpy.allclose(read_snap.box.tilt, snap.box.tilt)
+        else:
+            assert read_snap.box.tilt is None
+        if shuffle_ids:
+            assert read_snap.has_id()
+            if sort_ids:
+                assert numpy.allclose(read_snap.id, numpy.arange(1, snap.N + 1))
+            else:
+                if snap.N == 3:
+                    assert numpy.allclose(
+                        read_snap.id, numpy.arange(1, snap.N + 1)[::-1]
+                    )
+                elif snap.N == 5:
+                    assert numpy.allclose(read_snap.id, [3, 2, 1, 4, 5])
+        else:
+            assert not read_snap.has_id()
+        assert read_snap.has_position()
+        assert numpy.allclose(read_snap.position, 0)
+        assert not read_snap.has_image()
+        assert not read_snap.has_velocity()
+        assert not read_snap.has_typeid()
+        assert numpy.allclose(read_snap.mass, 1)
+        assert not read_snap.has_molecule()
+        assert not read_snap.has_charge()
+
+
+@pytest.mark.lammps
+@pytest.mark.parametrize("sort_ids", [False, True])
+@pytest.mark.parametrize("shuffle_ids", [False, True])
+@pytest.mark.parametrize("compression_extension", ["", ".gz", ".zst"])
+@pytest.mark.skipif(not has_lammps, reason="lammps not installed")
+def test_dump_file_all_lammps(  #
     snap, compression_extension, shuffle_ids, sort_ids, tmp_path
 ):
     if not has_pyzstd and compression_extension == ".zst":
