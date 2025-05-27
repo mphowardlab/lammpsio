@@ -388,14 +388,14 @@ def test_data_file_all_lammps(snap, atom_style, set_style, shuffle_ids, tmp_path
 @pytest.mark.parametrize("shuffle_ids", [False, True])
 def test_data_file_topology_lammps(snap_8, tmp_path, shuffle_ids):
     # set ids to be assigned
+    # Note: LAMMPS reorders the ids of topology objects when ids are shuffled
+    # We check that topology objects typeid and members survive the round trip
     if shuffle_ids:
         particle_id = [1, 5, 2, 6, 3, 7, 4, 8]
         bond_id = [1, 4, 2, 5, 3, 6]
         angle_id = [1, 3, 2, 4]
-        # Dihedral ids are automatically sorted by LAMMPS
-        dihedral_id = [1, 2]
-        # LAMMPS sorts
-        improper_id = [1, 2]
+        dihedral_id = [2, 1]
+        improper_id = [2, 1]
     else:
         particle_id = [1, 2, 3, 4, 5, 6, 7, 8]
         bond_id = [1, 2, 3, 4, 5, 6]
@@ -445,7 +445,6 @@ def test_data_file_topology_lammps(snap_8, tmp_path, shuffle_ids):
     # dihedral information
     snap_8.dihedrals = lammpsio.topology.Dihedrals(N=2, num_types=2)
     snap_8.dihedrals.id = dihedral_id
-    # dihedral typeids are automatically sorted by LAMMPS
     snap_8.dihedrals.typeid = [1, 2]
     snap_8.dihedrals.members = [
         [1, 2, 3, 4],
@@ -455,7 +454,6 @@ def test_data_file_topology_lammps(snap_8, tmp_path, shuffle_ids):
     # improper information
     snap_8.impropers = lammpsio.topology.Impropers(N=2, num_types=2)
     snap_8.impropers.id = improper_id
-    # dihedral typeids are automatically sorted by LAMMPS
     snap_8.impropers.typeid = [1, 2]
     snap_8.impropers.members = [
         [1, 2, 3, 4],
@@ -498,9 +496,6 @@ def test_data_file_topology_lammps(snap_8, tmp_path, shuffle_ids):
     assert snap_2.has_mass()
     assert numpy.allclose(snap_2.mass, snap_8.mass)
 
-    # LAMMPS reorders the ids of topology objects when particle ids are shuffled
-    # We check that topology objects typeid and members survive the round trip
-
     # test bonds
     assert snap_2.bonds.N == snap_8.bonds.N
 
@@ -510,6 +505,8 @@ def test_data_file_topology_lammps(snap_8, tmp_path, shuffle_ids):
     snap_8_bond_data = numpy.column_stack((snap_8.bonds.members, snap_8.bonds.typeid))
     snap_2_bond_data = numpy.column_stack((snap_2.bonds.members, snap_2.bonds.typeid))
     # test that types and bond members survive round trip
+    # Note: This sorting only works because each member only appears in the first
+    # column one time.
     assert numpy.allclose(
         snap_2_bond_data[snap_2_bond_data[:, 0].argsort()],
         snap_8_bond_data[snap_8_bond_data[:, 0].argsort()],
