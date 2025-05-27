@@ -15,8 +15,7 @@ concurrency:
 
 jobs:
   test:
-    name: unit test lammps [python-${{ matrix.python-version }}]
-    needs: test
+    name: unit test [python-${{ matrix.python-version }}]
     runs-on: ubuntu-latest
     defaults:
       run:
