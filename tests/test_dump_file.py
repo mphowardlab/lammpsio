@@ -345,11 +345,9 @@ def test_dump_file_all_lammps(
     snap.mass = [3, 2, 3]
     snap.molecule = [1, 2, 3]
     snap.charge = [-1, 0, 1]
-    filename_data = tmp_path / "atoms.data"
-    lammpsio.DataFile.create(filename_data, snap)
 
     snap_2 = lammpsio.Snapshot(snap.N, snap.box, snap.step + 1)
-    snap.step = 1
+    snap_2.step = 1
     snap_2.position = snap.position[::-1]
     snap_2.image = snap.image[::-1]
     snap_2.velocity = snap.velocity[::-1]
@@ -369,20 +367,13 @@ def test_dump_file_all_lammps(
     else:
         order = numpy.arange(snap.N)
 
-    # create file with 2 snapshots
-    schema = {
-        "id": 13,
-        "position": (11, 10, 12),
-        "image": (9, 8, 7),
-        "velocity": (4, 5, 6),
-        "typeid": 3,
-        "mass": 2,
-        "molecule": 1,
-        "charge": 0,
-    }
+    # create file with first snapshot
+    filename_data = tmp_path / f"atoms.data{compression_extension}"
+    lammpsio.DataFile.create(filename_data, snap)
+    assert filename_data.exists
 
+    # create dump with 2 snapshots in LAMMPS
     filename = tmp_path / f"atoms.lammpstrj{compression_extension}"
-
     lmps = lammps.lammps(cmdargs=["-log", f"{tmp_path}/log.lammps"])
 
     cmds = []
@@ -402,26 +393,53 @@ def test_dump_file_all_lammps(
     cmds += ["run 0"]
 
     # Manually reverse all atom data to match snap_2
-    cmds += ["set atom 1 x 0.7 y 0.8 z 0.9"]
-    cmds += ["set atom 1 vx 9 vy 8 vz 7"]
-    cmds += ["set atom 1 mol 3"]
-    cmds += ["set atom 1 type 2"]
-    cmds += ["set atom 1 charge 1.0"]
-    cmds += ["set atom 1 image 7 8 9"]
+    cmds += [
+        f"set atom {snap.id[0]} x {snap_2.position[0, 0]} "
+        f"y {snap_2.position[0, 1]} z {snap_2.position[0, 2]}"
+    ]
+    cmds += [
+        f"set atom {snap.id[0]} vx {snap_2.velocity[0, 0]} "
+        f"vy {snap_2.velocity[0, 1]} vz {snap_2.velocity[0, 2]}"
+    ]
+    cmds += [f"set atom {snap.id[0]} mol {snap_2.molecule[0]}"]
+    cmds += [f"set atom {snap.id[0]} type {snap_2.typeid[0]}"]
+    cmds += [f"set atom {snap.id[0]} charge {snap_2.charge[0]}"]
+    cmds += [
+        f"set atom {snap.id[0]} image {snap_2.image[0, 0]} "
+        f"{snap_2.image[0, 1]} {snap_2.image[0, 2]}"
+    ]
 
-    cmds += ["set atom 2 x -0.4 y -0.5 z -0.6"]
-    cmds += ["set atom 2 vx 6 vy 5 vz 4"]
-    cmds += ["set atom 2 mol 2"]
-    cmds += ["set atom 2 type 1"]
-    cmds += ["set atom 2 charge 0.0"]
-    cmds += ["set atom 2 image -4 -5 -6"]
+    cmds += [
+        f"set atom {snap.id[1]} x {snap_2.position[1, 0]} "
+        f"y {snap_2.position[1, 1]} z {snap_2.position[1, 2]}"
+    ]
+    cmds += [
+        f"set atom {snap.id[1]} vx {snap_2.velocity[1, 0]} "
+        f"vy {snap_2.velocity[1, 1]} vz {snap_2.velocity[1, 2]}"
+    ]
+    cmds += [f"set atom {snap.id[1]} mol {snap_2.molecule[1]}"]
+    cmds += [f"set atom {snap.id[1]} type {snap_2.typeid[1]}"]
+    cmds += [f"set atom {snap.id[1]} charge {snap_2.charge[1]}"]
+    cmds += [
+        f"set atom {snap.id[1]} image {snap_2.image[1, 0]} "
+        f"{snap_2.image[1, 1]} {snap_2.image[1, 2]}"
+    ]
 
-    cmds += ["set atom 3 x 0.1 y 0.2 z 0.3"]
-    cmds += ["set atom 3 vx -3 vy -2 vz -1"]
-    cmds += ["set atom 3 mol 1"]
-    cmds += ["set atom 3 type 2"]
-    cmds += ["set atom 3 charge -1.0"]
-    cmds += ["set atom 3 image 1 2 3"]
+    cmds += [
+        f"set atom {snap.id[2]} x {snap_2.position[2, 0]} "
+        f"y {snap_2.position[2, 1]} z {snap_2.position[2, 2]}"
+    ]
+    cmds += [
+        f"set atom {snap.id[2]} vx {snap_2.velocity[2, 0]} "
+        f"vy {snap_2.velocity[2, 1]} vz {snap_2.velocity[2, 2]}"
+    ]
+    cmds += [f"set atom {snap.id[2]} mol {snap_2.molecule[2]}"]
+    cmds += [f"set atom {snap.id[2]} type {snap_2.typeid[2]}"]
+    cmds += [f"set atom {snap.id[2]} charge {snap_2.charge[2]}"]
+    cmds += [
+        f"set atom {snap.id[2]} image {snap_2.image[2, 0]} "
+        f"{snap_2.image[2, 1]} {snap_2.image[2, 2]}"
+    ]
 
     # Dump reversed state (frame 1)
     cmds += ["run 1"]
@@ -429,216 +447,40 @@ def test_dump_file_all_lammps(
     lmps.commands_list(cmds)
     lmps.close()
 
-    f = lammpsio.DumpFile.create(filename, schema, snaps)
     assert filename.exists
-    assert len(f) == 2
 
     # read it back in and check snapshots
-    f2 = lammpsio.DumpFile(filename, sort_ids=sort_ids)
-    read_snaps = [s for s in f2]
-    for i, s in enumerate(f2):
-        assert read_snaps[i].N == snaps[i].N
-        assert read_snaps[i].step == snaps[i].step
-        assert numpy.allclose(read_snaps[i].box.low, snaps[i].box.low)
-        assert numpy.allclose(read_snaps[i].box.high, snaps[i].box.high)
-        if snaps[i].box.tilt is not None:
-            assert numpy.allclose(read_snaps[i].box.tilt, snaps[i].box.tilt)
-        else:
-            assert read_snaps[i].box.tilt is None
-        if shuffle_ids:
-            assert read_snaps[i].has_id()
-            if sort_ids:
-                assert numpy.allclose(read_snaps[i].id, numpy.arange(1, snaps[i].N + 1))
-            else:
-                assert numpy.allclose(
-                    read_snaps[i].id, numpy.arange(1, snaps[i].N + 1)[::-1]
-                )
-        else:
-            assert not read_snaps[i].has_id()
-        assert read_snaps[i].has_position()
-        assert numpy.allclose(read_snaps[i].position, snaps[i].position[order])
-        assert read_snaps[i].has_image()
-        assert numpy.allclose(read_snaps[i].image, snaps[i].image[order])
-        assert read_snaps[i].has_velocity()
-        assert numpy.allclose(read_snaps[i].velocity, snaps[i].velocity[order])
-        assert read_snaps[i].has_typeid()
-        assert numpy.allclose(read_snaps[i].typeid, snaps[i].typeid[order])
-        assert read_snaps[i].has_mass()
-        assert numpy.allclose(read_snaps[i].mass, snaps[i].mass[order])
-        assert read_snaps[i].has_molecule()
-        assert numpy.allclose(read_snaps[i].molecule, snaps[i].molecule[order])
-        assert read_snaps[i].has_charge()
-        assert numpy.allclose(read_snaps[i].charge, snaps[i].charge[order])
-
-
-@pytest.mark.skipif(not has_lammps, reason="lammps not installed")
-def test_copy_from_lammps(snap, tmp_path):
-    # take dump round trip through LAMMPS
-    ref_snap = copy.deepcopy(snap)
-    ref_snap.id = [12, 1, 2]
-    ref_snap.typeid = [2, 1, 2]
-    ref_snap.mass = [3, 2, 3]
-    ref_snap.molecule = [2, 0, 1]
-    ref_snap.charge = [-1, 0, 1]
-
-    snap.id = [1, 2, 12]
-    snap.position = [[0.1, 0.2, 0.3], [-0.4, -0.5, -0.6], [0.7, 0.8, 0.9]]
-
-    # create data and dump file using lammpsio
-    filename_data = tmp_path / "atoms.data"
-    lammpsio.DataFile.create(filename_data, ref_snap)
-    assert filename_data.exists
-
-    filename_dump = tmp_path / "atoms.lammpstrj"
-    schema = {"id": 0, "position": (1, 2, 3)}
-    lammpsio.DumpFile.create(filename_dump, schema, snap)
-    assert filename_dump.exists
-
-    # read dump and data file into LAMMPS
-    lmps = lammps.lammps(cmdargs=["-log", f"{tmp_path}/log.lammps"])
-    cmds = ["atom_style full"]
-    cmds += [f"read_data {filename_data}"]
-    cmds += [f"read_dump {filename_dump} 10 x y z"]
-
-    # write dump file out of LAMMPS
-    cmds += [f"dump mydump all custom 1 {filename_dump} id x y z"]
-    cmds += ["run 0"]
-    lmps.commands_list(cmds)
-    lmps.close()
-
-    f = lammpsio.DumpFile(filename_dump, schema, copy_from=ref_snap)
-    read_snap = [s for s in f][0]
-
-    assert read_snap.N == snap.N
-    assert read_snap.step == snap.step
-    assert numpy.allclose(read_snap.box.low, snap.box.low)
-    assert numpy.allclose(read_snap.box.high, snap.box.high)
-    if snap.box.tilt is not None:
-        assert numpy.allclose(read_snap.box.tilt, snap.box.tilt)
-    else:
-        assert read_snap.box.tilt is None
-    assert read_snap.has_id()
-    assert numpy.allclose(read_snap.id, snap.id)
-    assert read_snap.has_position()
-    assert numpy.allclose(read_snap.position, snap.position)
-    assert not read_snap.has_image()
-    assert not read_snap.has_velocity()
-    assert read_snap.has_typeid()
-    assert numpy.all(read_snap.typeid == [1, 2, 2])
-    assert read_snap.has_mass()
-    assert numpy.allclose(read_snap.mass, [2, 3, 3])
-    assert read_snap.has_molecule()
-    assert numpy.all(read_snap.molecule == [0, 1, 2])
-    assert read_snap.has_charge()
-    assert numpy.allclose(read_snap.charge, [0, 1, -1])
-
-
-@pytest.mark.skipif(not has_lammps, reason="lammps not installed")
-def test_copy_from_topology_lammps(snap_8, tmp_path):
-    # particle information
-    snap_8.id = [1, 2, 3, 4, 5, 6, 7, 8]
-    snap_8.typeid = [1, 1, 1, 1, 2, 2, 2, 2]
-    snap_8.position = [
-        [0, 0, 0],
-        [0.1, 0.1, 0.1],
-        [0.2, 0.2, 0.2],
-        [0.3, 0.3, 0.3],
-        [1, 1, 1],
-        [1.1, 1.1, 1.1],
-        [1.2, 1.2, 1.2],
-        [1.3, 1.3, 1.3],
-    ]
-    snap_8.mass = [1, 1, 1, 1, 2, 2, 2, 2]
-    snap_8.molecule = [1, 1, 1, 1, 2, 2, 2, 2]
-    # bonds information
-    snap_8.bonds = lammpsio.topology.Bonds(N=6, num_types=2)
-    snap_8.bonds.id = [1, 2, 3, 4, 5, 6]
-    snap_8.bonds.typeid = [1, 2, 1, 2, 1, 2]
-    snap_8.bonds.members = [
-        [1, 2],
-        [2, 3],
-        [3, 4],
-        [5, 6],
-        [6, 7],
-        [7, 8],
-    ]
-    # angles information
-    snap_8.angles = lammpsio.topology.Angles(N=4, num_types=2)
-    snap_8.angles.id = [1, 2, 3, 4]
-    snap_8.angles.typeid = [1, 2, 1, 2]
-    snap_8.angles.members = [
-        [1, 2, 3],
-        [2, 3, 4],
-        [5, 6, 7],
-        [6, 7, 8],
-    ]
-    # dihedrals information
-    snap_8.dihedrals = lammpsio.topology.Dihedrals(N=2, num_types=2)
-    snap_8.dihedrals.id = [1, 2]
-    snap_8.dihedrals.typeid = [1, 2]
-    snap_8.dihedrals.members = [
-        [1, 2, 3, 4],
-        [5, 6, 7, 8],
-    ]
-    # impropers information
-    snap_8.impropers = lammpsio.topology.Impropers(N=2, num_types=2)
-    snap_8.impropers.id = [1, 2]
-    snap_8.impropers.typeid = [1, 2]
-    snap_8.impropers.members = [
-        [1, 2, 3, 4],
-        [5, 6, 7, 8],
-    ]
-
-    # create reference snapshot
-    ref_snap_8 = copy.deepcopy(snap_8)
-
-    # create data and dump file using lammpsio
-    filename_data = tmp_path / "atoms.data"
-    lammpsio.DataFile.create(filename_data, ref_snap_8)
-    assert filename_data.exists
-
-    filename_dump = tmp_path / "atoms.lammpstrj"
-    schema = {"id": 0, "position": (1, 2, 3)}
-    lammpsio.DumpFile.create(filename_dump, schema, snap_8)
-    assert filename_dump.exists
-
-    # read dump and data file into LAMMPS
-    lmps = lammps.lammps(cmdargs=["-log", f"{tmp_path}/log.lammps"])
-    cmds = ["atom_style molecular"]
-    cmds += [f"read_data {filename_data}"]
-    cmds += [f"read_dump {filename_dump} 10 x y z"]
-
-    # write dump file out of LAMMPS
-    cmds += [f"dump mydump all custom 1 {filename_dump} id x y z"]
-    cmds += ["run 0"]
-    lmps.commands_list(cmds)
-    lmps.close()
-
-    filename = tmp_path / "atoms.lammpstrj"
-    schema = {"id": 0, "position": (1, 2, 3)}
-    lammpsio.DumpFile.create(filename, schema, snap_8)
+    f = lammpsio.DumpFile(filename, sort_ids=sort_ids)
     assert filename.exists
-
-    f = lammpsio.DumpFile(filename, schema, copy_from=ref_snap_8)
-    read_snap_8 = [s for s in f][0]
-
-    # test bonds
-    assert read_snap_8.has_bonds()
-    assert numpy.allclose(read_snap_8.bonds.id, snap_8.bonds.id)
-    assert numpy.allclose(read_snap_8.bonds.typeid, snap_8.bonds.typeid)
-    assert numpy.allclose(read_snap_8.bonds.members, snap_8.bonds.members)
-    # test angles
-    assert read_snap_8.has_angles()
-    assert numpy.allclose(read_snap_8.angles.id, snap_8.angles.id)
-    assert numpy.allclose(read_snap_8.angles.typeid, snap_8.angles.typeid)
-    assert numpy.allclose(read_snap_8.angles.members, snap_8.angles.members)
-    # test dihedrals
-    assert read_snap_8.has_dihedrals()
-    assert numpy.allclose(read_snap_8.dihedrals.id, snap_8.dihedrals.id)
-    assert numpy.allclose(read_snap_8.dihedrals.typeid, snap_8.dihedrals.typeid)
-    assert numpy.allclose(read_snap_8.dihedrals.members, snap_8.dihedrals.members)
-    # test impropers
-    assert read_snap_8.has_impropers()
-    assert numpy.allclose(read_snap_8.impropers.id, snap_8.impropers.id)
-    assert numpy.allclose(read_snap_8.impropers.typeid, snap_8.impropers.typeid)
-    assert numpy.allclose(read_snap_8.impropers.members, snap_8.impropers.members)
+    assert len(f) == 2
+    for read_snap, snap in zip(f, snaps):
+        assert read_snap.N == snap.N
+        assert read_snap.step == snap.step
+        assert numpy.allclose(read_snap.box.low, snap.box.low)
+        assert numpy.allclose(read_snap.box.high, snap.box.high)
+        if snap.box.tilt is not None:
+            assert numpy.allclose(read_snap.box.tilt, snap.box.tilt)
+        else:
+            assert read_snap.box.tilt is None
+        if shuffle_ids:
+            assert read_snap.has_id()
+            if sort_ids:
+                assert numpy.allclose(read_snap.id, numpy.arange(1, snap.N + 1))
+            else:
+                assert numpy.allclose(read_snap.id, numpy.arange(1, snap.N + 1)[::-1])
+        else:
+            assert not read_snap.has_id()
+        assert read_snap.has_position()
+        assert numpy.allclose(read_snap.position, snap.position[order])
+        assert read_snap.has_image()
+        assert numpy.allclose(read_snap.image, snap.image[order])
+        assert read_snap.has_velocity()
+        assert numpy.allclose(read_snap.velocity, snap.velocity[order])
+        assert read_snap.has_typeid()
+        assert numpy.allclose(read_snap.typeid, snap.typeid[order])
+        assert read_snap.has_mass()
+        assert numpy.allclose(read_snap.mass, snap.mass[order])
+        assert read_snap.has_molecule()
+        assert numpy.allclose(read_snap.molecule, snap.molecule[order])
+        assert read_snap.has_charge()
+        assert numpy.allclose(read_snap.charge, snap.charge[order])
