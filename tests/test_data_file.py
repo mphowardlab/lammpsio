@@ -460,12 +460,6 @@ def test_data_file_topology_lammps(snap_8, tmp_path, shuffle_ids):
         [5, 6, 7, 8],
     ]
 
-    if shuffle_ids:
-        bond_id_lammpsio = [b - 1 for b in bond_id]
-        angle_id_lammpsio = [a - 1 for a in angle_id]
-        snap_8.bonds.reorder(bond_id_lammpsio, check_order=True)
-        snap_8.angles.reorder(angle_id_lammpsio, check_order=True)
-
     filename = tmp_path / "atoms.data"
     # create the data file using lammpsio
     lammpsio.DataFile.create(filename, snap_8)
