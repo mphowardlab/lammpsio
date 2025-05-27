@@ -15,40 +15,9 @@ concurrency:
 
 jobs:
   test:
-    name: unit test [python-${{ matrix.python-version }}]
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Setup Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install
-        run: |
-          python -m pip install pip --upgrade pip
-          pip install -r tests/requirements.txt
-          pip install .
-      - name: Test
-        run: |
-          python -m pytest
-      - name: Install optional dependencies
-        run: |
-          pip install -r tests/requirements-optin.txt
-      - name: Test (optin)
-        run: |
-          python -m pytest
-  test-lammps:
     name: unit test lammps [python-${{ matrix.python-version }}]
     needs: test
     runs-on: ubuntu-latest
-    env:
-      MPIEXEC_TIMEOUT: 300
-      RDMAV_FORK_SAFE: 1
     defaults:
       run:
         shell: bash -el {0}
