@@ -350,7 +350,7 @@ def test_dump_file_min_lammps(
         snap_2.id = [3, 2, 1, 4, 5]
 
     # create file with first snapshot
-    filename_data = tmp_path / f"atoms.data{compression_extension}"
+    filename_data = tmp_path / "atoms.data"
     lammpsio.DataFile.create(filename_data, snap)
     assert filename_data.exists
 
@@ -462,7 +462,7 @@ def test_dump_file_all_lammps(  #
         order = numpy.arange(snap.N)
 
     # create file with first snapshot
-    filename_data = tmp_path / f"atoms.data{compression_extension}"
+    filename_data = tmp_path / "atoms.data"
     lammpsio.DataFile.create(filename_data, snap)
     assert filename_data.exists
 

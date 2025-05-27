@@ -190,7 +190,7 @@ def test_data_file_topology(snap_8, tmp_path, shuffle_ids):
     assert filename.exists
 
     snap_2 = data.read()
-    # test none topology features of a snapshot with topology
+    # test non-topology features of a snapshot with topology
     assert snap_2.N == snap_8.N
     if shuffle_ids:
         assert snap_2.has_id()
@@ -475,7 +475,7 @@ def test_data_file_topology_lammps(snap_8, tmp_path, shuffle_ids):
 
     # read it back in and check
     snap_2 = lammpsio.DataFile(filename).read()
-    # test none topology features of a snapshot with topology
+    # test non-topology features of a snapshot with topology
     assert snap_2.N == snap_8.N
     if shuffle_ids:
         assert snap_2.has_id()
