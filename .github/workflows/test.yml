@@ -43,7 +43,7 @@ jobs:
         run: |
           python -m pytest -m "not lammps"
   test-lammps:
-    name: unit test lammps [python-${{ matrix.python-version }}]
+    name: unit test lammps [python-${{ matrix.python-version }}, lammps-${{ matrix.lammps-version }}]
     needs: test
     runs-on: ubuntu-latest
     defaults:
