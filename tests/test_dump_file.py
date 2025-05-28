@@ -356,7 +356,7 @@ def test_dump_file_min_lammps(
 
     # create dump with 2 snapshots in LAMMPS
     filename = tmp_path / f"atoms.lammpstrj{compression_extension}"
-    lmps = lammps.lammps(cmdargs=["-log", f"{tmp_path}/log.lammps"])
+    lmps = lammps.lammps(cmdargs=["-log", "none", "-nocite"])
 
     cmds = []
     cmds += ["units lj"]
@@ -468,7 +468,7 @@ def test_dump_file_all_lammps(  #
 
     # create dump with 2 snapshots in LAMMPS
     filename = tmp_path / f"atoms.lammpstrj{compression_extension}"
-    lmps = lammps.lammps(cmdargs=["-log", f"{tmp_path}/log.lammps"])
+    lmps = lammps.lammps(cmdargs=["-log", "none", "-nocite"])
 
     cmds = []
     cmds += ["units lj"]

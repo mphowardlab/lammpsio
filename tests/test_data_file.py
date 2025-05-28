@@ -274,7 +274,7 @@ def test_data_file_min_lammps(tmp_path, snap, atom_style, shuffle_ids):
     assert filename.exists
 
     # read it in LAMMPS and write it out
-    lmps = lammps.lammps(cmdargs=["-log", "none"])
+    lmps = lammps.lammps(cmdargs=["-log", "none", "-nocite"])
     cmds = [f"atom_style {atom_style}"]
     cmds += [f"read_data {filename}"]
     cmds += ["mass 1 1.0"]
@@ -340,7 +340,7 @@ def test_data_file_all_lammps(snap, atom_style, set_style, shuffle_ids, tmp_path
     lammpsio.DataFile.create(filename, snap, atom_style if set_style else None)
     assert filename.exists
 
-    lmps = lammps.lammps(cmdargs=["-log", "none"])
+    lmps = lammps.lammps(cmdargs=["-log", "none", "-nocite"])
     cmds = [f"atom_style {atom_style}"]
     cmds += [f"read_data {filename}"]
     cmds += [f"write_data {filename}"]
@@ -467,7 +467,7 @@ def test_data_file_topology_lammps(snap_8, tmp_path, shuffle_ids):
     lammpsio.DataFile.create(filename, snap_8)
 
     # read it in LAMMPS and write it out
-    lmps = lammps.lammps(cmdargs=["-log", "none"])
+    lmps = lammps.lammps(cmdargs=["-log", "none", "-nocite"])
     cmds = ["atom_style molecular"]
     cmds += [f"read_data {filename}"]
     cmds += [f"write_data {filename}"]
