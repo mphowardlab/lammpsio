@@ -494,15 +494,14 @@ def test_data_file_topology_lammps(snap_8, tmp_path, shuffle_ids):
 
     # test bonds
     assert snap_2.bonds.N == snap_8.bonds.N
-
     assert snap_2.bonds.has_typeid()
     assert snap_2.bonds.has_members()
+
     # test that types and bond members survive round trip
     # Note: This sorting only works because each member only appears in the first
     # column one time.
     snap_8_bond_data = numpy.column_stack((snap_8.bonds.members, snap_8.bonds.typeid))
     snap_2_bond_data = numpy.column_stack((snap_2.bonds.members, snap_2.bonds.typeid))
-
     assert numpy.allclose(
         snap_2_bond_data[snap_2_bond_data[:, 0].argsort()],
         snap_8_bond_data[snap_8_bond_data[:, 0].argsort()],
@@ -510,16 +509,16 @@ def test_data_file_topology_lammps(snap_8, tmp_path, shuffle_ids):
 
     # test angles
     assert snap_2.angles.N == snap_8.angles.N
-
     assert snap_2.angles.has_typeid()
     assert snap_2.angles.has_members()
+
+    # test that types and angle members survive round trip
     snap_8_angle_data = numpy.column_stack(
         (snap_8.angles.members, snap_8.angles.typeid)
     )
     snap_2_angle_data = numpy.column_stack(
         (snap_2.angles.members, snap_2.angles.typeid)
     )
-    # test that types and angle members survive round trip
     assert numpy.allclose(
         snap_2_angle_data[snap_2_angle_data[:, 0].argsort()],
         snap_8_angle_data[snap_8_angle_data[:, 0].argsort()],
@@ -527,16 +526,16 @@ def test_data_file_topology_lammps(snap_8, tmp_path, shuffle_ids):
 
     # test dihedrals
     assert snap_2.dihedrals.N == snap_8.dihedrals.N
-
     assert snap_2.dihedrals.has_typeid()
     assert snap_2.dihedrals.has_members()
+
+    # test that types and dihedral members survive round trip
     snap_8_dihedral_data = numpy.column_stack(
         (snap_8.dihedrals.members, snap_8.dihedrals.typeid)
     )
     snap_2_dihedral_data = numpy.column_stack(
         (snap_2.dihedrals.members, snap_2.dihedrals.typeid)
     )
-    # test that types and dihedral members survive round trip
     assert numpy.allclose(
         snap_2_dihedral_data[snap_2_dihedral_data[:, 0].argsort()],
         snap_8_dihedral_data[snap_8_dihedral_data[:, 0].argsort()],
@@ -544,16 +543,16 @@ def test_data_file_topology_lammps(snap_8, tmp_path, shuffle_ids):
 
     # test impropers
     assert snap_2.impropers.N == snap_8.impropers.N
-
     assert snap_2.impropers.has_typeid()
     assert snap_2.impropers.has_members()
+
+    # test that types and improper members survive round trip
     snap_8_improper_data = numpy.column_stack(
         (snap_8.impropers.members, snap_8.impropers.typeid)
     )
     snap_2_improper_data = numpy.column_stack(
         (snap_2.impropers.members, snap_2.impropers.typeid)
     )
-    # test that types and improper members survive round trip
     assert numpy.allclose(
         snap_2_improper_data[snap_2_improper_data[:, 0].argsort()],
         snap_8_improper_data[snap_8_improper_data[:, 0].argsort()],
