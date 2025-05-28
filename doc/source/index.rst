@@ -10,10 +10,9 @@ in a variety of ways that improve workflow efficiency and reproducibility.
 .. toctree::
     :maxdepth: 1
 
-    guide/install
-    guide/examples/index
-    guide/release
-    guide/guidelines
-    guide/license
-    guide/credits
-    api/api.rst
+    ./install
+    ./release
+    ./guidelines
+    ./license
+    ./credits
+    ./api.rst

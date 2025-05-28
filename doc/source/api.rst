@@ -6,7 +6,7 @@ Overview
 
 .. autosummary::
     :nosignatures:
-    :toctree: api reference
+    :toctree: generated/
 
     lammpsio.Box
     lammpsio.DataFile
