@@ -26,7 +26,7 @@ class DataFile:
         snap = lammpsio.Snapshot(3, box, 10)
 
         data = lammpsio.DataFile.create(tmp_path / "atoms.data",
-                                            snap, atom_style="atomic")
+                                        snap, atom_style="atomic")
 
     The file must be explicitly `read()` to get a `Snapshot`:
 
