@@ -4,8 +4,8 @@ import pytest
 
 def test_orthorhombic(orthorhombic):
     box = orthorhombic
-    assert numpy.allclose(box.low, [-5, -10, 0])
-    assert numpy.allclose(box.high, [1, 10, 8])
+    assert numpy.allclose(box.low, [-5, -10, -1])
+    assert numpy.allclose(box.high, [2, 10, 8])
     assert box.tilt is None
 
     box.low = [0, 0, 0]
@@ -21,9 +21,9 @@ def test_orthorhombic(orthorhombic):
 
 def test_triclinic(triclinic):
     box = triclinic
-    assert numpy.allclose(box.low, [-5, -10, 0])
-    assert numpy.allclose(box.high, [1, 10, 8])
-    assert numpy.allclose(box.tilt, [1.0, -2.0, 0.5])
+    assert numpy.allclose(box.low, [-5, -10, -1])
+    assert numpy.allclose(box.high, [2, 10, 8])
+    assert numpy.allclose(box.tilt, [2.0, -2.0, 0.5])
 
     box.low = [0, 0, 0]
     assert numpy.allclose(box.low, [0, 0, 0])
