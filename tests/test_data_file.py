@@ -390,7 +390,8 @@ def test_data_file_all_lammps(snap, atom_style, set_style, shuffle_ids, tmp_path
 def test_data_file_topology_lammps(snap_8, tmp_path, shuffle_ids):
     # set ids to be assigned
     # Note: LAMMPS reorders the ids of topology objects when ids are shuffled
-    # We check that topology objects typeid and members survive the round trip
+    # We only check that topology objects typeid and members survive the round
+    # trip, but in future, we could check the IDs if this behavior were changed.
     if shuffle_ids:
         particle_id = [1, 5, 2, 6, 3, 7, 4, 8]
         bond_id = [1, 4, 2, 5, 3, 6]
@@ -494,14 +495,14 @@ def test_data_file_topology_lammps(snap_8, tmp_path, shuffle_ids):
     # test bonds
     assert snap_2.bonds.N == snap_8.bonds.N
 
-    # Create arrays with bond members and typeid
     assert snap_2.bonds.has_typeid()
     assert snap_2.bonds.has_members()
-    snap_8_bond_data = numpy.column_stack((snap_8.bonds.members, snap_8.bonds.typeid))
-    snap_2_bond_data = numpy.column_stack((snap_2.bonds.members, snap_2.bonds.typeid))
     # test that types and bond members survive round trip
     # Note: This sorting only works because each member only appears in the first
     # column one time.
+    snap_8_bond_data = numpy.column_stack((snap_8.bonds.members, snap_8.bonds.typeid))
+    snap_2_bond_data = numpy.column_stack((snap_2.bonds.members, snap_2.bonds.typeid))
+
     assert numpy.allclose(
         snap_2_bond_data[snap_2_bond_data[:, 0].argsort()],
         snap_8_bond_data[snap_8_bond_data[:, 0].argsort()],
@@ -510,7 +511,6 @@ def test_data_file_topology_lammps(snap_8, tmp_path, shuffle_ids):
     # test angles
     assert snap_2.angles.N == snap_8.angles.N
 
-    # Create arrays with angle members and typeid
     assert snap_2.angles.has_typeid()
     assert snap_2.angles.has_members()
     snap_8_angle_data = numpy.column_stack(
@@ -528,7 +528,6 @@ def test_data_file_topology_lammps(snap_8, tmp_path, shuffle_ids):
     # test dihedrals
     assert snap_2.dihedrals.N == snap_8.dihedrals.N
 
-    # Create arrays with dihedral members and typeid
     assert snap_2.dihedrals.has_typeid()
     assert snap_2.dihedrals.has_members()
     snap_8_dihedral_data = numpy.column_stack(
@@ -546,7 +545,6 @@ def test_data_file_topology_lammps(snap_8, tmp_path, shuffle_ids):
     # test impropers
     assert snap_2.impropers.N == snap_8.impropers.N
 
-    # Create arrays with improper members and typeid
     assert snap_2.impropers.has_typeid()
     assert snap_2.impropers.has_members()
     snap_8_improper_data = numpy.column_stack(

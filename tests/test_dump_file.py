@@ -347,7 +347,7 @@ def test_dump_file_min_lammps(
     if shuffle_ids:
         snap.id = snap.id[::-1]
         # LAMMPS create_atoms gives atom smallest available id
-        snap_2.id = [3, 2, 1, 4, 5]
+        snap_2.id = numpy.append(snap.id, [4, 5])
 
     # create file with first snapshot
     filename_data = tmp_path / "atoms.data"
@@ -487,53 +487,22 @@ def test_dump_file_all_lammps(  #
     cmds += ["run 0"]
 
     # Manually reverse all atom data to match snap_2
-    cmds += [
-        f"set atom {snap.id[0]} x {snap_2.position[0, 0]} "
-        f"y {snap_2.position[0, 1]} z {snap_2.position[0, 2]}"
-    ]
-    cmds += [
-        f"set atom {snap.id[0]} vx {snap_2.velocity[0, 0]} "
-        f"vy {snap_2.velocity[0, 1]} vz {snap_2.velocity[0, 2]}"
-    ]
-    cmds += [f"set atom {snap.id[0]} mol {snap_2.molecule[0]}"]
-    cmds += [f"set atom {snap.id[0]} type {snap_2.typeid[0]}"]
-    cmds += [f"set atom {snap.id[0]} charge {snap_2.charge[0]}"]
-    cmds += [
-        f"set atom {snap.id[0]} image {snap_2.image[0, 0]} "
-        f"{snap_2.image[0, 1]} {snap_2.image[0, 2]}"
-    ]
-
-    cmds += [
-        f"set atom {snap.id[1]} x {snap_2.position[1, 0]} "
-        f"y {snap_2.position[1, 1]} z {snap_2.position[1, 2]}"
-    ]
-    cmds += [
-        f"set atom {snap.id[1]} vx {snap_2.velocity[1, 0]} "
-        f"vy {snap_2.velocity[1, 1]} vz {snap_2.velocity[1, 2]}"
-    ]
-    cmds += [f"set atom {snap.id[1]} mol {snap_2.molecule[1]}"]
-    cmds += [f"set atom {snap.id[1]} type {snap_2.typeid[1]}"]
-    cmds += [f"set atom {snap.id[1]} charge {snap_2.charge[1]}"]
-    cmds += [
-        f"set atom {snap.id[1]} image {snap_2.image[1, 0]} "
-        f"{snap_2.image[1, 1]} {snap_2.image[1, 2]}"
-    ]
-
-    cmds += [
-        f"set atom {snap.id[2]} x {snap_2.position[2, 0]} "
-        f"y {snap_2.position[2, 1]} z {snap_2.position[2, 2]}"
-    ]
-    cmds += [
-        f"set atom {snap.id[2]} vx {snap_2.velocity[2, 0]} "
-        f"vy {snap_2.velocity[2, 1]} vz {snap_2.velocity[2, 2]}"
-    ]
-    cmds += [f"set atom {snap.id[2]} mol {snap_2.molecule[2]}"]
-    cmds += [f"set atom {snap.id[2]} type {snap_2.typeid[2]}"]
-    cmds += [f"set atom {snap.id[2]} charge {snap_2.charge[2]}"]
-    cmds += [
-        f"set atom {snap.id[2]} image {snap_2.image[2, 0]} "
-        f"{snap_2.image[2, 1]} {snap_2.image[2, 2]}"
-    ]
+    for i in range(snap_2.N):
+        cmds += [
+            f"set atom {snap_2.id[i]} x {snap_2.position[i, 0]} "
+            f"y {snap_2.position[i, 1]} z {snap_2.position[i, 2]}"
+        ]
+        cmds += [
+            f"set atom {snap_2.id[i]} vx {snap_2.velocity[i, 0]} "
+            f"vy {snap_2.velocity[i, 1]} vz {snap_2.velocity[i, 2]}"
+        ]
+        cmds += [f"set atom {snap_2.id[i]} mol {snap_2.molecule[i]}"]
+        cmds += [f"set atom {snap_2.id[i]} type {snap_2.typeid[i]}"]
+        cmds += [f"set atom {snap_2.id[i]} charge {snap_2.charge[i]}"]
+        cmds += [
+            f"set atom {snap_2.id[i]} image {snap_2.image[i, 0]} "
+            f"{snap_2.image[i, 1]} {snap_2.image[i, 2]}"
+        ]
 
     # Dump reversed state (frame 1)
     cmds += ["run 1"]
