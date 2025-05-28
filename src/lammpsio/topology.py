@@ -300,7 +300,8 @@ class Impropers(Topology):
 
 
 class LabelMap(collections.abc.MutableMapping):
-    """
+    """Label map between typeids and types.
+
     A `LabelMap` is effectively a dictionary associating a label (type) with a
     particle's or connection's typeid. These labels can be useful for tracking
     the meaning of typeids. They are also automatically used when interconverting
