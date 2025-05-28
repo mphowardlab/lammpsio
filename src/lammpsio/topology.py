@@ -6,7 +6,8 @@ from . import _compatibility
 
 
 class Topology:
-    """
+    """Particle topology.
+
     The topology (bond information) can be stored in `Bonds`, `Angles`, `Dihedrals`,
     and `Impropers` objects. All these objects function similarly, differing only in the
     number of particles that are included in a connection (2 for a bond, 3 for an angle,
@@ -312,7 +313,7 @@ class LabelMap(collections.abc.MutableMapping):
 
     Example
     -------
-    Create `LabelMaps`:
+    Create `LabelMap`:
 
     .. code-block:: python
 

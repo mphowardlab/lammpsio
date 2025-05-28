@@ -8,7 +8,8 @@ from .topology import Angles, Bonds, Dihedrals, Impropers, LabelMap
 
 
 class Snapshot:
-    """
+    """Particle configuration.
+
     The particle configuration is stored in a `Snapshot`. A `Snapshot` holds the
     data for *N* particles, the simulation `Box`, and the timestep. The `Box` follows
     the LAMMPS conventions for its shape and bounds.
@@ -23,7 +24,7 @@ class Snapshot:
         Simulation time step counter. Default of ``None`` means
         time step is not specified.
     num_types : int
-            Number of particle types. If `num_types is None`,
+            Number of particle types. If ``num_types is None``,
             then the number of types is deduced from `typeid`.
 
     Example
@@ -36,7 +37,7 @@ class Snapshot:
 
         box = lammpsio.Box([-5.0, -10.0, 0.0], [1.0, 10.0, 8.0], [1.0, -2.0, 0.5])
 
-        snap = lammpsio.Snapshot(3, box, 10)
+        snap = lammpsio.Snapshot(3, box, 10, num_types=None)
 
     """
 
@@ -457,9 +458,7 @@ class Snapshot:
 
         .. code-block:: python
 
-            snap.position = [[0.1, 0.2, 0.3],
-                             [-0.4, -0.5, -0.6],
-                             [0.7, 0.8, 0.9]]
+            snap.position = [[0.1, 0.2, 0.3], [-0.4, -0.5, -0.6], [0.7, 0.8, 0.9]]
 
         """
         if not self.has_position():
@@ -555,9 +554,7 @@ class Snapshot:
 
         .. code-block:: python
 
-            snap.velocity = [[-3, -2, -1],
-                             [6, 5, 4],
-                             [9, 8, 7]]
+            snap.velocity = [[-3, -2, -1], [6, 5, 4], [9, 8, 7]]
 
         """
         if not self.has_velocity():
