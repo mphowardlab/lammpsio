@@ -50,16 +50,16 @@ class DumpFile:
 
     A LAMMPS dump file is represented by a `DumpFile`. The actual file format is
     very flexible, but by default embeds a schema that can be read:
-    
+
     .. code-block:: python
-    
+
         traj = lammpsio.DumpFile("atoms.lammpstrj", schema=None)
 
     A `DumpFile` is iterable, so you can use it to go through all the snapshots
     of a trajectory:
-    
+
     .. skip: next
-    
+
     .. code-block:: python
 
         for snapshot in traj:
@@ -67,9 +67,9 @@ class DumpFile:
 
     You can also get the number of snapshots in the `DumpFile`, but this does
     require reading the entire file: so use with caution!
-    
+
     .. skip: next
-    
+
     .. code-block:: python
 
         num_frames = len(traj)
@@ -79,7 +79,7 @@ class DumpFile:
     whole file into a list:
 
     .. skip: next
-    
+
     .. code-block:: python
 
         snapshots = [snap for snap in traj]
