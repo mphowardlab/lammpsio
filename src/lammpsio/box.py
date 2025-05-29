@@ -21,6 +21,15 @@ class Box:
         Tilt factors ``xy``, ``xz``, and ``yz`` for a triclinic box.
         Default of ``None`` is a strictly orthorhombic box.
 
+    Examples
+    --------
+
+    Construct a triclinic simulation box:
+
+    .. code-block:: python
+
+        box = lammpsio.Box([-5.0, -10.0, 0.0], [1.0, 10.0, 8.0], [1.0, -2.0, 0.5])
+
     """
 
     def __init__(self, low, high, tilt=None):
@@ -30,7 +39,7 @@ class Box:
 
     @classmethod
     def cast(cls, value):
-        """Cast an array to a :class:`Box`.
+        """Cast an array to a `Box`.
 
         If ``value`` has 6 elements, it is unpacked as an orthorhombic box::
 
@@ -47,8 +56,16 @@ class Box:
 
         Returns
         -------
-        :class:`Box`
+        `Box`
             A simulation box matching the array.
+
+        Examples
+        --------
+        Construct an orthorhombic simulation box by casting an array:
+
+        .. code-block:: python
+
+            box = lammpsio.Box.cast([-5.0, -10.0, 0.0, 1.0, 10.0, 8.0])
 
         """
         if isinstance(value, Box):
@@ -65,7 +82,10 @@ class Box:
 
     @property
     def low(self):
-        """:class:`numpy.ndarray`: Box low."""
+        """:class:`numpy.ndarray`: Box low.
+
+        The low of the box is used as the origin of the box.
+        """
         return self._low
 
     @low.setter
@@ -77,7 +97,10 @@ class Box:
 
     @property
     def high(self):
-        """:class:`numpy.ndarray`: Box high."""
+        """:class:`numpy.ndarray`: Box high.
+
+        The high of the box is used to compute the edge lengths of the box.
+        """
         return self._high
 
     @high.setter
@@ -89,7 +112,12 @@ class Box:
 
     @property
     def tilt(self):
-        """:class:`numpy.ndarray`: Box tilt factors."""
+        """:class:`numpy.ndarray`: Box tilt factors.
+
+        The tilt factors, ``xy``, ``xz``, and ``yz`` are used to define the
+        shape of the box. The default of ``None`` is a strictly orthorhombic.
+
+        """
         return self._tilt
 
     @tilt.setter
