@@ -17,7 +17,7 @@ class DataFile:
     """LAMMPS data file.
 
     A LAMMPS data file is represented by a `DataFile`.
-    It can be created by the following syntax:
+    A `Snapshot` can be written into it using the `create()` method:
 
     .. code-block:: python
 
@@ -28,7 +28,8 @@ class DataFile:
         data = lammpsio.DataFile.create(tmp_path / "atoms.data",
                                         snap, atom_style="atomic")
 
-    The file must be explicitly `read()` to get a `Snapshot`:
+    A `DataFile` corresponding to the new file is returned by `create()`.
+    This file must be explicitly `read()` to get a `Snapshot`:
 
     .. code-block:: python
 
