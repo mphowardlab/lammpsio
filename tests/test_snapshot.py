@@ -99,10 +99,14 @@ def test_gsd_conversion():
     snap2.to_hoomd_gsd()
     assert numpy.all(snap2.id == [2, 1])
 
-    # check for error out on bad box
+    # check that box is set correctly when not originally centered
+    snap2.id = [1, 2]
+    snap2.position = [[0, 0, 0], [1, 1, 1]]
     snap2.box.low = [-10, -10, -10]
-    with pytest.raises(ValueError):
-        snap2.to_hoomd_gsd()
+    center = (snap2.box.high + snap2.box.low) / 2
+    frame5 = snap2.to_hoomd_gsd()
+    assert numpy.allclose(frame5.configuration.box, [15, 15, 15, 0, 0, 0])
+    assert numpy.allclose(frame5.particles.position, snap2.position - center)
 
 
 @pytest.mark.skipif(not has_gsd, reason="gsd not installed")

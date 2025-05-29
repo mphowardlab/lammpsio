@@ -68,8 +68,8 @@ class Snapshot:
         frame.validate()
 
         # process HOOMD box to LAMMPS box
-        L = frame.configuration.box[:3]
-        tilt = frame.configuration.box[3:]
+        L = frame.configuration.box.copy()[:3]
+        tilt = frame.configuration.box.copy()[3:]
         if frame.configuration.dimensions == 3:
             tilt[0] *= L[1]
             tilt[1:] *= L[2]
@@ -225,12 +225,12 @@ class Snapshot:
         if self.step is not None:
             frame.configuration.step = int(self.step)
 
-        # we could shift the box later, but for now this is an error
-        if not numpy.allclose(-self.box.low, self.box.high):
-            raise ValueError("GSD boxes must be centered around 0")
         L = self.box.high - self.box.low
+        center = 0.5 * (self.box.high + self.box.low)
         if self.box.tilt is not None:
-            tilt = self.box.tilt
+            tilt = self.box.tilt.copy()
+            tilt[0] /= L[1]
+            tilt[1:] /= L[2]
         else:
             tilt = [0, 0, 0]
         frame.configuration.box = numpy.concatenate((L, tilt))
@@ -247,7 +247,7 @@ class Snapshot:
 
         frame.particles.N = self.N
         if self.has_position():
-            frame.particles.position = self.position.copy()
+            frame.particles.position = self.position.copy() - center
         if self.has_velocity():
             frame.particles.velocity = self.velocity.copy()
         if self.has_image():
