@@ -9,10 +9,22 @@ in a variety of ways that improve workflow efficiency and reproducibility.
 
 .. toctree::
     :maxdepth: 1
+    :caption: Getting started
 
     ./install
     ./release
     ./guidelines
-    ./license
+
+.. toctree::
+    :maxdepth: 1
+    :caption: Reference
+
+    ./api
+    ./tutorials
+
+.. toctree::
+    :maxdepth: 1
+    :caption: Additional information
+
     ./credits
-    ./api.rst
+    ./license
