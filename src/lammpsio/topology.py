@@ -14,18 +14,21 @@ These constructor arguments are available as attributes:
 
 - ``N``: number of connections (int)
 - ``num_types``: number of connection types (int). If ``num_types is None``,
-    then the number of types is deduced from ``typeid``.
+  then the number of types is deduced from ``typeid``.
 
 The data contained per connection is:
-- ``members``: (*N*, *M*) array of particles IDs in each topology (dtype: `int`,
-                                                                   default: ``1``),
+
+- ``members``:(*N*, *M*) array of particles IDs in each topology
+  (dtype: `int`, default: ``1``),
+
 where *M* is the number of particles in a connection.
+
 - ``id``: (*N*,) array topology IDs (dtype: `int`, default: runs from 1 to *N*)
 - ``typeid``: (*N*,) array of type indexes (dtype: `int`, default: ``1``)
 
 A label (type) can be associated with a connection's typeid using a ``type_label``.
-- ``type_label``: Labels of connection typeids. (`LabelMap`,
-                                                 default: `None`)
+
+- ``type_label``: Labels of connection typeids. (`LabelMap`,default: `None`)
 
 All values of indexes will follow the LAMMPS 1-indexed convention, but the
 arrays themselves are 0-indexed.
