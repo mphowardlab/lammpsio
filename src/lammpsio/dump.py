@@ -26,7 +26,7 @@ class DumpFile:
 
     The vector-valued fields (``position``, ``velocity``, ``image``) must contain all
     three elements.
-    
+
     LAMMPS will dump particles in an unknown order unless you have used the
     ``dump_modify sort`` option. If you want particles to be ordered by ``id`` in the
     `Snapshot`, use ``sort_ids=True`` (default).
@@ -52,40 +52,40 @@ class DumpFile:
     very flexible, but by default embeds a schema that can be read:
 
     .. code-block:: python
-    
+
         box = lammpsio.Box([-5.0, -10.0, 0.0], [1.0, 10.0, 8.0], [1.0, -2.0, 0.5])
 
         snapshot = lammpsio.Snapshot(3, box, 10)
 
         traj = lammpsio.DumpFile(tmp_path / "atoms.lammpstrj", schema=None)
-    
+
     A `DumpFile` is iterable, so you can use it to go through all the snapshots
     of a trajectory:
-     
+
     .. code-block:: python
-    
+
         for snapshot in traj:
             print(snapshot.step)
 
     You can also get the number of snapshots in the `DumpFile`, but this does
     require reading the entire file: so use with caution!
-    
+
     .. code-block:: python
-    
+
         num_frames = len(traj)
-    
+
     Random access to snapshots is not currently implemented, but it may be added
     in future. If you want to randomly access snapshots, you should load the
     whole file into a list:
-    
+
     .. skip: next
     .. code-block:: python
-    
+
         snapshots = [snap for snap in traj]
         print(snapshots[3].step)
-    
-    Keep in mind that the memory requirements for this can be huge! 
-        
+
+    Keep in mind that the memory requirements for this can be huge!
+
     """
 
     def __init__(self, filename, schema=None, sort_ids=True, copy_from=None):
@@ -115,17 +115,17 @@ class DumpFile:
 
         Example
         -------
-        
+
         A `DumpFile` can be created from a list of snapshots:
-        
-        .. skip: next 
-        
+
+        .. skip: next
+
         .. code-block:: python
-         
+
             t = lammpsio.DumpFile.create("atoms.lammpstrj", schema, snapshots)
 
         The object representing the new file is returned and can be used.
-        
+
         """
         # map out the schema into a dump row
         # each entry is a tuple: (column, (attribute, index))

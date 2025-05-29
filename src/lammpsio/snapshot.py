@@ -38,8 +38,8 @@ class Snapshot:
         box = lammpsio.Box([-5.0, -10.0, 0.0], [1.0, 10.0, 8.0], [1.0, -2.0, 0.5])
 
         snapshot = lammpsio.Snapshot(3, box, 10, num_types=None)
-    
-    
+
+
     All values of indexes will follow the LAMMPS 1-indexed convention, but the
     arrays themselves are 0-indexed.
 
@@ -47,14 +47,14 @@ class Snapshot:
     accessed to save memory. Hence, accessing a per-particle property will allocate
     it to default values. If you want to check if an attribute has been set, use the
     corresponding ``has_`` method instead (e.g., `has_position()`):
-    
+
     .. code-block:: python
-     
+
         snapshot.position = [[0,0,0],[1,-1,1],[1.5,2.5,-3.5]]
         snapshot.typeid[2] = 2
         if not snapshot.has_mass():
             snapshot.mass = [2.,2.,10.]
-            
+
     """
 
     def __init__(self, N, box, step=None, num_types=None):
