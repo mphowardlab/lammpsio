@@ -37,8 +37,24 @@ class Snapshot:
 
         box = lammpsio.Box([-5.0, -10.0, 0.0], [1.0, 10.0, 8.0], [1.0, -2.0, 0.5])
 
-        snap = lammpsio.Snapshot(3, box, 10, num_types=None)
+        snapshot = lammpsio.Snapshot(3, box, 10, num_types=None)
+    
+    
+    All values of indexes will follow the LAMMPS 1-indexed convention, but the
+    arrays themselves are 0-indexed.
 
+    `Snapshot` will lazily initialize these per-particle arrays as they are
+    accessed to save memory. Hence, accessing a per-particle property will allocate
+    it to default values. If you want to check if an attribute has been set, use the
+    corresponding ``has_`` method instead (e.g., `has_position()`):
+    
+    .. code-block:: python
+     
+        snapshot.position = [[0,0,0],[1,-1,1],[1.5,2.5,-3.5]]
+        snapshot.typeid[2] = 2
+        if not snapshot.has_mass():
+            snapshot.mass = [2.,2.,10.]
+            
     """
 
     def __init__(self, N, box, step=None, num_types=None):
@@ -384,7 +400,7 @@ class Snapshot:
         -------
         .. code-block:: python
 
-            num_particles = snap.N
+            num_particles = snapshot.N
 
         """
         return self._N
@@ -397,7 +413,7 @@ class Snapshot:
         -------
         .. code-block:: python
 
-            snap.box
+            snapshot.box
 
         """
         return self._box
@@ -411,7 +427,7 @@ class Snapshot:
 
         .. code-block:: python
 
-             snap.id = [2, 0, 1]
+             snapshot.id = [2, 0, 1]
 
         """
         if not self.has_id():
@@ -444,7 +460,7 @@ class Snapshot:
         -------
         .. code-block:: python
 
-            snap.has_id()
+            snapshot.has_id()
 
         """
         return self._id is not None
@@ -458,7 +474,7 @@ class Snapshot:
 
         .. code-block:: python
 
-            snap.position = [[0.1, 0.2, 0.3], [-0.4, -0.5, -0.6], [0.7, 0.8, 0.9]]
+            snapshot.position = [[0.1, 0.2, 0.3], [-0.4, -0.5, -0.6], [0.7, 0.8, 0.9]]
 
         """
         if not self.has_position():
@@ -492,7 +508,7 @@ class Snapshot:
 
         .. code-block:: python
 
-            snap.has_position()
+            snapshot.has_position()
 
         """
         return self._position is not None
@@ -506,7 +522,7 @@ class Snapshot:
 
         .. code-block:: python
 
-            snap.image = [[1, 2, 3], [-4, -5, -6], [7, 8, 9]]
+            snapshot.image = [[1, 2, 3], [-4, -5, -6], [7, 8, 9]]
 
         """
         if not self.has_image():
@@ -540,7 +556,7 @@ class Snapshot:
 
         .. code-block:: python
 
-            snap.has_image()
+            snapshot.has_image()
 
         """
         return self._image is not None
@@ -554,7 +570,7 @@ class Snapshot:
 
         .. code-block:: python
 
-            snap.velocity = [[-3, -2, -1], [6, 5, 4], [9, 8, 7]]
+            snapshot.velocity = [[-3, -2, -1], [6, 5, 4], [9, 8, 7]]
 
         """
         if not self.has_velocity():
@@ -588,7 +604,7 @@ class Snapshot:
 
         .. code-block:: python
 
-            snap.has_velocity()
+            snapshot.has_velocity()
 
         """
         return self._velocity is not None
@@ -627,7 +643,7 @@ class Snapshot:
 
         .. code-block:: python
 
-            snap.has_molecule()
+            snapshot.has_molecule()
 
         """
         return self._molecule is not None
@@ -659,7 +675,7 @@ class Snapshot:
 
         .. code-block:: python
 
-            snap.typeid = [2, 1, 2]
+            snapshot.typeid = [2, 1, 2]
 
         """
         if not self.has_typeid():
@@ -693,7 +709,7 @@ class Snapshot:
 
         .. code-block:: python
 
-            snap.has_typeid()
+            snapshot.has_typeid()
 
         """
         return self._typeid is not None
@@ -707,7 +723,7 @@ class Snapshot:
 
         .. code-block:: python
 
-            snap.charge = [-1, 0, 1]
+            snapshot.charge = [-1, 0, 1]
 
         """
         if not self.has_charge():
@@ -741,7 +757,7 @@ class Snapshot:
 
         .. code-block:: python
 
-            snap.has_charge()
+            snapshot.has_charge()
 
         """
         return self._charge is not None
@@ -755,7 +771,7 @@ class Snapshot:
 
         .. code-block:: python
 
-            snap.mass = [3, 2, 3]
+            snapshot.mass = [3, 2, 3]
 
         """
         if not self.has_mass():
@@ -789,7 +805,7 @@ class Snapshot:
 
         .. code-block:: python
 
-            snap.has_mass()
+            snapshot.has_mass()
 
         """
         return self._mass is not None
@@ -805,7 +821,7 @@ class Snapshot:
 
             label_map = lammpsio.topology.LabelMap({1: "typeA", 2: "typeB"})
 
-            snap.type_label = LabelMap(map=label_map)
+            snapshot.type_label = LabelMap(map=label_map)
 
 
         """
@@ -829,7 +845,7 @@ class Snapshot:
 
         .. code-block:: python
 
-            snap.bonds = lammpsio.topology.Bonds(N=6, num_types=2)
+            snapshot.bonds = lammpsio.topology.Bonds(N=6, num_types=2)
 
         """
         return self._bonds
@@ -857,7 +873,7 @@ class Snapshot:
 
         .. code-block:: python
 
-            snap.has_bonds()
+            snapshot.has_bonds()
 
         """
         return self._bonds is not None and self._bonds.N > 0
@@ -872,7 +888,7 @@ class Snapshot:
 
         .. code-block:: python
 
-            snap.angles = lammpsio.topology.Angles(N=4, num_types=2)
+            snapshot.angles = lammpsio.topology.Angles(N=4, num_types=2)
 
         """
         return self._angles
@@ -899,7 +915,7 @@ class Snapshot:
 
         .. code-block:: python
 
-            snap.has_angles()
+            snapshot.has_angles()
 
         """
         return self._angles is not None and self._angles.N > 0
@@ -913,7 +929,7 @@ class Snapshot:
 
         .. code-block:: python
 
-            snap.dihedrals = lammpsio.topology.Dihedrals(N=2, num_types=2)
+            snapshot.dihedrals = lammpsio.topology.Dihedrals(N=2, num_types=2)
 
         """
         return self._dihedrals
@@ -940,7 +956,7 @@ class Snapshot:
 
         .. code-block:: python
 
-            snap.has_dihedrals()
+            snapshot.has_dihedrals()
 
         """
         return self._dihedrals is not None and self._dihedrals.N > 0
@@ -954,7 +970,7 @@ class Snapshot:
 
         .. code-block:: python
 
-            snap.impropers = lammpsio.topology.Impropers(N=2, num_types=2)
+            snapshot.impropers = lammpsio.topology.Impropers(N=2, num_types=2)
 
         """
         return self._impropers
@@ -981,7 +997,7 @@ class Snapshot:
 
         .. code-block:: python
 
-            snap.has_impropers()
+            snapshot.has_impropers()
 
         """
         return self._impropers is not None and self._impropers.N > 0
@@ -1003,7 +1019,7 @@ class Snapshot:
 
             bond_id = [0, 3, 1, 4, 2, 5]
 
-            snap.bonds.reorder(numpy.sort(bond_id), check_order=True)
+            snapshot.bonds.reorder(numpy.sort(bond_id), check_order=True)
 
         """
         # sanity check the sorting order before applying it
