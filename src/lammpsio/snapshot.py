@@ -68,8 +68,9 @@ class Snapshot:
         frame.validate()
 
         # process HOOMD box to LAMMPS box
-        L = frame.configuration.box.copy()[:3]
-        tilt = frame.configuration.box.copy()[3:]
+        box = numpy.array(frame.configuration.box, copy=True)
+        L = box[:3]
+        tilt = box[3:]
         if frame.configuration.dimensions == 3:
             tilt[0] *= L[1]
             tilt[1:] *= L[2]
