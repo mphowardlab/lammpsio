@@ -100,21 +100,16 @@ def test_gsd_conversion():
     assert numpy.all(snap2.id == [2, 1])
 
     # check that orthorhombic box is set correctly when not originally centered
-    snap2.id = [1, 2]
-    snap2.position = [[0, 0, 0], [1, 1, 1]]
-    snap2.box.low = [-10, -10, -10]
+    snap3 = lammpsio.Snapshot(N=2, box=lammpsio.Box([0, 0, 0], [15, 15, 15]))
+    snap3.position = [[0, 0, 0], [1, 1, 1]]
     # center calculated using box vectors as describe in LAMMPS documentation
-    center = [-2.5, -2.5, -2.5]
-    frame5 = snap2.to_hoomd_gsd()
+    center = [7.5, 7.5, 7.5]
+    frame5 = snap3.to_hoomd_gsd()
     assert numpy.allclose(frame5.configuration.box, [15, 15, 15, 0, 0, 0])
-    assert numpy.allclose(frame5.particles.position, snap2.position - center)
+    assert numpy.allclose(frame5.particles.position, snap3.position - center)
 
     # check that triclinic box is set correctly when not originally centered
-    snap3 = lammpsio.Snapshot(
-        N=2, box=lammpsio.Box([0, 0, 0], [15, 15, 15], [1.5, 3.0, 4.5])
-    )
-    snap3.id = [1, 2]
-    snap3.position = [[0, 0, 0], [1, 1, 1]]
+    snap3.box.tilt = [1.5, 3.0, 4.5]
     # center calculated using box vectors as describe in LAMMPS documentation
     center = [9.75, 9.75, 7.5]
     frame6 = snap3.to_hoomd_gsd()

@@ -234,22 +234,19 @@ class Snapshot:
             frame.configuration.step = int(self.step)
 
         L = self.box.high - self.box.low
-        # Calculate edge vectors using LAMMPS convention
-        x_edge = numpy.array([L[0], 0, 0])
-        y_edge = numpy.array(
-            [self.box.tilt[0] if self.box.tilt is not None else 0, L[1], 0]
-        )
-        z_edge = numpy.array(
+        # Calculate box vectors a b & c using LAMMPS convention
+        a = numpy.array([L[0], 0, 0])
+        b = numpy.array([self.box.tilt[0] if self.box.tilt is not None else 0, L[1], 0])
+        c = numpy.array(
             [
                 self.box.tilt[1] if self.box.tilt is not None else 0,
                 self.box.tilt[2] if self.box.tilt is not None else 0,
                 L[2],
             ]
         )
-
         # Calculate center of box by calculating opposite corner of low
-        opposite_corner = self.box.low + x_edge + y_edge + z_edge
-        center = (opposite_corner + self.box.low) / 2.0
+        far_vertex = self.box.low + a + b + c
+        center = (far_vertex + self.box.low) / 2.0
         if self.box.tilt is not None:
             tilt = self.box.tilt.copy()
             tilt[0] /= L[1]
