@@ -46,8 +46,8 @@ def test_gsd_conversion():
     # make Snapshot from GSD
     snap, type_map = lammpsio.Snapshot.from_hoomd_gsd(frame)
     assert snap.step == 3
-    assert numpy.allclose(snap.box.low, [-2, -2.5, -3])
-    assert numpy.allclose(snap.box.high, [2, 2.5, 3])
+    assert numpy.allclose(snap.box.low, [-2.85, -3.4, -3])
+    assert numpy.allclose(snap.box.high, [1.15, 1.6, 3])
     assert numpy.allclose(snap.box.tilt, [0.5, 1.2, 1.8])
     assert snap.N == 2
     assert numpy.allclose(snap.position, [[0.1, 0.2, 0.3], [-0.1, -0.2, -0.3]])
@@ -99,14 +99,27 @@ def test_gsd_conversion():
     snap2.to_hoomd_gsd()
     assert numpy.all(snap2.id == [2, 1])
 
-    # check that box is set correctly when not originally centered
+    # check that orthorhombic box is set correctly when not originally centered
     snap2.id = [1, 2]
     snap2.position = [[0, 0, 0], [1, 1, 1]]
     snap2.box.low = [-10, -10, -10]
-    center = (snap2.box.high + snap2.box.low) / 2
+    # center calculated using box vectors as describe in LAMMPS documentation
+    center = [-2.5, -2.5, -2.5]
     frame5 = snap2.to_hoomd_gsd()
     assert numpy.allclose(frame5.configuration.box, [15, 15, 15, 0, 0, 0])
     assert numpy.allclose(frame5.particles.position, snap2.position - center)
+
+    # check that triclinic box is set correctly when not originally centered
+    snap3 = lammpsio.Snapshot(
+        N=2, box=lammpsio.Box([0, 0, 0], [15, 15, 15], [1.5, 3.0, 4.5])
+    )
+    snap3.id = [1, 2]
+    snap3.position = [[0, 0, 0], [1, 1, 1]]
+    # center calculated using box vectors as describe in LAMMPS documentation
+    center = [9.75, 9.75, 7.5]
+    frame6 = snap3.to_hoomd_gsd()
+    assert numpy.allclose(frame6.configuration.box, [15, 15, 15, 0.1, 0.2, 0.3])
+    assert numpy.allclose(frame6.particles.position, snap3.position - center)
 
 
 @pytest.mark.skipif(not has_gsd, reason="gsd not installed")
