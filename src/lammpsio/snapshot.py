@@ -68,8 +68,9 @@ class Snapshot:
         frame.validate()
 
         # process HOOMD box to LAMMPS box
-        L = frame.configuration.box[:3]
-        tilt = frame.configuration.box[3:]
+        box = numpy.array(frame.configuration.box, copy=True)
+        L = box[:3]
+        tilt = box[3:]
         if frame.configuration.dimensions == 3:
             tilt[0] *= L[1]
             tilt[1:] *= L[2]
@@ -78,7 +79,14 @@ class Snapshot:
             # HOOMD boxes can have Lz = 0, but LAMMPS does not allow this.
             if L[2] == 0:
                 L[2] = 1.0
-        box = Box(low=-0.5 * L, high=0.5 * L, tilt=tilt)
+
+        x_edge = numpy.array([L[0], 0, 0])
+        y_edge = numpy.array([tilt[0], L[1], 0])
+        z_edge = numpy.array([tilt[1], tilt[2], L[2]])
+
+        low = -0.5 * (x_edge + y_edge + z_edge)
+        high = low + L
+        box = Box(low=low, high=high, tilt=tilt)
 
         snap = Snapshot(
             N=frame.particles.N,
@@ -225,12 +233,24 @@ class Snapshot:
         if self.step is not None:
             frame.configuration.step = int(self.step)
 
-        # we could shift the box later, but for now this is an error
-        if not numpy.allclose(-self.box.low, self.box.high):
-            raise ValueError("GSD boxes must be centered around 0")
         L = self.box.high - self.box.low
+        # Calculate box vectors a b & c using LAMMPS convention
+        a = numpy.array([L[0], 0, 0])
+        b = numpy.array([self.box.tilt[0] if self.box.tilt is not None else 0, L[1], 0])
+        c = numpy.array(
+            [
+                self.box.tilt[1] if self.box.tilt is not None else 0,
+                self.box.tilt[2] if self.box.tilt is not None else 0,
+                L[2],
+            ]
+        )
+        # Calculate center of box by calculating opposite corner of low
+        far_vertex = self.box.low + a + b + c
+        center = (far_vertex + self.box.low) / 2.0
         if self.box.tilt is not None:
-            tilt = self.box.tilt
+            tilt = self.box.tilt.copy()
+            tilt[0] /= L[1]
+            tilt[1:] /= L[2]
         else:
             tilt = [0, 0, 0]
         frame.configuration.box = numpy.concatenate((L, tilt))
@@ -247,7 +267,7 @@ class Snapshot:
 
         frame.particles.N = self.N
         if self.has_position():
-            frame.particles.position = self.position.copy()
+            frame.particles.position = self.position.copy() - center
         if self.has_velocity():
             frame.particles.velocity = self.velocity.copy()
         if self.has_image():
