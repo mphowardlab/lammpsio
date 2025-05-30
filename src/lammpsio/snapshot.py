@@ -79,7 +79,14 @@ class Snapshot:
             # HOOMD boxes can have Lz = 0, but LAMMPS does not allow this.
             if L[2] == 0:
                 L[2] = 1.0
-        box = Box(low=-0.5 * L, high=0.5 * L, tilt=tilt)
+
+        x_edge = numpy.array([L[0], 0, 0])
+        y_edge = numpy.array([tilt[0], L[1], 0])
+        z_edge = numpy.array([tilt[1], tilt[2], L[2]])
+
+        low = -0.5 * (x_edge + y_edge + z_edge)
+        high = low + L
+        box = Box(low=low, high=high, tilt=tilt)
 
         snap = Snapshot(
             N=frame.particles.N,
@@ -227,7 +234,22 @@ class Snapshot:
             frame.configuration.step = int(self.step)
 
         L = self.box.high - self.box.low
-        center = 0.5 * (self.box.high + self.box.low)
+        # Calculate edge vectors using LAMMPS convention
+        x_edge = numpy.array([L[0], 0, 0])
+        y_edge = numpy.array(
+            [self.box.tilt[0] if self.box.tilt is not None else 0, L[1], 0]
+        )
+        z_edge = numpy.array(
+            [
+                self.box.tilt[1] if self.box.tilt is not None else 0,
+                self.box.tilt[2] if self.box.tilt is not None else 0,
+                L[2],
+            ]
+        )
+
+        # Calculate center of box by calculating opposite corner of low
+        opposite_corner = self.box.low + x_edge + y_edge + z_edge
+        center = (opposite_corner + self.box.low) / 2.0
         if self.box.tilt is not None:
             tilt = self.box.tilt.copy()
             tilt[0] /= L[1]
