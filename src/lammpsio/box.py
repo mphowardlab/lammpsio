@@ -5,29 +5,29 @@ from . import _compatibility
 
 class Box:
     """Triclinic simulation box.
-    
-    ``lammpsio.Box`` defines the simulation box using LAMMPS's convention. 
-    In LAMMPS, the simulation box is specified by three parameters: `low`, `high`, and `tilt`. 
-    The `low` parameter defines the origin (lower corner) of the box, while `high` specifies how far the box extends along each axis. 
+
+    ``lammpsio.Box`` defines the simulation box using LAMMPS's convention.
+    In LAMMPS, the simulation box is specified by three parameters: `low`, `high`, and `tilt`.
+    The `low` parameter defines the origin (lower corner) of the box, while `high` specifies how far the box extends along each axis.
     The `tilt` parameter contains tilt factors (xy, xz, yz) that skew the edges to create non-orthorhombic simulation boxes.
 
     These parameters can be transformed into a box matrix with the following form:
 
-    .. math:: 
+    .. math::
         \\begin{bmatrix}
             1 & b_x & c_x \\\\
             0 & b_y & c_y \\\\
             0 & 0 & c_z
         \\end{bmatrix},
-    
-    where each column of this matrix represents one of the three edge vectors (**A**, **B**, & **C**) that define the triclinic simulation box, 
-    and each of the matrix elements are derived from the `low`, `high`, and `tilt` values. 
-    The diagonal elements ($a_x$, $b_y$, $c_z$) represent the box lengths along each axis, while the off-diagonal elements come from the tilt factors. 
-    For more details on how to convert between the LAMMPS parameters and 
+
+    where each column of this matrix represents one of the three edge vectors (**A**, **B**, & **C**) that define the triclinic simulation box,
+    and each of the matrix elements are derived from the `low`, `high`, and `tilt` values.
+    The diagonal elements ($a_x$, $b_y$, $c_z$) represent the box lengths along each axis, while the off-diagonal elements come from the tilt factors.
+    For more details on how to convert between the LAMMPS parameters and
     box matrix see the [LAMMPS documentation](https://docs.lammps.org/Howto_triclinic.html#transformation-from-general-to-restricted-triclinic-boxes).
 
-    For our orthorhombic unit cell, all tilt factors are zero, so `tilt` has the default value of `None`, resulting in a simple rectangular box. 
-    We choose `low` to be at ``[0, 0, 0]`` and `high` is the diagonal values of the box. 
+    For our orthorhombic unit cell, all tilt factors are zero, so `tilt` has the default value of `None`, resulting in a simple rectangular box.
+    We choose `low` to be at ``[0, 0, 0]`` and `high` is the diagonal values of the box.
 
     Parameters
     ----------
