@@ -1,5 +1,8 @@
 import numpy
 import pytest
+from pytest_lazy_fixtures import lf
+
+import lammpsio
 
 
 def test_orthorhombic(orthorhombic):
@@ -39,3 +42,30 @@ def test_triclinic(triclinic):
     assert numpy.allclose(box.tilt, [0, 0, 0])
     with pytest.raises(TypeError):
         box.tilt = [0, 0]
+
+
+@pytest.mark.parametrize("box", [lf("orthorhombic"), lf("triclinic")])
+def test_from_matrix(box):
+    lx, ly, lz = box.high - box.low
+    xy, xz, yz = box.tilt if box.tilt is not None else (0, 0, 0)
+    matrix = numpy.array([[lx, xy, xz], [0, ly, yz], [0, 0, lz]])
+    new_box = lammpsio.Box.from_matrix(box.low, matrix)
+
+    assert numpy.allclose(new_box.low, box.low)
+    assert numpy.allclose(new_box.high, box.high)
+    if box.tilt is not None:
+        assert numpy.allclose(new_box.tilt, box.tilt)
+
+    # test with invalid low
+    with pytest.raises(TypeError):
+        lammpsio.Box.from_matrix([0, 0], matrix)
+
+    # test with invalid matrix shape
+    invalid_matrix_shape = numpy.array([[lx, xy], [ly, yz]])
+    with pytest.raises(TypeError):
+        lammpsio.Box.from_matrix(box.low, invalid_matrix_shape)
+
+    # test with invalid matrix values
+    invalid_matrix = numpy.array([[lx, xy, xz], [ly, 0, yz], [lz, 0, 0]])
+    with pytest.raises(ValueError):
+        lammpsio.Box.from_matrix(box.low, invalid_matrix)
