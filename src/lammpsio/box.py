@@ -110,11 +110,9 @@ class Box:
         high = low + numpy.diag(arr)
 
         # Extract tilt factors
-        xy, xz, yz = arr[0, 1], arr[0, 2], arr[1, 2]
-        if force_triclinic:
-            tilt = [xy, xz, yz] if numpy.any([xy, xz, yz]) else [0, 0, 0]
-        else:
-            tilt = [xy, xz, yz] if numpy.any([xy, xz, yz]) else None
+        tilt = [arr[0, 1], arr[0, 2], arr[1, 2]]
+        if not force_triclinic and not numpy.any(tilt):
+            tilt = None
 
         return cls(low, high, tilt)
 
