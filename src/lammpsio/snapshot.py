@@ -80,13 +80,11 @@ class Snapshot:
             if L[2] == 0:
                 L[2] = 1.0
 
-        x_edge = numpy.array([L[0], 0, 0])
-        y_edge = numpy.array([tilt[0], L[1], 0])
-        z_edge = numpy.array([tilt[1], tilt[2], L[2]])
-
-        low = -0.5 * (x_edge + y_edge + z_edge)
-        high = low + L
-        box = Box(low=low, high=high, tilt=tilt)
+        matrix = numpy.array(
+            [[L[0], tilt[0], tilt[1]], [0, L[1], tilt[2]], [0, 0, L[2]]]
+        )
+        low = -0.5 * (matrix[:, 0] + matrix[:, 1] + matrix[:, 2])
+        box = Box.from_matrix(low=low, matrix=matrix)
 
         snap = Snapshot(
             N=frame.particles.N,
@@ -234,19 +232,6 @@ class Snapshot:
             frame.configuration.step = int(self.step)
 
         L = self.box.high - self.box.low
-        # Calculate box vectors a b & c using LAMMPS convention
-        a = numpy.array([L[0], 0, 0])
-        b = numpy.array([self.box.tilt[0] if self.box.tilt is not None else 0, L[1], 0])
-        c = numpy.array(
-            [
-                self.box.tilt[1] if self.box.tilt is not None else 0,
-                self.box.tilt[2] if self.box.tilt is not None else 0,
-                L[2],
-            ]
-        )
-        # Calculate center of box by calculating opposite corner of low
-        far_vertex = self.box.low + a + b + c
-        center = (far_vertex + self.box.low) / 2.0
         if self.box.tilt is not None:
             tilt = self.box.tilt.copy()
             tilt[0] /= L[1]
@@ -267,6 +252,22 @@ class Snapshot:
 
         frame.particles.N = self.N
         if self.has_position():
+            # Calculate box vectors a b & c using LAMMPS convention
+            a = numpy.array([L[0], 0, 0])
+            b = numpy.array(
+                [self.box.tilt[0] if self.box.tilt is not None else 0, L[1], 0]
+            )
+            c = numpy.array(
+                [
+                    self.box.tilt[1] if self.box.tilt is not None else 0,
+                    self.box.tilt[2] if self.box.tilt is not None else 0,
+                    L[2],
+                ]
+            )
+            # Calculate center of box by calculating opposite corner of low
+            far_vertex = self.box.low + a + b + c
+            center = (far_vertex + self.box.low) / 2.0
+            # center the positions around the box center
             frame.particles.position = self.position.copy() - center
         if self.has_velocity():
             frame.particles.velocity = self.velocity.copy()
