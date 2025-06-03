@@ -45,16 +45,26 @@ def test_triclinic(triclinic):
 
 
 @pytest.mark.parametrize("box", [lf("orthorhombic"), lf("triclinic")])
-def test_from_matrix(box):
+@pytest.mark.parametrize("force_triclinic", [True, False])
+def test_from_matrix(box, force_triclinic):
     lx, ly, lz = box.high - box.low
     xy, xz, yz = box.tilt if box.tilt is not None else (0, 0, 0)
     matrix = numpy.array([[lx, xy, xz], [0, ly, yz], [0, 0, lz]])
-    new_box = lammpsio.Box.from_matrix(box.low, matrix)
+    new_box = lammpsio.Box.from_matrix(box.low, matrix, force_triclinic=force_triclinic)
 
     assert numpy.allclose(new_box.low, box.low)
     assert numpy.allclose(new_box.high, box.high)
-    if box.tilt is not None:
-        assert numpy.allclose(new_box.tilt, box.tilt)
+    if force_triclinic:
+        assert new_box.tilt is not None
+        if box.tilt is not None:
+            assert numpy.allclose(new_box.tilt, box.tilt)
+        else:
+            assert numpy.allclose(new_box.tilt, [0, 0, 0])
+    else:
+        if box.tilt is not None:
+            assert numpy.allclose(new_box.tilt, box.tilt)
+        else:
+            assert new_box.tilt is None
 
     # test with invalid low
     with pytest.raises(TypeError):

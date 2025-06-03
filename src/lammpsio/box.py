@@ -64,7 +64,7 @@ class Box:
             raise TypeError(f"Unable to cast boxlike object with shape {v.shape}")
 
     @classmethod
-    def from_matrix(cls, low, matrix):
+    def from_matrix(cls, low, matrix, force_triclinic=False):
         """Create a Box from low and matrix.
 
         Parameters
@@ -77,6 +77,9 @@ class Box:
                 [[lx, xy, xz],
                  [0, ly, yz],
                  [0, 0, lz]]
+        force_triclinic : bool, optional
+            If ``True``, forces the box to be triclinic even if the tilt
+            factors are zero. Default is ``False``.
 
         Returns
         -------
@@ -103,13 +106,15 @@ class Box:
         if arr[1, 0] != 0 or arr[2, 0] != 0 or arr[2, 1] != 0:
             raise ValueError("Box matrix must be upper triangular")
 
-        # Extract diagonal elements for box lengths
-        lx, ly, lz = arr[0, 0], arr[1, 1], arr[2, 2]
-        high = low + [lx, ly, lz]
+        # Calculate high from the matrix
+        high = low + numpy.diag(arr)
 
         # Extract tilt factors
         xy, xz, yz = arr[0, 1], arr[0, 2], arr[1, 2]
-        tilt = [xy, xz, yz] if numpy.any([xy, xz, yz]) else None
+        if force_triclinic:
+            tilt = [xy, xz, yz] if numpy.any([xy, xz, yz]) else [0, 0, 0]
+        else:
+            tilt = [xy, xz, yz] if numpy.any([xy, xz, yz]) else None
 
         return cls(low, high, tilt)
 
