@@ -77,7 +77,7 @@ class Box:
                 [[lx, xy, xz],
                  [0, ly, yz],
                  [0, 0, lz]]
-        force_triclinic : bool, optional
+        force_triclinic : bool
             If ``True``, forces the box to be triclinic even if the tilt
             factors are zero. Default is ``False``.
 
