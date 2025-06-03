@@ -81,3 +81,16 @@ jobs:
       - name: Test
         run: |
           python -m pytest -m lammps
+ # final exit point for unit tests on PRs, which can be a required check
+  test-exit:
+    name: unit test
+    needs: [test, test-lammps]
+    if: ${{ always() && github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check core tests
+        if: needs.test.result != 'success'
+        run: echo "::error ::core tests failed." && exit 1
+      - name: Check lammps tests
+        if: needs.test-lammps.result != 'success'
+        run: echo "::error ::lammps tests failed." && exit 1
