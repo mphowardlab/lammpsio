@@ -76,16 +76,39 @@ class DataFile:
         "cvec",
         "abc origin",
     )
-    known_bodies = ("Atoms", "Velocities", "Masses")
+    known_bodies = (
+        "Atoms",
+        "Velocities",
+        "Masses",
+        "Bonds",
+        "Angles",
+        "Dihedrals",
+        "Impropers",
+    )
     unknown_bodies = (
         "Ellipsoids",
         "Lines",
         "Triangles",
         "Bodies",
-        "Bonds",
-        "Angles",
-        "Dihedrals",
-        "Impropers",
+        "Atom Type Labels",
+        "Bond Type Labels",
+        "Angle Type Labels",
+        "Dihedral Type Labels",
+        "Improper Type Labels",
+        "Pair Coeffs",
+        "PairIJ Coeffs",
+        "Bond Coeffs",
+        "Angle Coeffs",
+        "Dihedral Coeffs",
+        "Improper Coeffs",
+        "BondBond Coeffs",
+        "BondAngle Coeffs",
+        "MiddleBondTorsion Coeffs",
+        "EndBondTorsion Coeffs",
+        "AngleTorsion Coeffs",
+        "AngleAngleTorsion Coeffs",
+        "BondBond13 Coeffs",
+        "AngleAngle Coeffs",
     )
 
     @classmethod
