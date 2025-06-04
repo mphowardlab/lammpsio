@@ -66,10 +66,16 @@ class DataFile:
         "extra angle per atom",
         "extra dihedral per atom",
         "extra improper per atom",
+        "extra special per atom",
         "ellipsoids",
         "lines",
         "triangles",
         "bodies",
+        "avec",
+        "bvec",
+        "cvec",
+        "abc origin",
+        "",
     )
     known_bodies = ("Atoms", "Velocities", "Masses")
     unknown_bodies = (
