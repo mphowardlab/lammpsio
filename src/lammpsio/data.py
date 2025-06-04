@@ -75,7 +75,6 @@ class DataFile:
         "bvec",
         "cvec",
         "abc origin",
-        "",
     )
     known_bodies = ("Atoms", "Velocities", "Masses")
     unknown_bodies = (
