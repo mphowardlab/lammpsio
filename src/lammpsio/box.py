@@ -29,7 +29,7 @@ class Box:
     `low`, `high`, and `tilt` values.
     The diagonal elements ($a_x$, $b_y$, $c_z$) represent the box lengths
     along each axis,while the off-diagonal elements come from the tilt
-    factors.For more details on how to convert between the LAMMPS parameters
+    factors. For more details on how to convert between the LAMMPS parameters
     and box matrix see the `LAMMPS documentation
     <https://docs.lammps.org/Howto_triclinic.html#transformation-from-general-to-restricted-triclinic-boxes>`_.
 
@@ -108,7 +108,7 @@ class Box:
 
     @property
     def low(self):
-        """:class:`numpy.ndarray`: Box low.
+        """:math:`\\left(3,\\right)` :class:`numpy.ndarray`: Box low.
 
         The low of the box is used as the origin of the box.
         """
@@ -123,7 +123,7 @@ class Box:
 
     @property
     def high(self):
-        """:class:`numpy.ndarray`: Box high.
+        """:math:`\\left(3,\\right)` :class:`numpy.ndarray`: Box high.
 
         The high of the box is used to compute the edge lengths of the box.
         """
@@ -138,10 +138,10 @@ class Box:
 
     @property
     def tilt(self):
-        """:class:`numpy.ndarray`: Box tilt factors.
+        """:math:`\\left(3,\\right)` :class:`numpy.ndarray`: Box tilt factors.
 
         The tilt factors, ``xy``, ``xz``, and ``yz`` are used to define the
-        shape of the box. The default of ``None`` is a strictly orthorhombic.
+        shape of the box. The default of ``None`` is strictly orthorhombic.
 
         """
         return self._tilt

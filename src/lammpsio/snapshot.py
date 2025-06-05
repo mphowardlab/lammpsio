@@ -51,7 +51,9 @@ class Snapshot:
     .. code-block:: python
 
         snapshot.position = [[0,0,0],[1,-1,1],[1.5,2.5,-3.5]]
+
         snapshot.typeid[2] = 2
+
         if not snapshot.has_mass():
             snapshot.mass = [2.,2.,10.]
 
@@ -420,7 +422,7 @@ class Snapshot:
 
     @property
     def id(self):
-        """:class:`numpy.ndarray`: Particle IDs.
+        """:math:`\\left(N,\\right)` :class:`numpy.ndarray`: Particle IDs.
 
         Example
         -------
@@ -467,7 +469,7 @@ class Snapshot:
 
     @property
     def position(self):
-        """:class:`numpy.ndarray`: Positions.
+        """:math:`\\left(N,3\\right)` :class:`numpy.ndarray`: Positions.
 
         Example
         -------
@@ -515,7 +517,7 @@ class Snapshot:
 
     @property
     def image(self):
-        """:class:`numpy.ndarray`: Images.
+        """:math:`\\left(N,3\\right)` :class:`numpy.ndarray`: Images.
 
         Example
         -------
@@ -563,7 +565,7 @@ class Snapshot:
 
     @property
     def velocity(self):
-        """:class:`numpy.ndarray`: Velocities.
+        """:math:`\\left(N,3\\right)` :class:`numpy.ndarray`: Velocities.
 
         Example
         -------
@@ -611,7 +613,7 @@ class Snapshot:
 
     @property
     def molecule(self):
-        """:class:`numpy.ndarray`: Molecule tags."""
+        """:math:`\\left(N,\\right)` :class:`numpy.ndarray`: Molecule tags."""
         if not self.has_molecule():
             self._molecule = numpy.zeros(self.N, dtype=int)
         return self._molecule
@@ -668,7 +670,7 @@ class Snapshot:
 
     @property
     def typeid(self):
-        """:class:`numpy.ndarray`: Types.
+        """:math:`\\left(N,\\right)` :class:`numpy.ndarray`: Types.
 
         Example
         -------
@@ -716,7 +718,7 @@ class Snapshot:
 
     @property
     def charge(self):
-        """:class:`numpy.ndarray`: Charges.
+        """:math:`\\left(N,\\right)` :class:`numpy.ndarray`: Charges.
 
         Example
         -------
@@ -764,7 +766,7 @@ class Snapshot:
 
     @property
     def mass(self):
-        """:class:`numpy.ndarray`: Masses.
+        """:math:`\\left(N,\\right)` :class:`numpy.ndarray`: Masses.
 
         Example
         -------
@@ -793,7 +795,7 @@ class Snapshot:
             self._mass = None
 
     def has_mass(self):
-        """Check if configuration has masses.
+        """:class:`bool`:Check if configuration has masses.
 
         Returns
         -------
