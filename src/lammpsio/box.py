@@ -106,6 +106,59 @@ class Box:
         else:
             raise TypeError(f"Unable to cast boxlike object with shape {v.shape}")
 
+    @classmethod
+    def from_matrix(cls, low, matrix, force_triclinic=False):
+        """Create a Box from low and matrix.
+
+        Parameters
+        ----------
+        low : list
+            Origin of the box.
+        matrix : :class:`numpy.ndarray`
+            Upper triangular matrix in LAMMPS style::
+
+                [[lx, xy, xz],
+                 [0, ly, yz],
+                 [0, 0, lz]]
+        force_triclinic : bool
+            If ``True``, forces the box to be triclinic even if the tilt
+            factors are zero. Default is ``False``.
+
+        Returns
+        -------
+        :class:`Box`
+            A simulation box.
+
+        Raises
+        ------
+        TypeError
+            If `low` is not length 3.
+        TypeError
+            If `matrix` is not a 3x3 array.
+        ValueError
+            If `matrix` is not upper triangular.
+
+        """
+        low = numpy.array(low, dtype=float)
+        arr = numpy.array(matrix, dtype=float)
+
+        if low.shape != (3,):
+            raise TypeError("Low must be a 3-tuple")
+        if arr.shape != (3, 3):
+            raise TypeError("Box matrix must be a 3x3 array")
+        if arr[1, 0] != 0 or arr[2, 0] != 0 or arr[2, 1] != 0:
+            raise ValueError("Box matrix must be upper triangular")
+
+        # Calculate high from the matrix
+        high = low + numpy.diag(arr)
+
+        # Extract tilt factors
+        tilt = [arr[0, 1], arr[0, 2], arr[1, 2]]
+        if not force_triclinic and not numpy.any(tilt):
+            tilt = None
+
+        return cls(low, high, tilt)
+
     @property
     def low(self):
         """:math:`\\left(3,\\right)` :class:`numpy.ndarray`: Box low.

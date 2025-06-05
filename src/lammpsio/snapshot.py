@@ -115,8 +115,9 @@ class Snapshot:
         frame.validate()
 
         # process HOOMD box to LAMMPS box
-        L = frame.configuration.box[:3]
-        tilt = frame.configuration.box[3:]
+        box = numpy.array(frame.configuration.box, copy=True)
+        L = box[:3]
+        tilt = box[3:]
         if frame.configuration.dimensions == 3:
             tilt[0] *= L[1]
             tilt[1:] *= L[2]
@@ -125,7 +126,12 @@ class Snapshot:
             # HOOMD boxes can have Lz = 0, but LAMMPS does not allow this.
             if L[2] == 0:
                 L[2] = 1.0
-        box = Box(low=-0.5 * L, high=0.5 * L, tilt=tilt)
+
+        matrix = numpy.array(
+            [[L[0], tilt[0], tilt[1]], [0, L[1], tilt[2]], [0, 0, L[2]]]
+        )
+        low = -0.5 * numpy.sum(matrix, axis=1)
+        box = Box.from_matrix(low=low, matrix=matrix)
 
         snap = Snapshot(
             N=frame.particles.N,
@@ -283,12 +289,11 @@ class Snapshot:
         if self.step is not None:
             frame.configuration.step = int(self.step)
 
-        # we could shift the box later, but for now this is an error
-        if not numpy.allclose(-self.box.low, self.box.high):
-            raise ValueError("GSD boxes must be centered around 0")
         L = self.box.high - self.box.low
         if self.box.tilt is not None:
-            tilt = self.box.tilt
+            tilt = self.box.tilt.copy()
+            tilt[0] /= L[1]
+            tilt[1:] /= L[2]
         else:
             tilt = [0, 0, 0]
         frame.configuration.box = numpy.concatenate((L, tilt))
@@ -305,7 +310,16 @@ class Snapshot:
 
         frame.particles.N = self.N
         if self.has_position():
-            frame.particles.position = self.position.copy()
+            # Center the positions using HOOMD tilt factors (computed above)
+            matrix = numpy.array(
+                [
+                    [L[0], tilt[0] * L[1], tilt[1] * L[2]],
+                    [0, L[1], tilt[2] * L[2]],
+                    [0, 0, L[2]],
+                ]
+            )
+            center = self.box.low + 0.5 * numpy.sum(matrix, axis=1)
+            frame.particles.position = self.position - center
         if self.has_velocity():
             frame.particles.velocity = self.velocity.copy()
         if self.has_image():
