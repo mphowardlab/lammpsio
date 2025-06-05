@@ -27,6 +27,10 @@ class DumpFile:
     The vector-valued fields (``position``, ``velocity``, ``image``) must contain all
     three elements.
 
+    LAMMPS will dump particles in an unknown order unless you have used the
+    ``dump_modify sort`` option. If you want particles to be ordered by ``id`` in the
+    `Snapshot`, use ``sort_ids=True`` (default).
+
     Parameters
     ----------
     filename : str
@@ -35,11 +39,53 @@ class DumpFile:
         Schema for the contents of the file. Defaults to ``None``, which means to read
         it from the file.
     sort_ids : bool
-        If true, sort the particles by ID in each snapshot.
-    copy_from : :class:`Snapshot`
+        If ``True``, sort the particles by ID in each snapshot.
+    copy_from : `Snapshot`
         If specified, copy fields that are missing in the dump file but are set in
-        a reference :class:`Snapshot`. The fields that can be copied are ``typeid``,
+        a reference `Snapshot`. The fields that can be copied are ``typeid``,
         ``molecule``, ``charge``, and ``mass``.
+
+    Example
+    -------
+
+    A LAMMPS dump file is represented by a `DumpFile`. The actual file format is
+    very flexible, but by default embeds a schema that can be read:
+
+    .. code-block:: python
+
+        traj = lammpsio.DumpFile("atoms.lammpstrj", schema=None)
+
+    A `DumpFile` is iterable, so you can use it to go through all the snapshots
+    of a trajectory:
+
+    .. skip: next
+
+    .. code-block:: python
+
+        for snapshot in traj:
+            print(snapshot.step)
+
+    You can also get the number of snapshots in the `DumpFile`, but this does
+    require reading the entire file: so use with caution!
+
+    .. skip: next
+
+    .. code-block:: python
+
+        num_frames = len(traj)
+
+    Random access to snapshots is not currently implemented, but it may be added
+    in future. If you want to randomly access snapshots, you should load the
+    whole file into a list:
+
+    .. skip: next
+
+    .. code-block:: python
+
+        snapshots = [snap for snap in traj]
+        print(snapshots[3].step)
+
+    Keep in mind that the memory requirements for this can be huge!
 
     """
 
@@ -60,13 +106,26 @@ class DumpFile:
             Path to dump file.
         schema : dict
             Schema for the contents of the file.
-        snapshots : :class:`Snapshot` or list
+        snapshots : `Snapshot` or list
             One or more snapshots to write to the dump file.
 
         Returns
         -------
-        :class:`DumpFile`
+        `DumpFile`
             The object representing the new dump file.
+
+        Example
+        -------
+
+        A `DumpFile` can be created from a list of snapshots:
+
+        .. skip: next
+
+        .. code-block:: python
+
+            t = lammpsio.DumpFile.create("atoms.lammpstrj", schema, snapshots)
+
+        The object representing the new file is returned and can be used.
 
         """
         # map out the schema into a dump row
@@ -184,6 +243,7 @@ class DumpFile:
 
     @property
     def copy_from(self):
+        """Snapshot: Copy fields that are missing in a dump file."""
         return self._copy_from
 
     @copy_from.setter

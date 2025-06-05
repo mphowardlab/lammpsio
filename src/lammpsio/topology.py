@@ -1,3 +1,40 @@
+"""Topology module.
+
+The topology (bond information) can be stored in `Bonds`, `Angles`, `Dihedrals`,
+and `Impropers` objects. All these objects function similarly, differing only in the
+number of particles that are included in a connection (2 for a bond, 3 for an angle,
+4 for a dihedral or improper). Each connection has an associated ``id`` and ``typeid``.
+
+.. code-block:: python
+
+    bonds = lammpsio.topology.Bonds(N=3, num_types=2)
+    angles = lammpsio.topology.Angles(N=2, num_types=1)
+
+These constructor arguments are available as attributes:
+
+- ``N``: number of connections (int)
+- ``num_types``: number of connection types (int). If ``num_types is None``,
+  then the number of types is deduced from ``typeid``.
+
+The data contained per connection is:
+
+- ``members``:(*N*, *M*) array of particles IDs in each topology
+  (dtype: `int`, default: ``1``),
+
+where *M* is the number of particles in a connection.
+
+- ``id``: (*N*,) array topology IDs (dtype: `int`, default: runs from 1 to *N*)
+- ``typeid``: (*N*,) array of type indexes (dtype: `int`, default: ``1``)
+
+A label (type) can be associated with a connection's typeid using a ``type_label``.
+
+- ``type_label``: Labels of connection typeids. (`LabelMap`,default: `None`)
+
+All values of indexes will follow the LAMMPS 1-indexed convention, but the
+arrays themselves are 0-indexed.
+Lazy array initialization is used as for the `Snapshot`.
+"""
+
 import collections.abc
 
 import numpy
@@ -37,7 +74,7 @@ class Topology:
 
     @property
     def id(self):
-        """:class:`numpy.ndarray`: IDs."""
+        """:math:`\\left(N,\\right)` :class:`numpy.ndarray`: IDs."""
         if not self.has_id():
             self._id = numpy.arange(1, self.N + 1)
         return self._id
@@ -62,14 +99,14 @@ class Topology:
         Returns
         -------
         bool
-            True if connection IDs have been initialized.
+            ``True`` if connection IDs have been initialized.
 
         """
         return self._id is not None
 
     @property
     def typeid(self):
-        """:class:`numpy.ndarray`: Connection typeids."""
+        """:math:`\\left(N,\\right)` :class:`numpy.ndarray`: Connection typeids."""
         if not self.has_typeid():
             self._typeid = numpy.ones(self.N, dtype=int)
         return self._typeid
@@ -94,14 +131,14 @@ class Topology:
         Returns
         -------
         bool
-            True if connection typeids have been initialized.
+            ``True`` if connection typeids have been initialized.
 
         """
         return self._typeid is not None
 
     @property
     def members(self):
-        """:class:`numpy.ndarray`: Connection members."""
+        """:math:`\\left(N, M\\right)` :class:`numpy.ndarray`: Connection members."""
         if not self.has_members():
             self._members = numpy.ones((self.N, self._num_members), dtype=int)
         return self._members
@@ -126,7 +163,7 @@ class Topology:
         Returns
         -------
         bool
-            True if particle members have been initialized.
+            ``True`` if particle members have been initialized.
 
         """
         return self._members is not None
@@ -172,7 +209,7 @@ class Topology:
         order : list
             New order of indexes.
         check_order : bool
-            If true, validate the new ``order`` before applying it.
+            If ``True``, validate the new ``order`` before applying it.
 
         """
         # sanity check the sorting order before applying it
@@ -201,7 +238,16 @@ class Bonds(Topology):
     N : int
         Number of bonds.
     num_types : int
-        Number of bond types.
+        Number of bond types. Default of ``None`` means
+        the number of types is determined from the unique typeids.
+
+    Example
+    -------
+    Create bonds:
+
+    .. code-block:: python
+
+        bonds = lammpsio.topology.Bonds(N=2, num_types=2)
 
     """
 
@@ -217,7 +263,16 @@ class Angles(Topology):
     N : int
         Number of angles.
     num_types : int
-        Number of angle types.
+        Number of Angle types. Default of ``None`` means
+        the number of types is determined from the unique typeids.
+
+    Example
+    -------
+    Create angles:
+
+    .. code-block:: python
+
+        angles = lammpsio.topology.Angles(N=2, num_types=2)
 
     """
 
@@ -231,9 +286,18 @@ class Dihedrals(Topology):
     Parameters
     ----------
     N : int
-        Number of diehdrals.
+        Number of dihedrals.
     num_types : int
-        Number of dihedral types.
+        Number of Dihedral types. Default of ``None`` means
+        the number of types is determined from the unique typeids.
+
+    Example
+    -------
+    Create dihedrals:
+
+    .. code-block:: python
+
+        dihedrals = lammpsio.topology.Dihedrals(N=2, num_types=2)
 
     """
 
@@ -249,7 +313,17 @@ class Impropers(Topology):
     N : int
         Number of improper dihedrals.
     num_types : int
-        Number of improper dihedral types.
+        Number of improper dihedral types. Default of ``None`` means
+        the number of types is determined from the unique typeids.
+
+
+    Example
+    -------
+    Create dihedrals:
+
+    .. code-block:: python
+
+        impropers = lammpsio.topology.Impropers(N=2, num_types=2)
 
     """
 
@@ -260,10 +334,23 @@ class Impropers(Topology):
 class LabelMap(collections.abc.MutableMapping):
     """Label map between typeids and types.
 
+    A `LabelMap` is effectively a dictionary associating a label (type) with a
+    particle's or connection's typeid. These labels can be useful for tracking
+    the meaning of typeids. They are also automatically used when interconverting
+    with HOOMD GSD files that require such labels.
+
     Parameters
     ----------
     map : dict
         Map of typeids to types.
+
+    Example
+    -------
+    Create `LabelMap`:
+
+    .. code-block:: python
+
+        label = lammpsio.topology.LabelMap({1: "typeA", 2: "typeB"})
 
     """
 
