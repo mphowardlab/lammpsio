@@ -190,7 +190,7 @@ class Box:
 
     @property
     def tilt(self):
-        """:math:`\\left(3,\\right)` :class:`numpy.ndarray` of `float`:
+        """:math:`\\left(3,\\right)` :class:`numpy.ndarray` of `float`: \\
         Box tilt factors.
 
         The tilt factors, ``xy``, ``xz``, and ``yz`` are used to define the
