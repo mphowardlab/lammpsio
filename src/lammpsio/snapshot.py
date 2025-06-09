@@ -436,7 +436,7 @@ class Snapshot:
 
     @property
     def id(self):
-        """:math:`\\left(N,\\right)` :class:`numpy.ndarray`: Particle IDs.
+        """:math:`\\left(N,\\right)` :class:`numpy.ndarray` of type `int`: Particle IDs.
 
         Example
         -------
@@ -483,7 +483,7 @@ class Snapshot:
 
     @property
     def position(self):
-        """:math:`\\left(N,3\\right)` :class:`numpy.ndarray`: Positions.
+        """:math:`\\left(N,3\\right)`:class:`numpy.ndarray` of type `float`: Positions.
 
         Example
         -------
@@ -531,7 +531,7 @@ class Snapshot:
 
     @property
     def image(self):
-        """:math:`\\left(N,3\\right)` :class:`numpy.ndarray`: Images.
+        """:math:`\\left(N,3\\right)` :class:`numpy.ndarray` of type `int`: Images.
 
         Example
         -------
@@ -579,7 +579,7 @@ class Snapshot:
 
     @property
     def velocity(self):
-        """:math:`\\left(N,3\\right)` :class:`numpy.ndarray`: Velocities.
+        """:math:`\\left(N,3\\right)` :class:`numpy.ndarray` of type `float`: Velocities.
 
         Example
         -------
@@ -627,7 +627,7 @@ class Snapshot:
 
     @property
     def molecule(self):
-        """:math:`\\left(N,\\right)` :class:`numpy.ndarray`: Molecule tags."""
+        """:math:`\\left(N,\\right)` :class:`numpy.ndarray` of type `int`: Molecule tags."""
         if not self.has_molecule():
             self._molecule = numpy.zeros(self.N, dtype=int)
         return self._molecule
@@ -684,7 +684,7 @@ class Snapshot:
 
     @property
     def typeid(self):
-        """:math:`\\left(N,\\right)` :class:`numpy.ndarray`: Types.
+        """:math:`\\left(N,\\right)` :class:`numpy.ndarray` of type `int`: Types.
 
         Example
         -------
@@ -732,7 +732,7 @@ class Snapshot:
 
     @property
     def charge(self):
-        """:math:`\\left(N,\\right)` :class:`numpy.ndarray`: Charges.
+        """:math:`\\left(N,\\right)` :class:`numpy.ndarray` of type `float`: Charges.
 
         Example
         -------
@@ -780,7 +780,7 @@ class Snapshot:
 
     @property
     def mass(self):
-        """:math:`\\left(N,\\right)` :class:`numpy.ndarray`: Masses.
+        """:math:`\\left(N,\\right)` :class:`numpy.ndarray` of type `float`: Masses.
 
         Example
         -------
