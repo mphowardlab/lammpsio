@@ -579,7 +579,8 @@ class Snapshot:
 
     @property
     def velocity(self):
-        """:math:`\\left(N,3\\right)` :class:`numpy.ndarray` of type `float`: Velocities.
+        """:math:`\\left(N,3\\right)` :class:`numpy.ndarray` of type `float`:
+        Velocities.
 
         Example
         -------
@@ -627,7 +628,10 @@ class Snapshot:
 
     @property
     def molecule(self):
-        """:math:`\\left(N,\\right)` :class:`numpy.ndarray` of type `int`: Molecule tags."""
+        """:math:`\\left(N,\\right)` :class:`numpy.ndarray` of type `int`:
+        Molecule tags.
+
+        """
         if not self.has_molecule():
             self._molecule = numpy.zeros(self.N, dtype=int)
         return self._molecule

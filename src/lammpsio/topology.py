@@ -106,7 +106,10 @@ class Topology:
 
     @property
     def typeid(self):
-        """:math:`\\left(N,\\right)` :class:`numpy.ndarray` of type `int`: Connection typeids."""
+        """:math:`\\left(N,\\right)` :class:`numpy.ndarray` of type `int`:
+        Connection typeids.
+
+        """
         if not self.has_typeid():
             self._typeid = numpy.ones(self.N, dtype=int)
         return self._typeid
@@ -138,7 +141,10 @@ class Topology:
 
     @property
     def members(self):
-        """:math:`\\left(N, M\\right)` :class:`numpy.ndarray` of type `int`: Connection members."""
+        """:math:`\\left(N, M\\right)` :class:`numpy.ndarray` of type `int`:
+        Connection members.
+
+        """
         if not self.has_members():
             self._members = numpy.ones((self.N, self._num_members), dtype=int)
         return self._members
