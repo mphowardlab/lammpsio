@@ -33,9 +33,8 @@ class Box:
     and box matrix see the `LAMMPS documentation
     <https://docs.lammps.org/Howto_triclinic.html#transformation-from-general-to-restricted-triclinic-boxes>`_.
 
-    For our orthorhombic unit cell, all tilt factors are zero,
+    For orthorhombic unit cell, all tilt factors are zero,
     so `tilt` has the default value of `None`, resulting in a simple rectangular box.
-    We choose `low` to be at ``[0, 0, 0]`` and `high` is the diagonal values of the box.
 
     Parameters
     ----------
@@ -161,7 +160,7 @@ class Box:
 
     @property
     def low(self):
-        """:math:`\\left(3,\\right)` :class:`numpy.ndarray` of type `float`: Box low.
+        """:math:`\\left(3,\\right)` :class:`numpy.ndarray` of `float`: Box low.
 
         The low of the box is used as the origin of the box.
         """
@@ -176,7 +175,7 @@ class Box:
 
     @property
     def high(self):
-        """:math:`\\left(3,\\right)` :class:`numpy.ndarray` of type `float`: Box high.
+        """:math:`\\left(3,\\right)` :class:`numpy.ndarray` of `float`: Box high.
 
         The high of the box is used to compute the edge lengths of the box.
         """
@@ -191,7 +190,8 @@ class Box:
 
     @property
     def tilt(self):
-        """:math:`\\left(3,\\right)` :class:`numpy.ndarray`: Box tilt factors.
+        """:math:`\\left(3,\\right)` :class:`numpy.ndarray` of `float`:
+        Box tilt factors.
 
         The tilt factors, ``xy``, ``xz``, and ``yz`` are used to define the
         shape of the box. The default of ``None`` is strictly orthorhombic.
