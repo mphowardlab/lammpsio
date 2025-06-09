@@ -161,7 +161,7 @@ class Box:
 
     @property
     def low(self):
-        """:math:`\\left(3,\\right)` :class:`numpy.ndarray`: Box low.
+        """:math:`\\left(3,\\right)` :class:`numpy.ndarray` of type `float`: Box low.
 
         The low of the box is used as the origin of the box.
         """
@@ -176,7 +176,7 @@ class Box:
 
     @property
     def high(self):
-        """:math:`\\left(3,\\right)` :class:`numpy.ndarray`: Box high.
+        """:math:`\\left(3,\\right)` :class:`numpy.ndarray` of type `float`: Box high.
 
         The high of the box is used to compute the edge lengths of the box.
         """
