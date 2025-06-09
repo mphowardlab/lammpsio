@@ -195,7 +195,6 @@ class Box:
 
         The tilt factors, ``xy``, ``xz``, and ``yz`` are used to define the
         shape of the box. The default of ``None`` is strictly orthorhombic.
-
         """
         return self._tilt
 
