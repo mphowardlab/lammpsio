@@ -16,6 +16,35 @@ def _readline(file_, require=False):
 class DataFile:
     """LAMMPS data file.
 
+    A LAMMPS data file is represented by a `DataFile`.
+    A `Snapshot` can be written into it using the `create()` method:
+
+    .. code-block:: python
+
+        box = lammpsio.Box([-5.0, -10.0, 0.0], [1.0, 10.0, 8.0], [1.0, -2.0, 0.5])
+
+        snap = lammpsio.Snapshot(3, box, 10)
+
+        data = lammpsio.DataFile.create(tmp_path / "atoms.data",
+                                        snap, atom_style="atomic")
+
+    A `DataFile` corresponding to the new file is returned by `create()`.
+    This file must be explicitly `read()` to get a `Snapshot`:
+
+    .. code-block:: python
+
+        snap = data.read()
+
+    The `atom_style` will be read from the comment in the Atoms section
+    of the file. If it is not present, it must be specified in the `DataFile`.
+    If `atom_style` is specified and also present in the file, the two must match
+    or an error will be raised.
+
+    There are many sections that can be stored in a data file, but ``lammpsio`` does
+    not currently understand all of them. You can check `DataFile.known_headers`,
+    `DataFile.unknown_headers`, `DataFile.known_bodies` and `DataFile.unknown_bodies`
+    for lists of what is currently supported.
+
     Parameters
     ----------
     filename : str
@@ -119,7 +148,7 @@ class DataFile:
         ----------
         filename : str
             Path to data file.
-        snapshot : :class:`Snapshot`
+        snapshot : `Snapshot`
             Snapshot to write to file.
         atom_style : str
             Atom style to use for data file. Defaults to ``None``, which means the
@@ -127,7 +156,7 @@ class DataFile:
 
         Returns
         -------
-        :class:`DataFile`
+        `DataFile`
             The object representing the new data file.
 
         Raises
@@ -328,7 +357,7 @@ class DataFile:
 
         Returns
         -------
-        :class:`Snapshot`
+        `Snapshot`
             Snapshot from the data file.
 
         Raises
