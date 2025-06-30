@@ -10,9 +10,8 @@ from .topology import Angles, Bonds, Dihedrals, Impropers, LabelMap
 class Snapshot:
     """Particle configuration.
 
-    The particle configuration is stored in a `Snapshot`. A `Snapshot` holds the
-    data for *N* particles, the simulation `Box`, and the timestep. The `Box` follows
-    the LAMMPS conventions for its shape and bounds.
+    A `Snapshot` holds the data for `N` particles, the simulation `Box`, and the
+    timestep.
 
     Parameters
     ----------
@@ -21,32 +20,30 @@ class Snapshot:
     box : `Box`
         Simulation box.
     step : int
-        Simulation time step counter. Default of ``None`` means
-        time step is not specified.
+        Simulation time step. Default of ``None`` means time step is not
+        specified.
     num_types : int
-            Number of particle types. If ``num_types is None``,
-            then the number of types is deduced from `typeid`.
+        Number of particle types. If ``None``, the number of types is deduced
+        from `typeid`.
 
     Example
     -------
-
-    Here is a 3-particle configuration in an triclinic box
-    centered at the origin at step 10:
+    Here is a 3-particle configuration in an triclinic box centered at the
+    origin at step 10:
 
     .. code-block:: python
 
-        box = lammpsio.Box([-5.0, -10.0, 0.0], [1.0, 10.0, 8.0], [1.0, -2.0, 0.5])
+        box = lammpsio.Box([-5.0, -10.0, 0.0], [1.0, 10.0, 8.0], [1.0, -2.0,
+        0.5])
 
         snapshot = lammpsio.Snapshot(3, box, 10, num_types=None)
 
-
-    All values of indexes will follow the LAMMPS 1-indexed convention, but the
-    arrays themselves are 0-indexed.
-
-    `Snapshot` will lazily initialize these per-particle arrays as they are
-    accessed to save memory. Hence, accessing a per-particle property will allocate
-    it to default values. If you want to check if an attribute has been set, use the
-    corresponding ``has_`` method instead (e.g., `has_position()`):
+    All values of indexes follow the LAMMPS 1-indexed convention, but the arrays
+    themselves are 0-indexed. `Snapshot` will lazily initialize these
+    per-particle arrays as they are accessed to save memory. Hence, accessing a
+    per-particle property will allocate it to default values. If you want to
+    check if an attribute has been set, use the corresponding ``has_`` method
+    instead (e.g., `has_position` to check if the `position` data is allocated):
 
     .. code-block:: python
 
@@ -85,7 +82,7 @@ class Snapshot:
 
         Parameters
         ----------
-        frame : :class:`gsd.hoomd.Frame`
+        frame : `gsd.hoomd.Frame`
             HOOMD GSD frame to convert.
 
         Returns
@@ -97,7 +94,6 @@ class Snapshot:
 
         Example
         -------
-
         Create snapshot from a GSD file:
 
         .. skip: next if(frame == 0, reason="gsd.hoomd not installed")
@@ -264,9 +260,12 @@ class Snapshot:
             A map from the :attr:`Snapshot.typeid` to a HOOMD type.
             If not specified, the typeids are used as the types.
 
+            .. deprecated:: 0.7.0
+                Use `Snapshot.type_label` instead.
+
         Returns
         -------
-        :class:`gsd.hoomd.Frame`
+        `gsd.hoomd.Frame`
             Converted HOOMD GSD frame.
 
         Example
@@ -435,8 +434,17 @@ class Snapshot:
         return self._box
 
     @property
+    def step(self):
+        """int: Simulation time step."""
+        return self._step
+
+    @step.setter
+    def step(self, value):
+        self._step = int(value)
+
+    @property
     def id(self):
-        """:math:`\\left(N,\\right)` :class:`numpy.ndarray` of `int`: Particle IDs.
+        """(*N*,) `numpy.ndarray` of `int`: Particle IDs.
 
         Example
         -------
@@ -483,7 +491,7 @@ class Snapshot:
 
     @property
     def position(self):
-        """:math:`\\left(N,3\\right)`:class:`numpy.ndarray` of `float`: Positions.
+        """(*N*, 3) `numpy.ndarray` of `float`: Positions.
 
         Example
         -------
@@ -531,7 +539,7 @@ class Snapshot:
 
     @property
     def image(self):
-        """:math:`\\left(N,3\\right)` :class:`numpy.ndarray` of `int`: Images.
+        """(*N*, 3) `numpy.ndarray` of `int`: Images.
 
         Example
         -------
@@ -579,8 +587,7 @@ class Snapshot:
 
     @property
     def velocity(self):
-        """:math:`\\left(N,3\\right)` :class:`numpy.ndarray` of `float`:
-        Velocities.
+        """(*N*, 3) `numpy.ndarray` of `float`: Velocities.
 
         Example
         -------
@@ -628,10 +635,7 @@ class Snapshot:
 
     @property
     def molecule(self):
-        """:math:`\\left(N,\\right)` :class:`numpy.ndarray` of `int`:
-        Molecule tags.
-
-        """
+        """(*N*,) `numpy.ndarray` of `int`: Molecule tags."""
         if not self.has_molecule():
             self._molecule = numpy.zeros(self.N, dtype=int)
         return self._molecule
@@ -688,7 +692,7 @@ class Snapshot:
 
     @property
     def typeid(self):
-        """:math:`\\left(N,\\right)` :class:`numpy.ndarray` of `int`: Types.
+        """(*N*,) `numpy.ndarray` of `int`: Types.
 
         Example
         -------
@@ -736,7 +740,7 @@ class Snapshot:
 
     @property
     def charge(self):
-        """:math:`\\left(N,\\right)` :class:`numpy.ndarray` of `float`: Charges.
+        """(*N*,) `numpy.ndarray` of `float`: Charges.
 
         Example
         -------
@@ -784,7 +788,7 @@ class Snapshot:
 
     @property
     def mass(self):
-        """:math:`\\left(N,\\right)` :class:`numpy.ndarray` of `float`: Masses.
+        """:(*N*,) `numpy.ndarray` of `float`: Masses.
 
         Example
         -------
@@ -813,7 +817,7 @@ class Snapshot:
             self._mass = None
 
     def has_mass(self):
-        """:class:`bool`:Check if configuration has masses.
+        """`bool`: Check if configuration has masses.
 
         Returns
         -------
@@ -832,17 +836,14 @@ class Snapshot:
 
     @property
     def type_label(self):
-        """LabelMap: Labels for particle typeids.
+        """`LabelMap`: Labels for `typeid`.
 
         Example
         -------
 
-        .. code-block ::python
+        .. code-block:: python
 
-            label_map = lammpsio.topology.LabelMap({1: "typeA", 2: "typeB"})
-
-            snapshot.type_label = LabelMap(map=label_map)
-
+            snapshot.type_label = lammpsio.topology.LabelMap({1: "A", 2: "B"})
 
         """
         return self._type_label
@@ -858,7 +859,7 @@ class Snapshot:
 
     @property
     def bonds(self):
-        """Bonds: Bond data.
+        """`Bonds`: Bond data.
 
         Example
         -------
@@ -887,7 +888,6 @@ class Snapshot:
         bool
             ``True`` if bonds is initialized and there is at least one bond.
 
-
         Example
         -------
 
@@ -900,8 +900,7 @@ class Snapshot:
 
     @property
     def angles(self):
-        """Angles: Angle data.
-
+        """`Angles`: Angle data.
 
         Example
         -------
@@ -942,7 +941,7 @@ class Snapshot:
 
     @property
     def dihedrals(self):
-        """Dihedrals: Dihedral data.
+        """`Dihedrals`: Dihedral data.
 
         Example
         -------
@@ -983,7 +982,7 @@ class Snapshot:
 
     @property
     def impropers(self):
-        """Impropers: Improper data.
+        """`Impropers`: Improper data.
 
         Example
         -------
@@ -1073,7 +1072,7 @@ class Snapshot:
 def _set_type_id(lammps_typeid, gsd_typeid, label_map):
     """Maps LAMMPS typeids to HOOMD GSD typeids using a given label map.
 
-    Parameters:
+    Parameters
     ----------
     lammps_typeid : list
         List of LAMMPS typeids to be mapped (one-indexed).
@@ -1082,11 +1081,10 @@ def _set_type_id(lammps_typeid, gsd_typeid, label_map):
     label_map : `LabelMap`
         LabelMap for connection type mapping LAMMPS typeids to HOOMD GSD types.
 
-    Returns:
+    Returns
     -------
     `LabelMap`
         LabelMap mapping LAMMPS typeids to HOOMD GSD types.
-        LabelMap is created mapping typeids to str(typeids) if not provided.
     """
     if label_map is None:
         sorted_typeids = numpy.sort(numpy.unique(lammps_typeid))

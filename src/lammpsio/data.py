@@ -16,8 +16,9 @@ def _readline(file_, require=False):
 class DataFile:
     """LAMMPS data file.
 
-    A LAMMPS data file is represented by a `DataFile`.
-    A `Snapshot` can be written into it using the `create()` method:
+    LAMMPS can both read a data file for initialization and also write a data
+    file (e.g., for visualization or restart purposes). A `Snapshot` can be
+    written to a data file using `create`:
 
     .. code-block:: python
 
@@ -25,33 +26,26 @@ class DataFile:
 
         snap = lammpsio.Snapshot(3, box, 10)
 
-        data = lammpsio.DataFile.create(tmp_path / "atoms.data",
-                                        snap, atom_style="atomic")
+        data = lammpsio.DataFile.create(tmp_path / "atoms.data", snap)
 
-    A `DataFile` corresponding to the new file is returned by `create()`.
-    This file must be explicitly `read()` to get a `Snapshot`:
+    A data file can also be read into a `Snapshot`:
 
     .. code-block:: python
 
-        snap = data.read()
+        snap = lammpsio.DataFile(tmp_path / "atoms.data").read()
 
-    The `atom_style` will be read from the comment in the Atoms section
-    of the file. If it is not present, it must be specified in the `DataFile`.
-    If `atom_style` is specified and also present in the file, the two must match
-    or an error will be raised.
-
-    There are many sections that can be stored in a data file, but ``lammpsio`` does
-    not currently understand all of them. You can check `DataFile.known_headers`,
-    `DataFile.unknown_headers`, `DataFile.known_bodies` and `DataFile.unknown_bodies`
-    for lists of what is currently supported.
+    There are many sections that can be stored in a data file, but ``lammpsio``
+    does not currently understand all of them. You can check `known_headers`,
+    `unknown_headers`, `known_bodies` and `unknown_bodies` for lists of what is
+    currently supported.
 
     Parameters
     ----------
     filename : str
         Path to data file.
     atom_style : str
-        Atom style to use for data file. Defaults to ``None``, which means the
-        style should be read from the file.
+        LAMMPS atom style to use. Defaults to ``None``, which means the style
+        should be read from the file.
 
     Attributes
     ----------
@@ -59,13 +53,13 @@ class DataFile:
         Path to the file.
     atom_style : str
         Atom style for the file.
-    known_headers : list
+    known_headers : list of str
         Data file headers that can be processed.
-    unknown_headers : list
+    unknown_headers : list of str
         Data file headers that will be ignored.
-    known_bodies : list
+    known_bodies : list of str
         Data file body sections that can be processed.
-    unknown_bodies : list
+    unknown_bodies : list of str
         Data file body sections that will be ignored.
 
     """
@@ -353,19 +347,19 @@ class DataFile:
         return DataFile(filename)
 
     def read(self):
-        """Read the file.
+        """Read a LAMMPS data file into a snapshot.
+
+        The `atom_style` will be read from the comment in the Atoms section
+        of the file. If it is not present, it must be specified manually.
+        If `atom_style` is specified manually and also present in the file,
+        the two must match or an error will be raised.
+
+        Unknown headers and sections are silently ignored.
 
         Returns
         -------
         `Snapshot`
             Snapshot from the data file.
-
-        Raises
-        ------
-        ValueError
-            If :attr:`atom_style` is set but does not match file contents.
-        ValueError
-            If :attr:`atom_style` is not specified and not set in file.
 
         """
         with open(self.filename) as f:

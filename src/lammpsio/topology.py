@@ -1,39 +1,4 @@
-"""Topology module.
-
-The topology (bond information) can be stored in `Bonds`, `Angles`, `Dihedrals`,
-and `Impropers` objects. All these objects function similarly, differing only in the
-number of particles that are included in a connection (2 for a bond, 3 for an angle,
-4 for a dihedral or improper). Each connection has an associated ``id`` and ``typeid``.
-
-.. code-block:: python
-
-    bonds = lammpsio.topology.Bonds(N=3, num_types=2)
-    angles = lammpsio.topology.Angles(N=2, num_types=1)
-
-These constructor arguments are available as attributes:
-
-- ``N``: number of connections (int)
-- ``num_types``: number of connection types (int). If ``num_types is None``,
-  then the number of types is deduced from ``typeid``.
-
-The data contained per connection is:
-
-- ``members``:(*N*, *M*) array of particles IDs in each topology
-  (dtype: `int`, default: ``1``),
-
-where *M* is the number of particles in a connection.
-
-- ``id``: (*N*,) array topology IDs (dtype: `int`, default: runs from 1 to *N*)
-- ``typeid``: (*N*,) array of type indexes (dtype: `int`, default: ``1``)
-
-A label (type) can be associated with a connection's typeid using a ``type_label``.
-
-- ``type_label``: Labels of connection typeids. (`LabelMap`,default: `None`)
-
-All values of indexes will follow the LAMMPS 1-indexed convention, but the
-arrays themselves are 0-indexed.
-Lazy array initialization is used as for the `Snapshot`.
-"""
+"""Topology (connection and type) information."""
 
 import collections.abc
 
@@ -52,8 +17,12 @@ class Topology:
     num_members : int
         Number of members in a connection.
     num_types : int
-        Number of connection types. Default of ``None`` means
-        the number of types is determined from the unique typeids.
+        Number of connection types. Default of ``None`` means the number of
+        types is determined from the unique typeids.
+
+    All values of indexes follow the LAMMPS 1-indexed convention, but the
+    arrays themselves are 0-indexed. Lazy array initialization is used as for
+    the `Snapshot`.
 
     """
 
@@ -74,7 +43,11 @@ class Topology:
 
     @property
     def id(self):
-        """:math:`\\left(N,\\right)` :class:`numpy.ndarray` of `int`: IDs."""
+        """(*N*,) `numpy.ndarray` of `int`: Unique identifiers (IDs).
+
+        The default value on initialization runs from 1 to `N`.
+
+        """
         if not self.has_id():
             self._id = numpy.arange(1, self.N + 1)
         return self._id
@@ -106,8 +79,9 @@ class Topology:
 
     @property
     def typeid(self):
-        """:math:`\\left(N,\\right)` :class:`numpy.ndarray` of `int`:
-        Connection typeids.
+        """(*N*,) `numpy.ndarray` of `int`: Connection type IDs.
+
+        The default value on initialization is 1 for all entries.
 
         """
         if not self.has_typeid():
@@ -141,8 +115,10 @@ class Topology:
 
     @property
     def members(self):
-        """:math:`\\left(N, M\\right)` :class:`numpy.ndarray` of `int`:
-        Connection members.
+        """(*N*, *M*) `numpy.ndarray` of `int`: Connection members.
+
+        The default value on initialization is 1 for all entries. *M* is the
+        number of members in the connection.
 
         """
         if not self.has_members():
@@ -176,7 +152,7 @@ class Topology:
 
     @property
     def num_types(self):
-        """int: Number of connection types"""
+        """int: Number of connection types."""
         if self._num_types is not None:
             return self._num_types
         else:
@@ -194,7 +170,7 @@ class Topology:
 
     @property
     def type_label(self):
-        """LabelMap: Labels of connection typeids."""
+        """LabelMap: Labels of connection type IDs."""
 
         return self._type_label
 
@@ -237,15 +213,18 @@ class Topology:
 
 
 class Bonds(Topology):
-    """Particle bonds.
+    """Bond connections between particles.
+
+    All values of indexes follow the LAMMPS 1-indexed convention, but the
+    arrays themselves are 0-indexed.
 
     Parameters
     ----------
     N : int
         Number of bonds.
     num_types : int
-        Number of bond types. Default of ``None`` means
-        the number of types is determined from the unique typeids.
+        Number of bond types. Default of ``None`` means the number of types is
+        determined from the unique typeids.
 
     Example
     -------
@@ -262,15 +241,18 @@ class Bonds(Topology):
 
 
 class Angles(Topology):
-    """Particle angles.
+    """Angle connections between particles.
+
+    All values of indexes follow the LAMMPS 1-indexed convention, but the
+    arrays themselves are 0-indexed.
 
     Parameters
     ----------
     N : int
         Number of angles.
     num_types : int
-        Number of Angle types. Default of ``None`` means
-        the number of types is determined from the unique typeids.
+        Number of angle types. Default of ``None`` means the number of types is
+        determined from the unique typeids.
 
     Example
     -------
@@ -287,15 +269,18 @@ class Angles(Topology):
 
 
 class Dihedrals(Topology):
-    """Particle dihedrals.
+    """Dihedral connections between particles.
+
+    All values of indexes follow the LAMMPS 1-indexed convention, but the
+    arrays themselves are 0-indexed.
 
     Parameters
     ----------
     N : int
         Number of dihedrals.
     num_types : int
-        Number of Dihedral types. Default of ``None`` means
-        the number of types is determined from the unique typeids.
+        Number of dihedral types. Default of ``None`` means the number of types
+        is determined from the unique typeids.
 
     Example
     -------
@@ -312,16 +297,18 @@ class Dihedrals(Topology):
 
 
 class Impropers(Topology):
-    """Particle improper dihedrals.
+    """Improper dihedral connections between particles.
+
+    All values of indexes follow the LAMMPS 1-indexed convention, but the
+    arrays themselves are 0-indexed.
 
     Parameters
     ----------
     N : int
         Number of improper dihedrals.
     num_types : int
-        Number of improper dihedral types. Default of ``None`` means
-        the number of types is determined from the unique typeids.
-
+        Number of improper dihedral types. Default of ``None`` means the number
+        of types is determined from the unique typeids.
 
     Example
     -------
@@ -338,7 +325,7 @@ class Impropers(Topology):
 
 
 class LabelMap(collections.abc.MutableMapping):
-    """Label map between typeids and types.
+    """Map between integer type IDs and string type names.
 
     A `LabelMap` is effectively a dictionary associating a label (type) with a
     particle's or connection's typeid. These labels can be useful for tracking
@@ -356,7 +343,7 @@ class LabelMap(collections.abc.MutableMapping):
 
     .. code-block:: python
 
-        label = lammpsio.topology.LabelMap({1: "typeA", 2: "typeB"})
+        label = lammpsio.topology.LabelMap({1: "A", 2: "B"})
 
     """
 
@@ -382,10 +369,10 @@ class LabelMap(collections.abc.MutableMapping):
 
     @property
     def types(self):
-        """tuple: Types in label map."""
+        """tuple of str: Types in map."""
         return tuple(self._map.values())
 
     @property
     def typeid(self):
-        """tuple: Typeids in label map."""
+        """tuple of int: Type IDs in map."""
         return tuple(self._map.keys())

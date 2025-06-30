@@ -6,7 +6,7 @@
 
    {% block methods %}
    {% if methods %}
-   .. rubric:: {{ _('Methods') }}
+   .. rubric:: {{ _('Methods:') }}
 
    .. autosummary::
    {% for item in methods %}
@@ -19,7 +19,7 @@
 
    {% block attributes %}
    {% if attributes %}
-   .. rubric:: {{ _('Attributes') }}
+   .. rubric:: {{ _('Attributes:') }}
 
    .. autosummary::
    {% for item in attributes %}

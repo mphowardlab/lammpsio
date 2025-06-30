@@ -2,13 +2,14 @@
 Installation
 ============
 
-The easiest way to get ``lammpsio`` is from PyPI using ``pip``:
+The easiest way to get ``lammpsio`` is from PyPI:
 
 .. code:: bash
 
     pip install lammpsio
 
-or from conda-forge using ``conda`` or ``mamba``:
+or conda-forge:
+
 .. code:: bash
 
     conda install -c conda-forge lammpsio

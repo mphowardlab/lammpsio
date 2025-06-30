@@ -16,47 +16,64 @@ if _compatibility.pyzstd_version is not None:
 class DumpFile:
     """LAMMPS dump file.
 
-    The dump file is a flexible file format, so a ``schema`` can be given
-    to parse the atom data. The ``schema`` is given as a dictionary of column
-    indexes. Valid keys for the schema match the names and shapes in the `Snapshot`.
-    The keys requiring only 1 column index are: ``id``, ``typeid``, ``molecule``,
-    ``charge``, and ``mass``. The keys requiring 3 column indexes are ``position``,
-    ``velocity``, and ``image``. If a ``schema`` is not specified, it will be deduced
-    from the ``ITEM: ATOMS`` header.
+    The LAMMPS dump file is a highly flexible file format. The ``schema`` of the
+    file is deduced from the ``ITEM: ATOMS`` header unless one is manually
+    specified. If specificed, the ``schema`` must be a dictionary mapping pieces
+    of data to column indexes (0-indexed). Valid keys for the schema match the
+    names and shapes in the `Snapshot`. The keys requiring only 1 column index
+    are:
 
-    The vector-valued fields (``position``, ``velocity``, ``image``) must contain all
-    three elements.
+    - ``"id"``
+    - ``"typeid"``
+    - ``"molecule"``
+    - ``"charge"``
+    - ``"mass"``
 
-    LAMMPS will dump particles in an unknown order unless you have used the
-    ``dump_modify sort`` option. If you want particles to be ordered by ``id`` in the
-    `Snapshot`, use ``sort_ids=True`` (default).
+    The keys requiring 3 column indexes are:
+
+    - ``"position"``
+    - ``"velocity"``
+    - ``"image"``
+
+    LAMMPS dumps particles in an unknown order unless you have used the
+    ``dump_modify sort`` option. If you want particles to be ordered by ``id``
+    in the `Snapshot`, use ``sort_ids=True`` (default). Note that slightly
+    faster reading may be possible by setting this option to ``False``.
+
+    A `DumpFile` is iterable, so you can use it to go through all the snapshots
+    of a trajectory. Random access to snapshots is not currently implemented,
+    but it may be added in future. If you want to randomly access snapshots, you
+    should load the whole file into a list, but the memory requirements to do so
+    may be large.
+
+    The dump file may not contain certain information about your particles, for
+    example, topology, or you may choose not to write this information in the
+    dump file because it does not change frame-to-frame. The `copy_from` option
+    allows this information to be copied into a new snapshot from a reference
+    one, e.g, that was read from a `DataFile`.
 
     Parameters
     ----------
     filename : str
         Path to dump file.
     schema : dict
-        Schema for the contents of the file. Defaults to ``None``, which means to read
-        it from the file.
+        Schema for the contents of the file. Defaults to ``None``, which means
+        to read it from the file.
     sort_ids : bool
         If ``True``, sort the particles by ID in each snapshot.
     copy_from : `Snapshot`
-        If specified, copy fields that are missing in the dump file but are set in
-        a reference `Snapshot`. The fields that can be copied are ``typeid``,
-        ``molecule``, ``charge``, and ``mass``.
+        If specified, copy supported fields that are missing in the dump file
+        but are set in a reference `Snapshot`.
 
     Example
     -------
-
-    A LAMMPS dump file is represented by a `DumpFile`. The actual file format is
-    very flexible, but by default embeds a schema that can be read:
+    Create a dump file object:
 
     .. code-block:: python
 
-        traj = lammpsio.DumpFile("atoms.lammpstrj", schema=None)
+        traj = lammpsio.DumpFile("atoms.lammpstrj")
 
-    A `DumpFile` is iterable, so you can use it to go through all the snapshots
-    of a trajectory:
+    Iterate snapshots:
 
     .. skip: next
 
@@ -66,7 +83,7 @@ class DumpFile:
             print(snapshot.step)
 
     You can also get the number of snapshots in the `DumpFile`, but this does
-    require reading the entire file: so use with caution!
+    require reading the entire file: use with caution!
 
     .. skip: next
 
@@ -74,9 +91,7 @@ class DumpFile:
 
         num_frames = len(traj)
 
-    Random access to snapshots is not currently implemented, but it may be added
-    in future. If you want to randomly access snapshots, you should load the
-    whole file into a list:
+    Random access by creating a list:
 
     .. skip: next
 
@@ -84,8 +99,6 @@ class DumpFile:
 
         snapshots = [snap for snap in traj]
         print(snapshots[3].step)
-
-    Keep in mind that the memory requirements for this can be huge!
 
     """
 
@@ -116,16 +129,13 @@ class DumpFile:
 
         Example
         -------
-
         A `DumpFile` can be created from a list of snapshots:
 
         .. skip: next
 
         .. code-block:: python
 
-            t = lammpsio.DumpFile.create("atoms.lammpstrj", schema, snapshots)
-
-        The object representing the new file is returned and can be used.
+            lammpsio.DumpFile.create("atoms.lammpstrj", schema, snapshots)
 
         """
         # map out the schema into a dump row
@@ -243,7 +253,20 @@ class DumpFile:
 
     @property
     def copy_from(self):
-        """Snapshot: Copy fields that are missing in a dump file."""
+        """`Snapshot`: Copy fields that are missing in a dump file.
+
+        The fields that can be copied are:
+
+        - `Snapshot.angles`
+        - `Snapshot.bonds`
+        - `Snapshot.charge`
+        - `Snapshot.dihedrals`
+        - `Snapshot.impropers`
+        - `Snapshot.mass`
+        - `Snapshot.molecule`
+        - `Snapshot.typeid`
+
+        """
         return self._copy_from
 
     @copy_from.setter
