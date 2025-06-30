@@ -32,7 +32,7 @@ class DataFile:
 
     .. code-block:: python
 
-        snap = lammpsio.DataFile(tmp_path / "atoms.data").read()
+        snap = data.read()
 
     There are many sections that can be stored in a data file, but ``lammpsio``
     does not currently understand all of them. You can check `known_headers`,

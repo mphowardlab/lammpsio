@@ -440,7 +440,10 @@ class Snapshot:
 
     @step.setter
     def step(self, value):
-        self._step = int(value)
+        if value is not None:
+            self._step = int(value)
+        else:
+            self._step = None
 
     @property
     def id(self):
