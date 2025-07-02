@@ -60,6 +60,7 @@ html_theme_options = {
         "color-admonition-background": "#e86100",
     },
 }
+html_logo = "lammpsio_logo.svg"
 
 # -- Options for autodoc & autosummary ---------------------------------------
 
