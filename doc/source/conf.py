@@ -45,7 +45,7 @@ default_role = "any"
 # -- Options for HTML output -------------------------------------------------
 
 html_theme = "furo"
-html_static_path = ["_static"]
+html_static_path = []
 html_theme_options = {
     "navigation_with_keys": True,
     "top_of_page_buttons": [],
@@ -60,7 +60,7 @@ html_theme_options = {
         "color-admonition-background": "#e86100",
     },
 }
-html_logo = "lammpsio_logo.svg"
+html_logo = "_images/lammpsio_logo.svg"
 
 # -- Options for autodoc & autosummary ---------------------------------------
 
