@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.abspath("../../src"))
 
 # -- Project information -----------------------------------------------------
 
-project = "lammmpsio"
+project = "lammpsio"
 year = datetime.date.today().year
 copyright = f"2021-{year}, Auburn University"
 author = "Michael P. Howard"
@@ -60,10 +60,13 @@ html_theme_options = {
         "color-admonition-background": "#e86100",
     },
 }
+html_logo = "_images/lammpsio_logo.svg"
 
 # -- Options for autodoc & autosummary ---------------------------------------
 
 autosummary_generate = True
+
+autodoc_member_order = "bysource"
 
 autodoc_default_options = {"inherited-members": None, "special-members": False}
 

@@ -4,22 +4,51 @@ from . import _compatibility
 
 
 class Box:
-    """Triclinic simulation box.
+    r"""Simulation box.
 
-    The convention for defining the bounds of the box is based on
-    `LAMMPS <https://docs.lammps.org/Howto_triclinic.html>`_. This
-    means that the lower corner of the box is placed at ``low``, and
-    the size and shape of the box is determined by ``high`` and ``tilt``.
+    In LAMMPS, the simulation box is specified by three parameters: `low`,
+    `high`, and `tilt`. `low` defines the origin (lower corner) of the box,
+    while `high` specifies how far the box extends along each axis. The
+    difference between `high` and `low` gives three lengths $L_x$, $L_y$, and
+    $L_z$. `tilt` has three factors ($L_{xy}$, $L_{xz}$, $L_{yz}$) that skew the
+    edges to create non-orthorhombic simulation boxes. These parameters define
+    a box matrix consisting of three lattice vectors **a**, **b**, and **c**:
+
+    .. math::
+
+        [\mathbf{a} \quad \mathbf{b} \quad \mathbf{c} ] =
+        \begin{bmatrix}
+            L_x & L_{xy} & L_{xz} \\
+            0 & L_y & L_{yz} \\
+            0 & 0 & L_z
+        \end{bmatrix}
+
+    For more details on how to convert between the LAMMPS parameters and box
+    matrix see the `LAMMPS documentation
+    <https://docs.lammps.org/Howto_triclinic.html#transformation-from-general-to-restricted-triclinic-boxes>`_.
+
+    .. warning::
+
+        `high` is the upper bound of the simulation box **only** when it is
+        orthorhombic.
 
     Parameters
     ----------
     low : list
         Origin of the box
     high : list
-        "High" of the box, used to compute edge lengths.
+        High parameter used to compute edge lengths.
     tilt : list
-        Tilt factors ``xy``, ``xz``, and ``yz`` for a triclinic box.
-        Default of ``None`` is a strictly orthorhombic box.
+        Tilt factors ``xy``, ``xz``, and ``yz`` for a triclinic box. Default of
+        ``None`` is a strictly orthorhombic box, implying all are zero.
+
+    Examples
+    --------
+    Construct a triclinic simulation box:
+
+    .. code-block:: python
+
+        box = lammpsio.Box([-5.0, -10.0, 0.0], [1.0, 10.0, 8.0], [1.0, -2.0, 0.5])
 
     """
 
@@ -30,7 +59,7 @@ class Box:
 
     @classmethod
     def cast(cls, value):
-        """Cast an array to a :class:`Box`.
+        """Cast from an array.
 
         If ``value`` has 6 elements, it is unpacked as an orthorhombic box::
 
@@ -47,8 +76,16 @@ class Box:
 
         Returns
         -------
-        :class:`Box`
-            A simulation box matching the array.
+        `Box`
+            A simulation box.
+
+        Examples
+        --------
+        Construct an orthorhombic simulation box by casting an array:
+
+        .. code-block:: python
+
+            box = lammpsio.Box.cast([-5.0, -10.0, 0.0, 1.0, 10.0, 8.0])
 
         """
         if isinstance(value, Box):
@@ -65,35 +102,22 @@ class Box:
 
     @classmethod
     def from_matrix(cls, low, matrix, force_triclinic=False):
-        """Create a Box from low and matrix.
+        """Cast from an origin and matrix.
 
         Parameters
         ----------
         low : list
             Origin of the box.
-        matrix : :class:`numpy.ndarray`
-            Upper triangular matrix in LAMMPS style::
-
-                [[lx, xy, xz],
-                 [0, ly, yz],
-                 [0, 0, lz]]
+        matrix : `numpy.ndarray`
+            Box matrix.
         force_triclinic : bool
             If ``True``, forces the box to be triclinic even if the tilt
             factors are zero. Default is ``False``.
 
         Returns
         -------
-        :class:`Box`
+        `Box`
             A simulation box.
-
-        Raises
-        ------
-        TypeError
-            If `low` is not length 3.
-        TypeError
-            If `matrix` is not a 3x3 array.
-        ValueError
-            If `matrix` is not upper triangular.
 
         """
         low = numpy.array(low, dtype=float)
@@ -118,7 +142,10 @@ class Box:
 
     @property
     def low(self):
-        """:class:`numpy.ndarray`: Box low."""
+        """(3,) `numpy.ndarray` of `float`: Low parameter.
+
+        The low of the box is the origin.
+        """
         return self._low
 
     @low.setter
@@ -130,7 +157,11 @@ class Box:
 
     @property
     def high(self):
-        """:class:`numpy.ndarray`: Box high."""
+        """(3,) `numpy.ndarray` of `float`: High parameter.
+
+        The high of the box is used to compute the lengths $L_x$, $L_y$, and
+        $L_z$.
+        """
         return self._high
 
     @high.setter
@@ -142,7 +173,12 @@ class Box:
 
     @property
     def tilt(self):
-        """:class:`numpy.ndarray`: Box tilt factors."""
+        """(3,) `numpy.ndarray` of `float`: Tilt parameters.
+
+        The 3 tilt factors, $L_{xy}$, $L_{xz}$, and $L_{yz}$ define the
+        shape of the box. The default of ``None`` is strictly orthorhombic,
+        meaning all are zero.
+        """
         return self._tilt
 
     @tilt.setter
