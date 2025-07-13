@@ -4,6 +4,11 @@ API
 Particle data
 =============
 
+The particle data is stored in the `Snapshot`, `Box` and `LabelMap` objects.
+`Snapshot` contains information about the particles, their positions, velocities, and other properties.
+The `Box` object within the `Snapshot` defines the simulation box dimensions and shape.
+The `LabelMap` object is used to map particle labels (types) with a particle's or connection's typeid.
+
 .. autosummary::
     :nosignatures:
     :toctree: generated/
