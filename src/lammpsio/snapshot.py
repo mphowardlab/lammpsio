@@ -36,7 +36,7 @@ class Snapshot:
         box = lammpsio.Box([-5.0, -10.0, 0.0], [1.0, 10.0, 8.0], [1.0, -2.0,
         0.5])
 
-        snapshot = lammpsio.Snapshot(3, box, 10, num_types=None)
+        snapshot = lammpsio.Snapshot(N=3, box=box, step=10)
 
     All values of indexes follow the LAMMPS 1-indexed convention, but the arrays
     themselves are 0-indexed. `Snapshot` will lazily initialize these
