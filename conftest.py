@@ -25,7 +25,7 @@ def setup_sybil_tests(namespace):
     if has_gsd:
         namespace["frame"] = gsd.hoomd.Frame()
     else:
-        namespace["frame"] = 0
+        namespace["frame"] = None
 
 
 if sybil is not None:
