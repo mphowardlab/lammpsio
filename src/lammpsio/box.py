@@ -50,16 +50,21 @@ class Box:
 
         box = lammpsio.Box([-5.0, -10.0, 0.0], [1.0, 10.0, 8.0], [1.0, -2.0, 0.5])
 
-    The coordinates of the box from the range of [`low`, `high`] are:
+    The coordinates of the box of range [`low`, `high`] are:
     - x: [-5.0, 1.0]
     - y: [-10.0, 10.0]
     - z: [0.0, 8.0]
+
+    The tilt factors [1.0, -2.0, 0.5] corresponds to xy, xz, and yz respectively.
 
     Construct a orthorhombic simulation box:
 
     .. code-block:: python
 
         box = lammpsio.Box([-5.0, -10.0, 0.0], [1.0, 10.0, 8.0])
+
+    The box construction is same as before except the tilt factors are all zero,
+    meaning the box is orthorhombic.
 
     """
 
@@ -98,6 +103,13 @@ class Box:
 
             box = lammpsio.Box.cast([-5.0, -10.0, 0.0, 1.0, 10.0, 8.0])
 
+        The coordinates corresponds to a orthorhombic box with each coordinate
+        having the following range of [`low`, `high`]:
+
+        - x: [-5.0, 1.0]
+        - y: [-10.0, 10.0]
+        - z: [0.0, 8.0]
+
         """
         if isinstance(value, Box):
             return value
@@ -129,6 +141,24 @@ class Box:
         -------
         `Box`
             A simulation box.
+
+        Examples
+        --------
+        Construct a simulation box from a low and matrix:
+
+        .. code-block:: python
+
+            box_matrix = numpy.array([
+                [1, 1.0, -2.0],
+                [0, 1, 0.5],
+                [0, 0, 1]
+            ])
+
+            box = lammpsio.Box.from_matrix(low=[0, 0, 0], matrix=box_matrix)
+
+        This creates a triclinic box of unit length in each direction with origin
+        at [0, 0, 0] and the tilt factors [1.0, -2.0, 0.5] corresponding to
+        $L_{xy}$, $L_{xz}$, and $L_{yz}$ respectively.
 
         """
         low = numpy.array(low, dtype=float)
