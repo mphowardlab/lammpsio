@@ -39,6 +39,7 @@ def setup_sybil_tests(namespace):
         namespace["gsd"] = gsd
         namespace["gsd.hoomd"] = gsd.hoomd
     else:
+        namespace["gsd"] = gsd
         namespace["gsd.hoomd"] = None
 
 
