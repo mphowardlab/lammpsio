@@ -96,7 +96,8 @@ class Snapshot:
         -------
         Create snapshot from a GSD file:
 
-        .. skip: next if(gsd.hoomd == None, reason="gsd.hoomd not installed")
+        .. skip: next if(gsd.hoomd == None or gsd == None,
+                         reason="gsd not installed")
 
         .. code-block:: python
 
@@ -275,7 +276,8 @@ class Snapshot:
 
         Convert snapshot to a GSD file:
 
-        .. skip: next if(frame == None, reason="gsd.hoomd not installed")
+        .. skip: next if(gsd.hoomd == None or gsd == None,
+                         reason="gsd not installed")
 
         .. code-block:: python
 

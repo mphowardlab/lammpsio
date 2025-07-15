@@ -10,11 +10,18 @@ except ImportError:
 import lammpsio
 
 try:
-    import gsd.hoomd
+    import gsd
 
     has_gsd = True
 except ModuleNotFoundError:
     has_gsd = False
+
+try:
+    import gsd.hoomd
+
+    has_gsd_hoomd = True
+except ModuleNotFoundError:
+    has_gsd_hoomd = False
 
 try:
     import lammps
@@ -37,9 +44,12 @@ def setup_sybil_tests(namespace):
 
     if has_gsd:
         namespace["gsd"] = gsd
+    else:
+        namespace["gsd"] = None
+
+    if has_gsd_hoomd:
         namespace["gsd.hoomd"] = gsd.hoomd
     else:
-        namespace["gsd"] = gsd
         namespace["gsd.hoomd"] = None
 
 
