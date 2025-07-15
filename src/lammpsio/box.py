@@ -54,7 +54,7 @@ class Box:
     - x: [-5.0, 1.0]
     - y: [-10.0, 10.0]
     - z: [0.0, 8.0]
-    
+
     Construct a orthorhombic simulation box:
 
     .. code-block:: python
