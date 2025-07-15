@@ -226,7 +226,7 @@ class Box:
         if low is None:
             low = -0.5 * numpy.sum(matrix, axis=1)
 
-        return Box.from_matrix(low, matrix, force_triclinic)
+        return cls.from_matrix(low, matrix, force_triclinic)
 
     @property
     def low(self):

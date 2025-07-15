@@ -83,17 +83,14 @@ def test_from_matrix(box, force_triclinic):
 
 @pytest.mark.parametrize("box", [lf("orthorhombic"), lf("triclinic")])
 def test_to_matrix(box):
-    matrix = lammpsio.Box.to_matrix(box)
+    matrix, low = box.to_matrix()
 
     lx, ly, lz = box.high - box.low
     xy, xz, yz = box.tilt if box.tilt is not None else (0, 0, 0)
     expected_matrix = numpy.array([[lx, xy, xz], [0, ly, yz], [0, 0, lz]])
 
     assert numpy.allclose(matrix, expected_matrix)
-
-    # test with invalid box
-    with pytest.raises(TypeError):
-        lammpsio.Box.to_matrix([lx, ly, lz, xy, xz, yz])
+    assert numpy.allclose(low, box.low)
 
 
 @pytest.mark.parametrize("box", [lf("orthorhombic"), lf("triclinic")])
@@ -115,11 +112,8 @@ def test_convert_convention(box):
     else:
         assert numpy.allclose(hoomd_box[3:], [0, 0, 0])
 
-    # Convert back to LAMMPS convention
-    lammps_box = lammpsio.Box.from_hoomd_convention(hoomd_box, dimensions=3)
-    assert isinstance(lammps_box, numpy.ndarray)
-    assert lammps_box.shape == (3, 3)
-    new_box = lammpsio.Box.from_matrix(box.low, lammps_box)
+    # Convert back from HOOMD-blue convention
+    new_box = lammpsio.Box.from_hoomd_convention(hoomd_box, low=box.low)
     assert numpy.allclose(new_box.low, box.low)
     assert numpy.allclose(new_box.high, box.high)
     if box.tilt is not None:
@@ -129,11 +123,13 @@ def test_convert_convention(box):
 
     # test two dimension box
     hoomd_box_2d = lammpsio.Box.to_hoomd_convention(box)
-    # set Lz and yz to zero for 2D
+    # set Lz to zero for 2D
     hoomd_box_2d[2] = 0
-    hoomd_box_2d[5] = 0
 
-    lammps_box_2d = lammpsio.Box.from_hoomd_convention(hoomd_box_2d, dimensions=2)
-    assert isinstance(lammps_box_2d, numpy.ndarray)
-    assert lammps_box_2d.shape == (3, 3)
-    assert lammps_box_2d[2, 2] == 1.0  # Lz should be changed to 1.0 for 2D
+    lammps_box_2d = lammpsio.Box.from_hoomd_convention(hoomd_box_2d)
+    # check that Lz is set to 1.0 and xz & yz are 0
+    assert numpy.allclose(lammps_box_2d.high[2] - lammps_box_2d.low[2], 1.0)
+    if box.tilt is not None:
+        assert numpy.allclose(lammps_box_2d.tilt, [box.tilt[0], 0, 0])
+    else:
+        assert lammps_box_2d.tilt is None
