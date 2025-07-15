@@ -50,6 +50,17 @@ class Box:
 
         box = lammpsio.Box([-5.0, -10.0, 0.0], [1.0, 10.0, 8.0], [1.0, -2.0, 0.5])
 
+    The coordinates of the box from the range of [`low`, `high`] are:
+    - x: [-5.0, 1.0]
+    - y: [-10.0, 10.0]
+    - z: [0.0, 8.0]
+    The tilt factors are 
+    Construct a orthorhombic simulation box:
+
+    .. code-block:: python
+
+        box = lammpsio.Box([-5.0, -10.0, 0.0], [1.0, 10.0, 8.0])
+
     """
 
     def __init__(self, low, high, tilt=None):
