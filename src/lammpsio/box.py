@@ -150,7 +150,7 @@ class Box:
         return cls(low, high, tilt)
 
     def to_hoomd_convention(self):
-        """Convert a :class:`Box` to HOOMD-blue convention.
+        """Convert to HOOMD-blue convention.
 
         Parameters
         ----------
@@ -177,7 +177,7 @@ class Box:
     def from_hoomd_convention(
         cls, box_data, low=None, force_triclinic=False, dimensions=None
     ):
-        """Convert box data in HOOMD-blue convention to LAMMPS-convention
+        """Cast from HOOMD-blue convention.
 
         Parameters
         ----------

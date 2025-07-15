@@ -69,7 +69,7 @@ class Snapshot:
 
         # process HOOMD box to LAMMPS box
         box = numpy.array(frame.configuration.box, copy=True)
-        box = Box.from_hoomd_convention(box_data=box)
+        box = Box.from_hoomd_convention(box)
 
         snap = Snapshot(
             N=frame.particles.N,
@@ -216,7 +216,7 @@ class Snapshot:
         if self.step is not None:
             frame.configuration.step = int(self.step)
 
-        frame.configuration.box = Box.to_hoomd_convention(self.box)
+        frame.configuration.box = self.box.to_hoomd_convention()
 
         # sort tags if specified and not increasing because GSD guarantees an order
         reverse_order = None
@@ -231,8 +231,8 @@ class Snapshot:
         frame.particles.N = self.N
         if self.has_position():
             # Center the positions using HOOMD tilt factors (computed above)
-            matrix = Box.to_matrix(self.box)[0]
-            center = self.box.low + 0.5 * numpy.sum(matrix, axis=1)
+            low, matrix = self.box.to_matrix()
+            center = low + 0.5 * numpy.sum(matrix, axis=1)
             frame.particles.position = self.position - center
         if self.has_velocity():
             frame.particles.velocity = self.velocity.copy()

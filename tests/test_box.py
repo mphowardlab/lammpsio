@@ -96,7 +96,7 @@ def test_to_matrix(box):
 @pytest.mark.parametrize("box", [lf("orthorhombic"), lf("triclinic")])
 def test_convert_convention(box):
     # Convert to HOOMD-blue convention
-    hoomd_box = lammpsio.Box.to_hoomd_convention(box)
+    hoomd_box = box.to_hoomd_convention()
     assert isinstance(hoomd_box, numpy.ndarray)
     assert hoomd_box.shape == (6,)
     assert numpy.allclose(hoomd_box[:3], box.high - box.low)
@@ -122,7 +122,7 @@ def test_convert_convention(box):
         assert new_box.tilt is None
 
     # test two dimension box
-    hoomd_box_2d = lammpsio.Box.to_hoomd_convention(box)
+    hoomd_box_2d = box.to_hoomd_convention()
     # set Lz to zero for 2D
     hoomd_box_2d[2] = 0
 
