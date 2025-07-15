@@ -96,8 +96,7 @@ class Snapshot:
         -------
         Create snapshot from a GSD file:
 
-        .. skip: next if(gsd.hoomd == None or gsd == None,
-                         reason="gsd not installed")
+        .. skip: start if(gsd == None, reason="gsd not installed")
 
         .. code-block:: python
 
@@ -276,13 +275,11 @@ class Snapshot:
 
         Convert snapshot to a GSD file:
 
-        .. skip: next if(gsd.hoomd == None or gsd == None,
-                         reason="gsd not installed")
-
         .. code-block:: python
 
             frame = snap_2.to_hoomd_gsd()
 
+        .. skip: end
         """
         if _compatibility.gsd_version is None:
             raise ImportError("GSD package not found")
