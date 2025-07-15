@@ -63,8 +63,7 @@ class Box:
         else:
             raise TypeError(f"Unable to cast boxlike object with shape {v.shape}")
 
-    @classmethod
-    def to_matrix(cls, box):
+    def to_matrix(self):
         """Convert a :class:`Box` to an upper triangular matrix.
 
         Parameters
@@ -82,12 +81,9 @@ class Box:
                  [0, 0, lz]]
 
         """
-        if not isinstance(box, Box):
-            raise TypeError("box must be Box.")
-
-        low = box.low
-        high = box.high
-        tilt = box.tilt if box.tilt is not None else [0, 0, 0]
+        low = self.low
+        high = self.high
+        tilt = self.tilt if self.tilt is not None else [0, 0, 0]
 
         return numpy.array(
             [
@@ -150,8 +146,7 @@ class Box:
 
         return cls(low, high, tilt)
 
-    @classmethod
-    def to_hoomd_convention(cls, box):
+    def to_hoomd_convention(self):
         """Convert a :class:`Box` to HOOMD-blue convention.
 
         Parameters
@@ -165,11 +160,9 @@ class Box:
             A matrix of box dimensions in HOOMD-blue convention.
 
         """
-        if not isinstance(box, Box):
-            raise TypeError("box must be Box.")
-        L = box.high - box.low
-        if box.tilt is not None:
-            tilt = box.tilt.copy()
+        L = self.high - self.low
+        if self.tilt is not None:
+            tilt = self.tilt.copy()
             tilt[0] /= L[1]
             tilt[1:] /= L[2]
         else:
