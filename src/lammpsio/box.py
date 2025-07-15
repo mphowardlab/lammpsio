@@ -85,12 +85,15 @@ class Box:
         high = self.high
         tilt = self.tilt if self.tilt is not None else [0, 0, 0]
 
-        return numpy.array(
-            [
-                [high[0] - low[0], tilt[0], tilt[1]],
-                [0, high[1] - low[1], tilt[2]],
-                [0, 0, high[2] - low[2]],
-            ]
+        return (
+            numpy.array(
+                [
+                    [high[0] - low[0], tilt[0], tilt[1]],
+                    [0, high[1] - low[1], tilt[2]],
+                    [0, 0, high[2] - low[2]],
+                ]
+            ),
+            low,
         )
 
     @classmethod
@@ -171,7 +174,9 @@ class Box:
         return numpy.concatenate((L, tilt))
 
     @classmethod
-    def from_hoomd_convention(cls, box_data, dimensions):
+    def from_hoomd_convention(
+        cls, box_data, low, force_triclinic=False, dimensions=None
+    ):
         """Convert box data in HOOMD-blue convention to LAMMPS-convention
 
         Parameters
@@ -191,6 +196,11 @@ class Box:
         """
         if box_data.shape != (6,):
             raise TypeError("Box data must be a 6-tuple")
+        if dimensions is None:
+            dimensions = 3 if box_data[2] != 0 else 2
+        if dimensions not in (2, 3):
+            raise ValueError("Dimensions must be 2 or 3")
+
         L = box_data[:3]
         tilt = box_data[3:]
         if dimensions == 3:
@@ -198,6 +208,8 @@ class Box:
             tilt[1:] *= L[2]
         elif dimensions == 2:
             tilt[0] *= L[1]
+            tilt[1] = 0
+            tilt[2] = 0
             # HOOMD boxes can have Lz = 0, but LAMMPS does not allow this.
             if L[2] == 0:
                 L[2] = 1.0
@@ -205,7 +217,7 @@ class Box:
         matrix = numpy.array(
             [[L[0], tilt[0], tilt[1]], [0, L[1], tilt[2]], [0, 0, L[2]]]
         )
-        return matrix
+        return Box.from_matrix(low=low, matrix=matrix, force_triclinic=force_triclinic)
 
     @property
     def low(self):
