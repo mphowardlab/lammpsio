@@ -12,7 +12,7 @@ import lammpsio
 try:
     import gsd
     import gsd.hoomd
-    
+
     has_gsd = True
 except ModuleNotFoundError:
     has_gsd = False
@@ -38,11 +38,10 @@ def setup_sybil_tests(namespace):
 
     if has_gsd:
         namespace["gsd"] = gsd
+        namespace["gsd.hoomd"] = gsd.hoomd
+
     else:
         namespace["gsd"] = None
-
-
-    namespace["gsd.hoomd"] = gsd.hoomd
 
 
 if sybil is not None:
