@@ -69,11 +69,7 @@ class Snapshot:
 
         # process HOOMD box to LAMMPS box
         box = numpy.array(frame.configuration.box, copy=True)
-        matrix = Box.from_hoomd_convention(
-            box_data=box, dimensions=frame.configuration.dimensions
-        )
-        low = -0.5 * numpy.sum(matrix, axis=1)
-        box = Box.from_matrix(low=low, matrix=matrix)
+        box = Box.from_hoomd_convention(box_data=box)
 
         snap = Snapshot(
             N=frame.particles.N,
@@ -235,7 +231,7 @@ class Snapshot:
         frame.particles.N = self.N
         if self.has_position():
             # Center the positions using HOOMD tilt factors (computed above)
-            matrix = Box.to_matrix(self.box)
+            matrix = Box.to_matrix(self.box)[0]
             center = self.box.low + 0.5 * numpy.sum(matrix, axis=1)
             frame.particles.position = self.position - center
         if self.has_velocity():

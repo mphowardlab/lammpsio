@@ -175,7 +175,7 @@ class Box:
 
     @classmethod
     def from_hoomd_convention(
-        cls, box_data, low, force_triclinic=False, dimensions=None
+        cls, box_data, low=None, force_triclinic=False, dimensions=None
     ):
         """Convert box data in HOOMD-blue convention to LAMMPS-convention
 
@@ -183,16 +183,20 @@ class Box:
         ----------
         box_data : list
             An array of box dimensions in HOOMD-blue convention.
+        low : list
+            Origin of the box. If ``None``, the box is centered at the origin.
+            Default is ``None``.
+        force_triclinic : bool
+            If ``True``, forces the box to be triclinic even if the tilt
+            factors are zero. Default is ``False``.
+        dimensions : int
+            The number of dimensions of the box. If ``None``, it is inferred
+            from the box data. Default is ``None``.
 
         Returns
         -------
-        :class:`numpy.ndarray`
-            Upper triangular matrix in LAMMPS style::
-
-                [[lx, xy, xz],
-                 [0, ly, yz],
-                 [0, 0, lz]]
-
+        box : :class:`Box`
+            A simulation box in LAMMPS convention.
         """
         if box_data.shape != (6,):
             raise TypeError("Box data must be a 6-tuple")
@@ -217,7 +221,12 @@ class Box:
         matrix = numpy.array(
             [[L[0], tilt[0], tilt[1]], [0, L[1], tilt[2]], [0, 0, L[2]]]
         )
-        return Box.from_matrix(low=low, matrix=matrix, force_triclinic=force_triclinic)
+
+        # center the box if low is not provided
+        if low is None:
+            low = -0.5 * numpy.sum(matrix, axis=1)
+
+        return Box.from_matrix(low, matrix, force_triclinic)
 
     @property
     def low(self):
