@@ -79,3 +79,61 @@ def test_from_matrix(box, force_triclinic):
     invalid_matrix = numpy.array([[lx, xy, xz], [ly, 0, yz], [lz, 0, 0]])
     with pytest.raises(ValueError):
         lammpsio.Box.from_matrix(box.low, invalid_matrix)
+
+
+@pytest.mark.parametrize("box", [lf("orthorhombic"), lf("triclinic")])
+def test_to_matrix(box):
+    matrix = lammpsio.Box.to_matrix(box)
+
+    lx, ly, lz = box.high - box.low
+    xy, xz, yz = box.tilt if box.tilt is not None else (0, 0, 0)
+    expected_matrix = numpy.array([[lx, xy, xz], [0, ly, yz], [0, 0, lz]])
+
+    assert numpy.allclose(matrix, expected_matrix)
+
+    # test with invalid box
+    with pytest.raises(TypeError):
+        lammpsio.Box.to_matrix([lx, ly, lz, xy, xz, yz])
+
+
+@pytest.mark.parametrize("box", [lf("orthorhombic"), lf("triclinic")])
+def test_convert_convention(box):
+    # Convert to HOOMD-blue convention
+    hoomd_box = lammpsio.Box.to_hoomd_convention(box)
+    assert isinstance(hoomd_box, numpy.ndarray)
+    assert hoomd_box.shape == (6,)
+    assert numpy.allclose(hoomd_box[:3], box.high - box.low)
+    if box.tilt is not None:
+        assert numpy.allclose(
+            hoomd_box[3:],
+            [
+                box.tilt[0] / (box.high[1] - box.low[1]),
+                box.tilt[1] / (box.high[2] - box.low[2]),
+                box.tilt[2] / (box.high[2] - box.low[2]),
+            ],
+        )
+    else:
+        assert numpy.allclose(hoomd_box[3:], [0, 0, 0])
+
+    # Convert back to LAMMPS convention
+    lammps_box = lammpsio.Box.from_hoomd_convention(hoomd_box, dimensions=3)
+    assert isinstance(lammps_box, numpy.ndarray)
+    assert lammps_box.shape == (3, 3)
+    new_box = lammpsio.Box.from_matrix(box.low, lammps_box)
+    assert numpy.allclose(new_box.low, box.low)
+    assert numpy.allclose(new_box.high, box.high)
+    if box.tilt is not None:
+        assert numpy.allclose(new_box.tilt, box.tilt)
+    else:
+        assert new_box.tilt is None
+
+    # test two dimension box
+    hoomd_box_2d = lammpsio.Box.to_hoomd_convention(box)
+    # set Lz and yz to zero for 2D
+    hoomd_box_2d[2] = 0
+    hoomd_box_2d[5] = 0
+
+    lammps_box_2d = lammpsio.Box.from_hoomd_convention(hoomd_box_2d, dimensions=2)
+    assert isinstance(lammps_box_2d, numpy.ndarray)
+    assert lammps_box_2d.shape == (3, 3)
+    assert lammps_box_2d[2, 2] == 1.0  # Lz should be changed to 1.0 for 2D

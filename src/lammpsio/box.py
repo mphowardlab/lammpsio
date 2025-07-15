@@ -64,6 +64,40 @@ class Box:
             raise TypeError(f"Unable to cast boxlike object with shape {v.shape}")
 
     @classmethod
+    def to_matrix(cls, box):
+        """Convert a :class:`Box` to an upper triangular matrix.
+
+        Parameters
+        ----------
+        box : :class:`Box`
+            The box to convert.
+
+        Returns
+        -------
+        :class:`numpy.ndarray`
+            Upper triangular matrix in LAMMPS style::
+
+                [[lx, xy, xz],
+                 [0, ly, yz],
+                 [0, 0, lz]]
+
+        """
+        if not isinstance(box, Box):
+            raise TypeError("box must be Box.")
+
+        low = box.low
+        high = box.high
+        tilt = box.tilt if box.tilt is not None else [0, 0, 0]
+
+        return numpy.array(
+            [
+                [high[0] - low[0], tilt[0], tilt[1]],
+                [0, high[1] - low[1], tilt[2]],
+                [0, 0, high[2] - low[2]],
+            ]
+        )
+
+    @classmethod
     def from_matrix(cls, low, matrix, force_triclinic=False):
         """Create a Box from low and matrix.
 
@@ -115,6 +149,70 @@ class Box:
             tilt = None
 
         return cls(low, high, tilt)
+
+    @classmethod
+    def to_hoomd_convention(cls, box):
+        """Convert a :class:`Box` to HOOMD-blue convention.
+
+        Parameters
+        ----------
+        box : :class:`Box`
+            The box to convert.
+
+        Returns
+        -------
+        :class:`numpy.ndarray`
+            A matrix of box dimensions in HOOMD-blue convention.
+
+        """
+        if not isinstance(box, Box):
+            raise TypeError("box must be Box.")
+        L = box.high - box.low
+        if box.tilt is not None:
+            tilt = box.tilt.copy()
+            tilt[0] /= L[1]
+            tilt[1:] /= L[2]
+        else:
+            tilt = [0, 0, 0]
+
+        return numpy.concatenate((L, tilt))
+
+    @classmethod
+    def from_hoomd_convention(cls, box_data, dimensions):
+        """Convert box data in HOOMD-blue convention to LAMMPS-convention
+
+        Parameters
+        ----------
+        box_data : list
+            An array of box dimensions in HOOMD-blue convention.
+
+        Returns
+        -------
+        :class:`numpy.ndarray`
+            Upper triangular matrix in LAMMPS style::
+
+                [[lx, xy, xz],
+                 [0, ly, yz],
+                 [0, 0, lz]]
+
+        """
+        if box_data.shape != (6,):
+            raise TypeError("Box data must be a 6-tuple")
+        L = box_data[:3]
+        tilt = box_data[3:]
+        if dimensions == 3:
+            tilt[0] *= L[1]
+            tilt[1:] *= L[2]
+        elif dimensions == 2:
+            tilt[0] *= L[1]
+            # HOOMD boxes can have Lz = 0, but LAMMPS does not allow this.
+            if L[2] == 0:
+                L[2] = 1.0
+
+        matrix = numpy.array(
+            [[L[0], tilt[0], tilt[1]], [0, L[1], tilt[2]], [0, 0, L[2]]]
+        )
+        return matrix
 
     @property
     def low(self):
