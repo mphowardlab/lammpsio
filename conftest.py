@@ -36,9 +36,10 @@ def setup_sybil_tests(namespace):
         namespace["lammps"] = None
 
     if has_gsd:
-        namespace["frame"] = gsd.hoomd.Frame()
+        namespace["gsd"] = gsd
+        namespace["gsd.hoomd"] = gsd.hoomd
     else:
-        namespace["frame"] = None
+        namespace["gsd.hoomd"] = None
 
 
 if sybil is not None:

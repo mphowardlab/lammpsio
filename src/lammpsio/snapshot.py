@@ -96,9 +96,11 @@ class Snapshot:
         -------
         Create snapshot from a GSD file:
 
-        .. skip: next if(frame == None, reason="gsd.hoomd not installed")
+        .. skip: next if(gsd.hoomd == None, reason="gsd.hoomd not installed")
 
         .. code-block:: python
+
+            frame = gsd.hoomd.Frame()
 
             frame.configuration.box = [4, 5, 6, 0.1, 0.2, 0.3]
 
