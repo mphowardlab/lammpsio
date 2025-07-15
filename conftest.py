@@ -16,12 +16,25 @@ try:
 except ModuleNotFoundError:
     has_gsd = False
 
+try:
+    import lammps
+
+    has_lammps = True
+except ImportError:
+    has_lammps = False
+
 
 def setup_sybil_tests(namespace):
     """Sybil setup function."""
     # Common imports.
     namespace["numpy"] = numpy
     namespace["lammpsio"] = lammpsio
+
+    if has_lammps:
+        namespace["lammps"] = lammps
+    else:
+        namespace["lammps"] = None
+
     if has_gsd:
         namespace["frame"] = gsd.hoomd.Frame()
     else:

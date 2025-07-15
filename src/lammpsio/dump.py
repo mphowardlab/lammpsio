@@ -64,12 +64,11 @@ class DumpFile:
     copy_from : `Snapshot`
         If specified, copy supported fields that are missing in the dump file
         but are set in a reference `Snapshot`.
-    
-    
+
+    .. skip: next if(lammps == None, reason="lammps not installed")
+
     .. invisible-code-block: python
-        
-        import lammps
-        
+
         filename = tmp_path / "atoms.lammpstrj"
         lmps = lammps.lammps(cmdargs=["-log", "none", "-nocite"])
 
@@ -88,7 +87,7 @@ class DumpFile:
 
         cmds += ["pair_style lj/cut 2.5"]
         cmds += ["pair_coeff 1 1 1.0 1.0 2.5"]
-        
+
         cmds += ["minimize 1.0e-4 1.0e-6 100 1000"]
         cmds += ["timestep 0.005"]
         cmds += ["fix 1 all nvt temp 1.0 1.0 0.1"]
@@ -96,19 +95,23 @@ class DumpFile:
         cmds += ["thermo_style custom step temp pe ke etotal press density"]
         cmds += [f"dump 1 all custom 100 {filename} id x y z ix iy iz"]
         cmds += ["run 1000"]
-         
+
         lmps.commands_list(cmds)
         lmps.close()
-    
+
     Example
     -------
     Create a dump file object:
+
+    .. skip: next if(lammps == None, reason="lammps not installed")
 
     .. code-block:: python
 
         traj = lammpsio.DumpFile(filename)
 
     Iterate snapshots:
+
+    .. skip: next if(lammps == None, reason="lammps not installed")
 
     .. code-block:: python
 
@@ -118,11 +121,15 @@ class DumpFile:
     You can also get the number of snapshots in the `DumpFile`, but this does
     require reading the entire file: use with caution!
 
+    .. skip: next if(lammps == None, reason="lammps not installed")
+
     .. code-block:: python
 
         num_frames = len(traj)
 
     Random access by creating a list:
+
+    .. skip: next if(lammps == None, reason="lammps not installed")
 
     .. code-block:: python
 
@@ -160,10 +167,12 @@ class DumpFile:
         -------
         A `DumpFile` can be created from a list of snapshots:
 
+        .. skip: next if(lammps == None, reason="lammps not installed")
+
         .. code-block:: python
-            
+
             schema = {"id":0, "position":(1, 2, 3), "image": (4, 5, 6)}
-            
+
             lammpsio.DumpFile.create(filename, schema, snapshots)
 
         """
