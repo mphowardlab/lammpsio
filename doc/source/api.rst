@@ -1,10 +1,10 @@
 API
 ---
 
-Particle data
-=============
+Particles
+=========
 
-The particle data is stored in the `Snapshot`, `Box` and `LabelMap` objects.
+The particle configuration is stored in the `Snapshot`, `Box` and `LabelMap` objects.
 `Snapshot` contains information about the particles, their positions, velocities, and other properties.
 The `Box` object defines the simulation box dimensions and shape.
 The `LabelMap` object is used to map particle labels (types) with a particle's or connection's typeid.
