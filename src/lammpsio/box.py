@@ -56,16 +56,17 @@ class Box:
 
         [x_hi, y_hi, z_hi] = [1.0, 10.0, 8.0]
 
-    The tilt factors ``[1.0, -2.0, 0.5]`` corresponds to ``xy``, ``xz``, and ``yz`` respectively.
+    The tilt factors ``[1.0, -2.0, 0.5]`` corresponds to
+    ``xy``, ``xz``, and ``yz`` respectively.
 
     Construct a orthorhombic simulation box:
 
     .. code-block:: python
 
         box = lammpsio.Box([-5.0, -10.0, 0.0], [1.0, 10.0, 8.0])
-    
-    The box construction is same as before except the tilt factors are all zero or ``None``,
-    meaning the box is orthorhombic.
+
+    The box construction is same as before except the tilt
+    factors are all zero or ``None``, meaning the box is orthorhombic.
 
     """
 
@@ -105,7 +106,7 @@ class Box:
             box = lammpsio.Box.cast([-5.0, -10.0, 0.0, 1.0, 10.0, 8.0])
 
         The array defines an orthorhombic box, with each element being cast
-        to the `low` and `high` lists in the `lammpsio.Box` format.
+        to the `low` and `high` lists in the `Box` format.
 
         """
         if isinstance(value, Box):
