@@ -140,7 +140,19 @@ class Box:
                  [0, ly, yz],
                  [0, 0, lz]]
 
+        Examples
+        --------
+        Convert a box to an origin and matrix:
+
+        .. code-block:: python
+
+            low, matrix = box.to_matrix()
+
+        `low` is the origin of the box, and `matrix` is the upper triangular
+        matrix that defines the box dimensions and tilt factors.
+
         """
+
         low = self.low
         high = self.high
         tilt = self.tilt if self.tilt is not None else [0, 0, 0]
@@ -230,7 +242,45 @@ class Box:
         :class:`numpy.ndarray`
             A matrix of box dimensions in HOOMD-blue convention.
 
+        Examples
+        --------
+        Convert a box to HOOMD-blue convention:
+
+        .. skip: next if(lammps == None, reason="lammps not installed")
+
+        .. invisible-code-block: python
+
+            filename = tmp_path / "atoms.lammpstrj"
+            lmps = lammps.lammps(cmdargs=["-log", "none", "-nocite"])
+
+            cmds = []
+            cmds += ["units lj"]
+            cmds += ["atom_style atomic"]
+            cmds += ["boundary p p p"]
+
+            box_length = 3
+
+            cmds += [f"region box block 0 {box_length} 0 {box_length} 0 {box_length}"]
+            cmds += ["create_box 1 box"]
+
+            cmds += ["create_atoms 1 random 10 12345 box"]
+            cmds += ["mass 1 1.0"]
+
+            cmds += [f"dump 1 all custom 100 {filename} id x y z ix iy iz"]
+            cmds += ["run 1"]
+
+            lmps.commands_list(cmds)
+            lmps.close()
+
+        .. code-block:: python
+
+            dump_file = lammpsio.DumpFile(filename)
+
+            for snapshot in dump_file:
+                hoomd_box = snapshot.box.to_hoomd_convention()
+
         """
+
         L = self.high - self.low
         if self.tilt is not None:
             tilt = self.tilt.copy()
@@ -265,6 +315,15 @@ class Box:
         -------
         box : `Box`
             A simulation box in LAMMPS convention.
+
+        Examples
+        --------
+        Convert a box to the LAMMPS convention:
+
+        .. code-block:: python
+
+            lammps_box = snapshot.box.from_hoomd_convention(hoomd_box)
+
         """
         if box_data.shape != (6,):
             raise TypeError("Box data must be a 6-tuple")
