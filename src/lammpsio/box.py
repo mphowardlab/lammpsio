@@ -121,6 +121,41 @@ class Box:
         else:
             raise TypeError(f"Unable to cast boxlike object with shape {v.shape}")
 
+    def to_matrix(self):
+        """Convert to an origin and matrix.
+
+        Parameters
+        ----------
+        box : `Box`
+            The box to convert.
+
+        Returns
+        -------
+        list
+            Origin of the box.
+        `numpy.ndarray`
+            Upper triangular matrix in LAMMPS style::
+
+                [[lx, xy, xz],
+                 [0, ly, yz],
+                 [0, 0, lz]]
+
+        """
+        low = self.low
+        high = self.high
+        tilt = self.tilt if self.tilt is not None else [0, 0, 0]
+
+        return (
+            low,
+            numpy.array(
+                [
+                    [high[0] - low[0], tilt[0], tilt[1]],
+                    [0, high[1] - low[1], tilt[2]],
+                    [0, 0, high[2] - low[2]],
+                ]
+            ),
+        )
+
     @classmethod
     def from_matrix(cls, low, matrix, force_triclinic=False):
         """Cast from an origin and matrix.
@@ -178,6 +213,88 @@ class Box:
             tilt = None
 
         return cls(low, high, tilt)
+
+    def to_hoomd_convention(self):
+        """Convert to HOOMD-blue convention.
+
+        This convention for defining the box is based on
+        `HOOMD-blue <https://hoomd-blue.readthedocs.io/en/v5.0.1/hoomd/box.html>`_.
+
+        Parameters
+        ----------
+        box : `Box`
+            The box to convert.
+
+        Returns
+        -------
+        :class:`numpy.ndarray`
+            A matrix of box dimensions in HOOMD-blue convention.
+
+        """
+        L = self.high - self.low
+        if self.tilt is not None:
+            tilt = self.tilt.copy()
+            tilt[0] /= L[1]
+            tilt[1:] /= L[2]
+        else:
+            tilt = [0, 0, 0]
+
+        return numpy.concatenate((L, tilt))
+
+    @classmethod
+    def from_hoomd_convention(
+        cls, box_data, low=None, force_triclinic=False, dimensions=None
+    ):
+        """Cast from HOOMD-blue convention.
+
+        Parameters
+        ----------
+        box_data : list
+            An array of box dimensions in HOOMD-blue convention.
+        low : list
+            Origin of the box. If ``None``, the box is centered at the origin.
+            Default is ``None``.
+        force_triclinic : bool
+            If ``True``, forces the box to be triclinic even if the tilt
+            factors are zero. Default is ``False``.
+        dimensions : int
+            The number of dimensions of the box. If ``None``, it is inferred
+            from the box data. Default is ``None``.
+
+        Returns
+        -------
+        box : `Box`
+            A simulation box in LAMMPS convention.
+        """
+        if box_data.shape != (6,):
+            raise TypeError("Box data must be a 6-tuple")
+        if dimensions is None:
+            dimensions = 3 if box_data[2] != 0 else 2
+        if dimensions not in (2, 3):
+            raise ValueError("Dimensions must be 2 or 3")
+
+        L = box_data[:3]
+        tilt = box_data[3:]
+        if dimensions == 3:
+            tilt[0] *= L[1]
+            tilt[1:] *= L[2]
+        elif dimensions == 2:
+            tilt[0] *= L[1]
+            tilt[1] = 0
+            tilt[2] = 0
+            # HOOMD boxes can have Lz = 0, but LAMMPS does not allow this.
+            if L[2] == 0:
+                L[2] = 1.0
+
+        matrix = numpy.array(
+            [[L[0], tilt[0], tilt[1]], [0, L[1], tilt[2]], [0, 0, L[2]]]
+        )
+
+        # center the box if low is not provided
+        if low is None:
+            low = -0.5 * numpy.sum(matrix, axis=1)
+
+        return cls.from_matrix(low, matrix, force_triclinic)
 
     @property
     def low(self):

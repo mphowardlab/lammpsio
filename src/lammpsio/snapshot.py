@@ -114,22 +114,7 @@ class Snapshot:
 
         # process HOOMD box to LAMMPS box
         box = numpy.array(frame.configuration.box, copy=True)
-        L = box[:3]
-        tilt = box[3:]
-        if frame.configuration.dimensions == 3:
-            tilt[0] *= L[1]
-            tilt[1:] *= L[2]
-        elif frame.configuration.dimensions == 2:
-            tilt[0] *= L[1]
-            # HOOMD boxes can have Lz = 0, but LAMMPS does not allow this.
-            if L[2] == 0:
-                L[2] = 1.0
-
-        matrix = numpy.array(
-            [[L[0], tilt[0], tilt[1]], [0, L[1], tilt[2]], [0, 0, L[2]]]
-        )
-        low = -0.5 * numpy.sum(matrix, axis=1)
-        box = Box.from_matrix(low=low, matrix=matrix)
+        box = Box.from_hoomd_convention(box)
 
         snap = Snapshot(
             N=frame.particles.N,
@@ -289,14 +274,7 @@ class Snapshot:
         if self.step is not None:
             frame.configuration.step = int(self.step)
 
-        L = self.box.high - self.box.low
-        if self.box.tilt is not None:
-            tilt = self.box.tilt.copy()
-            tilt[0] /= L[1]
-            tilt[1:] /= L[2]
-        else:
-            tilt = [0, 0, 0]
-        frame.configuration.box = numpy.concatenate((L, tilt))
+        frame.configuration.box = self.box.to_hoomd_convention()
 
         # sort tags if specified and not increasing because GSD guarantees an order
         reverse_order = None
@@ -311,14 +289,8 @@ class Snapshot:
         frame.particles.N = self.N
         if self.has_position():
             # Center the positions using HOOMD tilt factors (computed above)
-            matrix = numpy.array(
-                [
-                    [L[0], tilt[0] * L[1], tilt[1] * L[2]],
-                    [0, L[1], tilt[2] * L[2]],
-                    [0, 0, L[2]],
-                ]
-            )
-            center = self.box.low + 0.5 * numpy.sum(matrix, axis=1)
+            low, matrix = self.box.to_matrix()
+            center = low + 0.5 * numpy.sum(matrix, axis=1)
             frame.particles.position = self.position - center
         if self.has_velocity():
             frame.particles.velocity = self.velocity.copy()
