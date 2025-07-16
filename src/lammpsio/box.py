@@ -244,7 +244,7 @@ class Box:
 
         Examples
         --------
-        Convert a box to HOOMD-blue convention:
+        Convert a LAMMPS simulation box to HOOMD-blue convention:
 
         .. skip: start(lammps == None, reason="lammps not installed")
 
@@ -318,7 +318,7 @@ class Box:
 
         Examples
         --------
-        Convert a box to the LAMMPS convention:
+        Convert a HOOMD-blue simulation box to the LAMMPS convention:
 
         .. code-block:: python
 
