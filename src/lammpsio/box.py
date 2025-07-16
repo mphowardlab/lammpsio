@@ -73,9 +73,9 @@ class Box:
 
         Returns
         -------
-        low : list
+        list
             Origin of the box.
-        :class:`numpy.ndarray`
+        `numpy.ndarray`
             Upper triangular matrix in LAMMPS style::
 
                 [[lx, xy, xz],
