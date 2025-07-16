@@ -65,7 +65,7 @@ class DumpFile:
         If specified, copy supported fields that are missing in the dump file
         but are set in a reference `Snapshot`.
 
-    .. skip: next if(lammps == None, reason="lammps not installed")
+    .. skip: start(lammps == None, reason="lammps not installed")
 
     .. invisible-code-block: python
 
@@ -103,15 +103,11 @@ class DumpFile:
     -------
     Create a dump file object:
 
-    .. skip: next if(lammps == None, reason="lammps not installed")
-
     .. code-block:: python
 
         traj = lammpsio.DumpFile(filename)
 
     Iterate snapshots:
-
-    .. skip: next if(lammps == None, reason="lammps not installed")
 
     .. code-block:: python
 
@@ -121,15 +117,12 @@ class DumpFile:
     You can also get the number of snapshots in the `DumpFile`, but this does
     require reading the entire file: use with caution!
 
-    .. skip: next if(lammps == None, reason="lammps not installed")
-
     .. code-block:: python
 
         num_frames = len(traj)
 
     Random access by creating a list:
 
-    .. skip: next if(lammps == None, reason="lammps not installed")
 
     .. code-block:: python
 
@@ -167,14 +160,13 @@ class DumpFile:
         -------
         A `DumpFile` can be created from a list of snapshots:
 
-        .. skip: next if(lammps == None, reason="lammps not installed")
-
         .. code-block:: python
 
             schema = {"id":0, "position":(1, 2, 3), "image": (4, 5, 6)}
 
             lammpsio.DumpFile.create(filename, schema, snapshots)
 
+        .. skip: end
         """
         # map out the schema into a dump row
         # each entry is a tuple: (column, (attribute, index))
