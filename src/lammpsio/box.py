@@ -325,6 +325,7 @@ class Box:
             lammps_box = snapshot.box.from_hoomd_convention(hoomd_box)
 
         .. skip: end
+
         """
         if box_data.shape != (6,):
             raise TypeError("Box data must be a 6-tuple")

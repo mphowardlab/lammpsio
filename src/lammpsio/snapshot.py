@@ -265,6 +265,7 @@ class Snapshot:
             frame = snap_2.to_hoomd_gsd()
 
         .. skip: end
+
         """
         if _compatibility.gsd_version is None:
             raise ImportError("GSD package not found")

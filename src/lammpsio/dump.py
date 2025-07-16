@@ -167,6 +167,7 @@ class DumpFile:
             lammpsio.DumpFile.create(filename, schema, snapshots)
 
         .. skip: end
+
         """
         # map out the schema into a dump row
         # each entry is a tuple: (column, (attribute, index))
