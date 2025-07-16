@@ -64,15 +64,17 @@ class Box:
             raise TypeError(f"Unable to cast boxlike object with shape {v.shape}")
 
     def to_matrix(self):
-        """Convert a :class:`Box` to an upper triangular matrix.
+        """Convert to an origin and matrix.
 
         Parameters
         ----------
-        box : :class:`Box`
+        box : `Box`
             The box to convert.
 
         Returns
         -------
+        low : list
+            Origin of the box.
         :class:`numpy.ndarray`
             Upper triangular matrix in LAMMPS style::
 
@@ -86,6 +88,7 @@ class Box:
         tilt = self.tilt if self.tilt is not None else [0, 0, 0]
 
         return (
+            low,
             numpy.array(
                 [
                     [high[0] - low[0], tilt[0], tilt[1]],
@@ -93,7 +96,6 @@ class Box:
                     [0, 0, high[2] - low[2]],
                 ]
             ),
-            low,
         )
 
     @classmethod
@@ -116,7 +118,7 @@ class Box:
 
         Returns
         -------
-        :class:`Box`
+        `Box`
             A simulation box.
 
         Raises
@@ -152,9 +154,12 @@ class Box:
     def to_hoomd_convention(self):
         """Convert to HOOMD-blue convention.
 
+        This convention for defining the box is based on
+        `HOOMD-blue <https://hoomd-blue.readthedocs.io/en/v5.0.1/hoomd/box.html>`_.
+
         Parameters
         ----------
-        box : :class:`Box`
+        box : `Box`
             The box to convert.
 
         Returns
@@ -195,7 +200,7 @@ class Box:
 
         Returns
         -------
-        box : :class:`Box`
+        box : `Box`
             A simulation box in LAMMPS convention.
         """
         if box_data.shape != (6,):

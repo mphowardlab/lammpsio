@@ -83,7 +83,7 @@ def test_from_matrix(box, force_triclinic):
 
 @pytest.mark.parametrize("box", [lf("orthorhombic"), lf("triclinic")])
 def test_to_matrix(box):
-    matrix, low = box.to_matrix()
+    low, matrix = box.to_matrix()
 
     lx, ly, lz = box.high - box.low
     xy, xz, yz = box.tilt if box.tilt is not None else (0, 0, 0)
