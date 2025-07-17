@@ -44,8 +44,8 @@ class Box:
 
     Examples
     --------
-    Construct a orthorhombic simulation box with edge lengths (6, 20, 8)
-    and origin (-5, -10, 0):
+    Construct a orthorhombic simulation box with edge lengths (10, 10, 10)
+    and origin (-5, -5, 5):
 
     .. code-block:: python
 
@@ -216,9 +216,9 @@ class Box:
                 force_triclinic=True)
 
         If the tilt factors in the matrix are set to zero,
-        `lammpsio` sets the tilt factors to `None` by default.
-        By setting the `force_triclinic` to `True`,
-        the box is forced to set the tilt factors to (0, 0, 0).
+        the method sets the tilt factors to `None` by default.
+        By setting the ``force_triclinic`` to `True`,
+        the tilt factors are set to (0, 0, 0).
 
         """
         low = numpy.array(low, dtype=float)
