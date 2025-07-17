@@ -22,11 +22,13 @@ class DataFile:
 
     .. code-block:: python
 
-        box = lammpsio.Box([-5.0, -10.0, 0.0], [1.0, 10.0, 8.0], [1.0, -2.0, 0.5])
+        snapshot = lammpsio.Snapshot(
+            N=3,
+            box=lammpsio.Box([-5, -5, -5], [5, 5, 5]),
+            step=10
+        )
 
-        snap = lammpsio.Snapshot(3, box, 10)
-
-        data = lammpsio.DataFile.create(tmp_path / "atoms.data", snap)
+        data = lammpsio.DataFile.create(tmp_path / "atoms.data", snapshot)
 
     A data file can also be read into a `Snapshot`:
 
