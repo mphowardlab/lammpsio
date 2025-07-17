@@ -4,10 +4,9 @@ API
 Particles
 =========
 
-The particle configuration is stored in the `Snapshot`, `Box` and `LabelMap` objects.
-`Snapshot` contains information about the particles, their positions, velocities, and other properties.
-The `Box` object defines the simulation box dimensions and shape.
-The `LabelMap` object is used to map particle labels (types) with a particle's or connection's typeid.
+The particle configuration can be stored in a `Snapshot`, including the simulation `Box`
+and timestep, per-particle properties like position and velocity, and topology
+information (see next).
 
 .. autosummary::
     :nosignatures:
@@ -36,6 +35,8 @@ an angle, 4 for a dihedral or improper).
 
 File formats
 ============
+
+Particle data can be read and written using the following LAMMPS file formats:
 
 .. autosummary::
     :nosignatures:

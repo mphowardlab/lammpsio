@@ -43,7 +43,6 @@ def setup_sybil_tests(namespace):
     else:
         namespace["gsd"] = None
 
-
 if sybil is not None:
     pytest_collect_file = sybil.Sybil(
         parsers=[
