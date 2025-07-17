@@ -39,9 +39,9 @@ def setup_sybil_tests(namespace):
     if has_gsd:
         namespace["gsd"] = gsd
         namespace["gsd.hoomd"] = gsd.hoomd
-
     else:
         namespace["gsd"] = None
+
 
 if sybil is not None:
     pytest_collect_file = sybil.Sybil(
