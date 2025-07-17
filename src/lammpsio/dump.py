@@ -43,7 +43,8 @@ class DumpFile:
     A `DumpFile` is iterable, so you can use it to go through all the snapshots
     of a trajectory. It supports LAMMPS dump file with different compression
     formats such as gzip and Zstandard
-    (`pyzstd` package needs to be installed separately for Zstandard support).
+    (`pyzstd <https://pyzstd.readthedocs.io/en/stable/>`_ package needs to be installed
+    separately for Zstandard support).
     Random access to snapshots is not currently implemented, but it may be added
     in future. If you want to randomly access snapshots, you should load the whole
     file into a list, but the memory requirements to do so may be large.
