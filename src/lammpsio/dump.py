@@ -41,10 +41,12 @@ class DumpFile:
     faster reading may be possible by setting this option to ``False``.
 
     A `DumpFile` is iterable, so you can use it to go through all the snapshots
-    of a trajectory. Random access to snapshots is not currently implemented,
-    but it may be added in future. If you want to randomly access snapshots, you
-    should load the whole file into a list, but the memory requirements to do so
-    may be large.
+    of a trajectory. It supports LAMMPS dump file with different compression
+    formats such as gzip and Zstandard
+    (`pyzstd` package needs to be installed separately for Zstandard support).
+    Random access to snapshots is not currently implemented, but it may be added
+    in future. If you want to randomly access snapshots, you should load the whole
+    file into a list, but the memory requirements to do so may be large.
 
     The dump file may not contain certain information about your particles, for
     example, topology, or you may choose not to write this information in the
@@ -64,6 +66,9 @@ class DumpFile:
     copy_from : `Snapshot`
         If specified, copy supported fields that are missing in the dump file
         but are set in a reference `Snapshot`.
+
+    Example
+    -------
 
     .. skip: start(lammps == None, reason="lammps not installed")
 
@@ -99,8 +104,6 @@ class DumpFile:
         lmps.commands_list(cmds)
         lmps.close()
 
-    Example
-    -------
     Create a dump file object:
 
     .. code-block:: python
