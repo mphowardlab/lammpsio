@@ -187,7 +187,7 @@ class Box:
 
         Examples
         --------
-        Construct a simulation box from a low and matrix:
+        Construct a triclinic simulation box from a low and matrix:
 
         .. code-block:: python
 
@@ -197,13 +197,28 @@ class Box:
                     [1, 1.0, -2.0],
                     [0, 1, 0.5],
                     [0, 0, 1]
-                ]
-                , force_triclinic=True)
+                ])
 
         This creates a triclinic box of unit length in each direction with origin
-        at (0, 0, 0) and the tilt factors (1.0, -2.0, 0.5). The `force_triclinic` being
-        `True` in this case sets the tilt factors to zero. By default for an
-        orthorhombic box, the tilt factors are set to `None`.
+        at (0, 0, 0) and the tilt factors (1.0, -2.0, 0.5).
+
+        Construct an orthorhombic simulation box from a low and matrix:
+
+        .. code-block:: python
+
+            box = lammpsio.Box.from_matrix(
+                low=[0, 0, 0],
+                matrix=[
+                    [1, 0, 0],
+                    [0, 1, 0],
+                    [0, 0, 1]
+                ],
+                force_triclinic=True)
+
+        If the tilt factors in the matrix are set to zero,
+        `lammpsio` sets the tilt factors to `None` by default.
+        By setting the `force_triclinic` to `True`,
+        the box is forced to set the tilt factors to (0, 0, 0).
 
         """
         low = numpy.array(low, dtype=float)
