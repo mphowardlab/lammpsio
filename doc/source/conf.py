@@ -59,6 +59,7 @@ html_theme_options = {
         "color-brand-content": "#e86100",
         "color-admonition-background": "#e86100",
     },
+    "sidebar_hide_name": True,
 }
 html_logo = "_images/lammpsio_logo.svg"
 
