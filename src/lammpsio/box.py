@@ -44,29 +44,27 @@ class Box:
 
     Examples
     --------
+    Construct a orthorhombic simulation box with edge lengths (6, 20, 8)
+    and origin (-5, -10, 0):
+
+    .. code-block:: python
+
+        box = lammpsio.Box(low=[-5, -5, -5], high=[5, 5, 5])
+
+    The tilt defaults to ``None``, meaning the box is orthorhombic.
+
     Construct a triclinic simulation box:
 
     .. code-block:: python
 
-        box = lammpsio.Box([-5.0, -10.0, 0.0], [1.0, 10.0, 8.0], [1.0, -2.0, 0.5])
+        box = lammpsio.Box(
+            low=[-5.0, -5.0, -5.0],
+            high=[5.0, 5.0, 5.0],
+            tilt=[1.0, -2.0, 0.5]
+        )
 
-    The coordinates of the box having the following `low` and `high` lists::
-
-        [x_lo, y_lo, z_lo] = [-5.0, -10.0, 0.0]
-
-        [x_hi, y_hi, z_hi] = [1.0, 10.0, 8.0]
-
-    The tilt factors ``[1.0, -2.0, 0.5]`` corresponds to
-    ``xy``, ``xz``, and ``yz`` respectively.
-
-    Construct a orthorhombic simulation box:
-
-    .. code-block:: python
-
-        box = lammpsio.Box([-5.0, -10.0, 0.0], [1.0, 10.0, 8.0])
-
-    The box construction is same as before except the tilt
-    factors are all zero or ``None``, meaning the box is orthorhombic.
+    This box has the same nominal $L_x$, $L_y$, and $L_z$ as the
+    orthorhombic box, but now it also has tilt factors (1, -2, 0.5).
 
     """
 
@@ -103,7 +101,7 @@ class Box:
 
         .. code-block:: python
 
-            box = lammpsio.Box.cast([-5.0, -10.0, 0.0, 1.0, 10.0, 8.0])
+            box = lammpsio.Box.cast([-5.0, -5.0, -5.0, 5.0, 5.0, 5.0])
 
         The array defines an orthorhombic box, with each element being cast
         to the `low` and `high` lists in the `Box` format.
@@ -193,17 +191,19 @@ class Box:
 
         .. code-block:: python
 
-            box_matrix = numpy.array([
-                [1, 1.0, -2.0],
-                [0, 1, 0.5],
-                [0, 0, 1]
-            ])
-
-            box = lammpsio.Box.from_matrix(low=[0, 0, 0], matrix=box_matrix)
+            box = lammpsio.Box.from_matrix(
+                low=[0, 0, 0],
+                matrix=[
+                    [1, 1.0, -2.0],
+                    [0, 1, 0.5],
+                    [0, 0, 1]
+                ]
+                , force_triclinic=True)
 
         This creates a triclinic box of unit length in each direction with origin
-        at [0, 0, 0] and the tilt factors [1.0, -2.0, 0.5] corresponding to
-        $L_{xy}$, $L_{xz}$, and $L_{yz}$ respectively.
+        at (0, 0, 0) and the tilt factors (1.0, -2.0, 0.5). The `force_triclinic` being
+        `True` in this case sets the tilt factors to zero. By default for an 
+        orthorhombic box, the tilt factors are set to `None`.
 
         """
         low = numpy.array(low, dtype=float)
@@ -246,38 +246,16 @@ class Box:
         --------
         Convert a LAMMPS simulation box to HOOMD-blue convention:
 
-        .. skip: start(lammps == None, reason="lammps not installed")
-
-        .. invisible-code-block: python
-
-            filename = tmp_path / "atoms.lammpstrj"
-            lmps = lammps.lammps(cmdargs=["-log", "none", "-nocite"])
-
-            cmds = []
-            cmds += ["units lj"]
-            cmds += ["atom_style atomic"]
-            cmds += ["boundary p p p"]
-
-            box_length = 3
-
-            cmds += [f"region box block 0 {box_length} 0 {box_length} 0 {box_length}"]
-            cmds += ["create_box 1 box"]
-
-            cmds += ["create_atoms 1 random 10 12345 box"]
-            cmds += ["mass 1 1.0"]
-
-            cmds += [f"dump 1 all custom 100 {filename} id x y z ix iy iz"]
-            cmds += ["run 1"]
-
-            lmps.commands_list(cmds)
-            lmps.close()
-
         .. code-block:: python
 
-            dump_file = lammpsio.DumpFile(filename)
+            box = (lammpsio.Box([-5, -5, -5], [5, 5, 5])).to_hoomd_convention()
 
-            for snapshot in dump_file:
-                hoomd_box = snapshot.box.to_hoomd_convention()
+        This creates an orthorhombic box of dimensions (10, 10, 10) with `low`
+        at (-5, -5, -5) and center of the box at (0, 0, 0).
+        In accordance with the HOOMD-blue convention, the tilt factors are
+        either normalized by $L_{y}$ for $L_{xy}$ tilt factor and $L_{z}$ for
+        $L_{yz}$ and $L_{xz}$ tilt factors. If tilt factors are `None`, 
+        they are set to zero.
 
         """
 
@@ -322,11 +300,20 @@ class Box:
 
         .. code-block:: python
 
-            lammps_box = snapshot.box.from_hoomd_convention(hoomd_box)
+            hoomd_box = numpy.array([10, 10, 10, 0, 0, 0])
 
-        .. skip: end
+            lammps_box = lammpsio.Box.from_hoomd_convention(box_data=hoomd_box, low=[0, 0, 0])
 
+        This creates a orthorhombic box of dimensions  $L_x = 10, L_y = 10$ and $L_z = 10$ as the HOOMD-blue box,
+        with `low` set at (0, 0, 0). If `low` is `None`, the box is centered at the origin.
+        The tilt factors are multiplied by $L_y$ for $L_{xy}$ and $L_z$ for $L_{xz}$ 
+        and $L_{yz}$ to convert them to the LAMMPS convention.
+        
+        .. note::
+            $L_z$ is changed to 1.0 if the input $L_z$ is zero, as LAMMPS does not allow zero height box.
+            
         """
+        
         if box_data.shape != (6,):
             raise TypeError("Box data must be a 6-tuple")
         if dimensions is None:
