@@ -202,7 +202,7 @@ class Box:
 
         This creates a triclinic box of unit length in each direction with origin
         at (0, 0, 0) and the tilt factors (1.0, -2.0, 0.5). The `force_triclinic` being
-        `True` in this case sets the tilt factors to zero. By default for an 
+        `True` in this case sets the tilt factors to zero. By default for an
         orthorhombic box, the tilt factors are set to `None`.
 
         """
@@ -254,7 +254,7 @@ class Box:
         at (-5, -5, -5) and center of the box at (0, 0, 0).
         In accordance with the HOOMD-blue convention, the tilt factors are
         either normalized by $L_{y}$ for $L_{xy}$ tilt factor and $L_{z}$ for
-        $L_{yz}$ and $L_{xz}$ tilt factors. If tilt factors are `None`, 
+        $L_{yz}$ and $L_{xz}$ tilt factors. If tilt factors are `None`,
         they are set to zero.
 
         """
@@ -302,18 +302,21 @@ class Box:
 
             hoomd_box = numpy.array([10, 10, 10, 0, 0, 0])
 
-            lammps_box = lammpsio.Box.from_hoomd_convention(box_data=hoomd_box, low=[0, 0, 0])
+            lammps_box = lammpsio.Box.from_hoomd_convention(box_data=hoomd_box,
+                                                            low=[0, 0, 0])
 
-        This creates a orthorhombic box of dimensions  $L_x = 10, L_y = 10$ and $L_z = 10$ as the HOOMD-blue box,
-        with `low` set at (0, 0, 0). If `low` is `None`, the box is centered at the origin.
-        The tilt factors are multiplied by $L_y$ for $L_{xy}$ and $L_z$ for $L_{xz}$ 
+        This creates a orthorhombic box of dimensions  $L_x = 10, L_y = 10$
+        and $L_z = 10$ as the HOOMD-blue box, with `low` set at (0, 0, 0).
+        If `low` is `None`, the box is centered at the origin.
+        The tilt factors are multiplied by $L_y$ for $L_{xy}$ and $L_z$ for $L_{xz}$
         and $L_{yz}$ to convert them to the LAMMPS convention.
-        
+
         .. note::
-            $L_z$ is changed to 1.0 if the input $L_z$ is zero, as LAMMPS does not allow zero height box.
-            
+            $L_z$ is changed to 1.0 if the input $L_z$ is zero,
+            as LAMMPS does not allow zero height box.
+
         """
-        
+
         if box_data.shape != (6,):
             raise TypeError("Box data must be a 6-tuple")
         if dimensions is None:
