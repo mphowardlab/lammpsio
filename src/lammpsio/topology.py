@@ -278,14 +278,14 @@ class Angles(Topology):
             box=lammpsio.Box([-5, -5, -5], [5, 5, 5]),
             step=10
         )
-        
+
         snapshot.angles = lammpsio.topology.Angles(N=3, num_types=1)
         snapshot.angles.id = [1, 2, 3]
         snapshot.angles.typeid = [1, 1, 1]
         snapshot.angles.members = [[1, 2, 3], [2, 3, 1], [3, 2, 1]]
 
-    This creates a molecule with three angles of the same type. 
-    The angles are defined between particles IDs 1-2-3, 2-3-1, and 3-2-1 
+    This creates a molecule with three angles of the same type.
+    The angles are defined between particles IDs 1-2-3, 2-3-1, and 3-2-1
     to form a triangle structure.
 
     """
@@ -362,7 +362,7 @@ class Impropers(Topology):
             box=lammpsio.Box([-5, -5, -5], [5, 5, 5]),
             step=10
         )
-        
+
         snapshot.impropers = lammpsio.topology.Impropers(N=2, num_types=2)
         snapshot.impropers.id = [1, 2]
         snapshot.impropers.typeid = [1, 2]
@@ -409,7 +409,7 @@ class LabelMap(collections.abc.MutableMapping):
         snapshot.types = ["A", "B", "A"]
 
     This creates a dictionary mapping numeric type ID labels 1 and 2 used by LAMMPS
-    to alphanumeric type ID labels "A" and "B" used by HOOMD-blue to define 
+    to alphanumeric type ID labels "A" and "B" used by HOOMD-blue to define
     particle types.
 
     """
