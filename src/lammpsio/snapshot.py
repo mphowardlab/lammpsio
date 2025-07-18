@@ -28,15 +28,16 @@ class Snapshot:
 
     Example
     -------
-    Here is a 3-particle configuration in an triclinic box centered at the
+    Here is a 3-particle configuration in a cubic box centered at the
     origin at step 10:
 
     .. code-block:: python
 
-        box = lammpsio.Box([-5.0, -10.0, 0.0], [1.0, 10.0, 8.0], [1.0, -2.0,
-        0.5])
-
-        snapshot = lammpsio.Snapshot(N=3, box=box, step=10)
+        snapshot = lammpsio.Snapshot(
+            N=3,
+            box=lammpsio.Box([-5, -5, -5], [5, 5, 5]),
+            step=10
+        )
 
     All values of indexes follow the LAMMPS 1-indexed convention, but the arrays
     themselves are 0-indexed. `Snapshot` will lazily initialize these
@@ -47,12 +48,12 @@ class Snapshot:
 
     .. code-block:: python
 
-        snapshot.position = [[0,0,0],[1,-1,1],[1.5,2.5,-3.5]]
+        snapshot.position = [[0, 0, 0], [1, -1, 1], [1.5, 2.5, -3.5]]
 
         snapshot.typeid[2] = 2
 
         if not snapshot.has_mass():
-            snapshot.mass = [2.,2.,10.]
+            snapshot.mass = [2., 2., 10.]
 
     """
 
@@ -102,11 +103,14 @@ class Snapshot:
 
             frame = gsd.hoomd.Frame()
 
-            frame.configuration.box = [4, 5, 6, 0.1, 0.2, 0.3]
+            frame.configuration.box = [10, 10, 10, 0, 0, 0]
 
             frame.particles.N = 3
 
-            snap_2, type_map = lammpsio.Snapshot.from_hoomd_gsd(frame)
+            snapshot, type_map = lammpsio.Snapshot.from_hoomd_gsd(frame)
+
+        This creates a `Snapshot` from the provided HOOMD GSD frame as well as
+        the corresponding dictionary of typeids mapped from the HOOMD GSD frame.
 
         """
         # ensures frame is well formed and that we have NumPy arrays
@@ -262,7 +266,10 @@ class Snapshot:
 
         .. code-block:: python
 
-            frame = snap_2.to_hoomd_gsd()
+            frame = snapshot.to_hoomd_gsd()
+
+        This creates a GSD frame for the HOOMD-blue simulation package
+        from the `Snapshot` object.
 
         .. skip: end
 
@@ -670,7 +677,7 @@ class Snapshot:
 
     @property
     def mass(self):
-        """:(*N*,) `numpy.ndarray` of `float`: Masses.
+        """(*N*,) `numpy.ndarray` of `float`: Masses.
 
         The default value on initialization is 1 for all entries.
 
@@ -694,7 +701,7 @@ class Snapshot:
             self._mass = None
 
     def has_mass(self):
-        """`bool`: Check if configuration has masses.
+        """Check if configuration has masses.
 
         Returns
         -------
@@ -826,13 +833,31 @@ class Snapshot:
         Example
         -------
 
+        Reorder the particles in a snapshot
+
         .. code-block:: python
 
-            snapshot.bonds = lammpsio.topology.Bonds(N=6, num_types=2)
+            snapshot.bonds = lammpsio.Bonds(N=3, num_types=1)
 
-            bond_id = [0, 3, 1, 4, 2, 5]
+            bond_id = [1, 3, 2]
 
-            bonds = snapshot.bonds.reorder(numpy.sort(bond_id), check_order=True)
+            members = [[1, 2],
+                       [2, 3],
+                       [3, 1]]
+
+            typeid = [1, 1, 1]
+
+            snapshot.bonds.id = bond_id
+            snapshot.bonds.typeid = typeid
+            snapshot.bonds.members = members
+
+            snapshot.bonds.reorder(numpy.sort(numpy.array(bond_id) - 1),
+                                   check_order=True)
+
+        The bonds will be reordered from 0 to N-1, where N is the number
+        of bonds. In LAMMPS, all the IDs are 1-indexed, while, python is
+        0-indexed. Thus the ``bond_id`` is decreased by 1 to match
+        the python convention.
 
         """
         # sanity check the sorting order before applying it

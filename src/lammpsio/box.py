@@ -104,7 +104,7 @@ class Box:
             box = lammpsio.Box.cast([-5.0, -5.0, -5.0, 5.0, 5.0, 5.0])
 
         The array defines an orthorhombic box, with (-5.0, -5.0, -5.0) being cast
-        to the `low` and (5.0, 5.0, 5.0) being cast to the `high` lists in the 
+        to the `low` and (5.0, 5.0, 5.0) being cast to the `high` lists in the
         `Box` format.
 
         """
@@ -188,7 +188,7 @@ class Box:
 
         Examples
         --------
-        
+
         Construct an orthorhombic simulation box from a low and matrix:
 
         .. code-block:: python
@@ -206,7 +206,7 @@ class Box:
         the method sets the tilt factors to `None` by default.
         By setting the ``force_triclinic`` to `True`,
         the tilt factors are set to (0, 0, 0).
-        
+
         Construct a triclinic simulation box from a low and matrix:
 
         .. code-block:: python
