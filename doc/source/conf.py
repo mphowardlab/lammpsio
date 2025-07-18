@@ -62,6 +62,7 @@ html_theme_options = {
     "sidebar_hide_name": True,
 }
 html_logo = "_images/lammpsio_logo.svg"
+html_favicon = "_images/lammpsio_icon.svg"
 
 # -- Options for autodoc & autosummary ---------------------------------------
 
