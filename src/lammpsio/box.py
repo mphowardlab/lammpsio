@@ -323,8 +323,9 @@ class Box:
                                                             low=[0, 0, 0])
 
         This creates a orthorhombic box of dimensions  $L_x = 10, L_y = 10$
-        and $L_z = 10$ as the HOOMD-blue box, with `low` set at (0, 0, 0).
-        If `low` is `None`, the box is centered at the origin.
+        and $L_z = 10$ with tilt factors set to (0, 0, 0).
+        If `low` is `None`, the box is centered at (0, 0, 0). However, since `low` is
+        set to (0, 0, 0), the box is centered at (5, 5, 5).
         The tilt factors are multiplied by $L_y$ for $L_{xy}$ and $L_z$
         for $L_{xz}$ and $L_{yz}$ to convert them to the LAMMPS convention.
 

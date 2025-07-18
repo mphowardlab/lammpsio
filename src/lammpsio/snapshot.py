@@ -854,10 +854,11 @@ class Snapshot:
             snapshot.bonds.reorder(numpy.sort(numpy.array(bond_id) - 1),
                                    check_order=True)
 
-        The bonds will be reordered from 0 to N-1, where N is the number
-        of bonds. In LAMMPS, all the IDs are 1-indexed, while, python is
-        0-indexed. Thus the ``bond_id`` is decreased by 1 to match
-        the python convention.
+        This reorders the particle data with the same ordering as the bonds.
+        To enforce 0 to N-1 indexing, the `check_order` parameter is set to True.
+        In LAMMPS, all the IDs are 1-indexed, while, python is 0-indexed.
+        Thus the ``bond_id`` is decreased by 1 to match the python convention
+        which allows us to use python-based sorting.
 
         """
         # sanity check the sorting order before applying it
