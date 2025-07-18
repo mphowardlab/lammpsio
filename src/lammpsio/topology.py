@@ -232,19 +232,13 @@ class Bonds(Topology):
 
     .. code-block:: python
 
-        snapshot = lammpsio.Snapshot(
-            N=3,
-            box=lammpsio.Box([-5, -5, -5], [5, 5, 5]),
-            step=10
-        )
-
-        snapshot.bonds = lammpsio.topology.Bonds(N=3, num_types=1)
-        snapshot.bonds.id = [1, 2, 3]
-        snapshot.bonds.typeid = [1, 1, 1]
-        snapshot.bonds.members = [[1, 2], [2, 3], [1, 3]]
+        bonds = lammpsio.topology.Bonds(N=3, num_types=1)
+        bonds.id = [1, 2, 3]
+        bonds.typeid = [1, 1, 1]
+        bonds.members = [[1, 2], [2, 3], [1, 3]]
 
     This creates a molecule with three bonds of the same type.
-    The bonds are defined between particles 1-2, 2-3, and 1-3 to form a triangle
+    The bonds are defined between particle IDs 1-2, 2-3, and 1-3 to form a triangle
     structure.
 
     """
@@ -273,19 +267,13 @@ class Angles(Topology):
 
     .. code-block:: python
 
-        snapshot = lammpsio.Snapshot(
-            N=3,
-            box=lammpsio.Box([-5, -5, -5], [5, 5, 5]),
-            step=10
-        )
-
-        snapshot.angles = lammpsio.topology.Angles(N=3, num_types=1)
-        snapshot.angles.id = [1, 2, 3]
-        snapshot.angles.typeid = [1, 1, 1]
-        snapshot.angles.members = [[1, 2, 3], [2, 3, 1], [3, 2, 1]]
+        angles = lammpsio.topology.Angles(N=3, num_types=1)
+        angles.id = [1, 2, 3]
+        angles.typeid = [1, 1, 1]
+        angles.members = [[1, 2, 3], [2, 3, 1], [3, 1, 2]]
 
     This creates a molecule with three angles of the same type.
-    The angles are defined between particles IDs 1-2-3, 2-3-1, and 3-2-1
+    The angles are defined between particles IDs 1-2-3, 2-3-1, and 3-1-2
     to form a triangle structure.
 
     """
@@ -314,21 +302,15 @@ class Dihedrals(Topology):
 
     .. code-block:: python
 
-        snapshot = lammpsio.Snapshot(
-            N=8,
-            box=lammpsio.Box([-5, -5, -5], [5, 5, 5]),
-            step=10
-        )
-
-        snapshot.dihedrals = lammpsio.topology.Dihedrals(N=2, num_types=2)
-        snapshot.dihedrals.id = [1, 2]
-        snapshot.dihedrals.typeid = [1, 2]
-        snapshot.dihedrals.members = [
+        dihedrals = lammpsio.topology.Dihedrals(N=2, num_types=2)
+        dihedrals.id = [1, 2]
+        dihedrals.typeid = [1, 2]
+        dihedrals.members = [
             [1, 2, 3, 4],
-            [5, 6, 7, 8],
+            [2, 3, 4, 5],
         ]
 
-    This creates two dihedral angles of two different types for a molecule
+    This creates two dihedrals of two different types for a molecule
     consisting of eight atoms.
 
     """
@@ -353,26 +335,20 @@ class Impropers(Topology):
 
     Example
     -------
-    Create dihedrals:
+    Create improper dihedrals:
 
     .. code-block:: python
 
-        snapshot = lammpsio.Snapshot(
-            N=8,
-            box=lammpsio.Box([-5, -5, -5], [5, 5, 5]),
-            step=10
-        )
-
-        snapshot.impropers = lammpsio.topology.Impropers(N=2, num_types=2)
-        snapshot.impropers.id = [1, 2]
-        snapshot.impropers.typeid = [1, 2]
-        snapshot.impropers.members = [
+        impropers = lammpsio.topology.Impropers(N=2, num_types=2)
+        impropers.id = [1, 2]
+        impropers.typeid = [1, 2]
+        impropers.members = [
             [1, 2, 3, 4],
-            [5, 6, 7, 8],
+            [2, 3, 4, 5],
         ]
 
-    This creates two impropers angles of two different types for a molecule
-    consisting of eight atoms.
+    This creates two improper dihedrals of two different types for a molecule
+    consisting of five atoms.
 
     """
 
@@ -399,18 +375,10 @@ class LabelMap(collections.abc.MutableMapping):
 
     .. code-block:: python
 
-        snapshot = lammpsio.Snapshot(
-            N=3,
-            box=lammpsio.Box([-5, -5, -5], [5, 5, 5]),
-            step=10
-        )
-        snapshot.type_label = lammpsio.topology.LabelMap({1: "A", 2: "B"})
-        snapshot.typeid = [1, 2, 1]
-        snapshot.types = ["A", "B", "A"]
+        type_label = lammpsio.topology.LabelMap({1: "A", 2: "B"})
 
     This creates a dictionary mapping numeric type ID labels 1 and 2 used by LAMMPS
-    to alphanumeric type ID labels "A" and "B" used by HOOMD-blue to define
-    particle types.
+    to alphanumeric type labels "A" and "B", such as those used by HOOMD-blue.
 
     """
 
