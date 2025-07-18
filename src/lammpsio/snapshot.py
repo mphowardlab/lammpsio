@@ -49,9 +49,7 @@ class Snapshot:
     .. code-block:: python
 
         snapshot.position = [[0, 0, 0], [1, -1, 1], [1.5, 2.5, -3.5]]
-
         snapshot.typeid[2] = 2
-
         if not snapshot.has_mass():
             snapshot.mass = [2., 2., 10.]
 
@@ -86,6 +84,8 @@ class Snapshot:
         frame : `gsd.hoomd.Frame`
             HOOMD GSD frame to convert.
 
+            .. deprecated:: 0.7.0
+                Use `Snapshot.type_label` instead.
         Returns
         -------
         `Snapshot`
@@ -102,11 +102,8 @@ class Snapshot:
         .. code-block:: python
 
             frame = gsd.hoomd.Frame()
-
             frame.configuration.box = [10, 10, 10, 0, 0, 0]
-
             frame.particles.N = 3
-
             snapshot, type_map = lammpsio.Snapshot.from_hoomd_gsd(frame)
 
         This creates a `Snapshot` from the provided HOOMD GSD frame as well as
@@ -838,13 +835,10 @@ class Snapshot:
         .. code-block:: python
 
             snapshot.bonds = lammpsio.Bonds(N=3, num_types=1)
-
             bond_id = [1, 3, 2]
-
             members = [[1, 2],
                        [2, 3],
                        [3, 1]]
-
             typeid = [1, 1, 1]
 
             snapshot.bonds.id = bond_id
@@ -858,7 +852,7 @@ class Snapshot:
         To enforce 0 to N-1 indexing, the ``check_order`` parameter is set to True.
         In LAMMPS, all the IDs are 1-indexed, while, python is 0-indexed.
         Thus the ``bond_id`` is decreased by 1 to match the python convention
-        which allows us to use python-based sorting.
+        which allows us to use python-based sorting algorithms.
 
         """
         # sanity check the sorting order before applying it

@@ -244,7 +244,7 @@ class Bonds(Topology):
         snapshot.bonds.members = [[1, 2], [2, 3], [1, 3]]
 
     This creates a molecule with three bonds of the same type.
-    The bonds are defined between particles 1-2, 2-3, and 1-3 to form a triangle
+    The bonds are defined between particle IDs 1-2, 2-3, and 1-3 to form a triangle
     structure.
 
     """
@@ -282,10 +282,10 @@ class Angles(Topology):
         snapshot.angles = lammpsio.topology.Angles(N=3, num_types=1)
         snapshot.angles.id = [1, 2, 3]
         snapshot.angles.typeid = [1, 1, 1]
-        snapshot.angles.members = [[1, 2, 3], [2, 3, 1], [3, 2, 1]]
+        snapshot.angles.members = [[1, 2, 3], [2, 3, 1], [3, 1, 2]]
 
     This creates a molecule with three angles of the same type.
-    The angles are defined between particles IDs 1-2-3, 2-3-1, and 3-2-1
+    The angles are defined between particles IDs 1-2-3, 2-3-1, and 3-1-2
     to form a triangle structure.
 
     """
@@ -315,7 +315,7 @@ class Dihedrals(Topology):
     .. code-block:: python
 
         snapshot = lammpsio.Snapshot(
-            N=8,
+            N=5,
             box=lammpsio.Box([-5, -5, -5], [5, 5, 5]),
             step=10
         )
@@ -325,10 +325,10 @@ class Dihedrals(Topology):
         snapshot.dihedrals.typeid = [1, 2]
         snapshot.dihedrals.members = [
             [1, 2, 3, 4],
-            [5, 6, 7, 8],
+            [2, 3, 4, 5],
         ]
 
-    This creates two dihedral angles of two different types for a molecule
+    This creates two dihedrals of two different types for a molecule
     consisting of eight atoms.
 
     """
@@ -353,12 +353,12 @@ class Impropers(Topology):
 
     Example
     -------
-    Create dihedrals:
+    Create improper dihedrals:
 
     .. code-block:: python
 
         snapshot = lammpsio.Snapshot(
-            N=8,
+            N=5,
             box=lammpsio.Box([-5, -5, -5], [5, 5, 5]),
             step=10
         )
@@ -368,11 +368,11 @@ class Impropers(Topology):
         snapshot.impropers.typeid = [1, 2]
         snapshot.impropers.members = [
             [1, 2, 3, 4],
-            [5, 6, 7, 8],
+            [2, 3, 4, 5],
         ]
 
-    This creates two impropers angles of two different types for a molecule
-    consisting of eight atoms.
+    This creates two improper dihedrals of two different types for a molecule
+    consisting of five atoms.
 
     """
 
@@ -409,8 +409,8 @@ class LabelMap(collections.abc.MutableMapping):
         snapshot.types = ["A", "B", "A"]
 
     This creates a dictionary mapping numeric type ID labels 1 and 2 used by LAMMPS
-    to alphanumeric type ID labels "A" and "B" used by HOOMD-blue to define
-    particle types.
+    to alphanumeric type ID labels "A" and "B" used by HOOMD-blue to define the
+    different particle types.
 
     """
 

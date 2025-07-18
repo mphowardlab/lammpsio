@@ -318,7 +318,6 @@ class Box:
         .. code-block:: python
 
             hoomd_box = numpy.array([10, 10, 10, 0, 0, 0])
-
             lammps_box = lammpsio.Box.from_hoomd_convention(box_data=hoomd_box,
                                                             low=[0, 0, 0])
 
@@ -330,7 +329,7 @@ class Box:
         for $L_{xz}$ and $L_{yz}$ to convert them to the LAMMPS convention.
 
         .. note::
-            $L_z$ is changed to 1.0 if the input $L_z$ is zero,
+            $L_z$ is changed to one if the input $L_z$ is zero,
             as LAMMPS does not allow zero height box.
 
         """
