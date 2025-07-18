@@ -84,15 +84,15 @@ class Snapshot:
         frame : `gsd.hoomd.Frame`
             HOOMD GSD frame to convert.
 
-            .. deprecated:: 0.7.0
-                Use `Snapshot.type_label` instead.
-
         Returns
         -------
         `Snapshot`
             Snapshot created from HOOMD GSD frame.
         dict
             A map from the :attr:`Snapshot.typeid` to the HOOMD type.
+
+            .. deprecated:: 0.7.0
+                Use `Snapshot.type_label` instead.
 
         Example
         -------
@@ -846,14 +846,14 @@ class Snapshot:
             snapshot.bonds.typeid = typeid
             snapshot.bonds.members = members
 
-            snapshot.bonds.reorder(numpy.sort(numpy.array(bond_id) - 1),
+            snapshot.bonds.reorder(numpy.sort(numpy.array(bond_id)) - 1,
                                    check_order=True)
 
         This reorders the particle data with the same ordering as the bonds.
-        To enforce 0 to N-1 indexing, the ``check_order`` parameter is set to True.
-        In LAMMPS, all the IDs are 1-indexed, while, python is 0-indexed.
-        Thus the ``bond_id`` is decreased by 1 to match the python convention
-        which allows us to use python-based sorting algorithms.
+        To ensure only the right unique indexes are used, the ``check_order``
+        parameter is set to True. In LAMMPS, all the IDs are 1-indexed, while,
+        python is 0-indexed. Thus the ``bond_id`` is also decreased by 1
+        to match the Python convention.
 
         """
         # sanity check the sorting order before applying it

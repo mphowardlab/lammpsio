@@ -375,18 +375,10 @@ class LabelMap(collections.abc.MutableMapping):
 
     .. code-block:: python
 
-        snapshot = lammpsio.Snapshot(
-            N=3,
-            box=lammpsio.Box([-5, -5, -5], [5, 5, 5]),
-            step=10
-        )
-        snapshot.type_label = lammpsio.topology.LabelMap({1: "A", 2: "B"})
-        snapshot.typeid = [1, 2, 1]
-        snapshot.types = ["A", "B", "A"]
+        type_label = lammpsio.topology.LabelMap({1: "A", 2: "B"})
 
     This creates a dictionary mapping numeric type ID labels 1 and 2 used by LAMMPS
-    to alphanumeric type ID labels "A" and "B" used by HOOMD-blue to define the
-    different particle types.
+    to alphanumeric type labels "A" and "B", such as those used by HOOMD-blue.
 
     """
 

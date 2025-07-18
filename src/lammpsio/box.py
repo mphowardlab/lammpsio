@@ -265,7 +265,7 @@ class Box:
 
         .. code-block:: python
 
-            box = (lammpsio.Box([-5, -5, -5], [5, 5, 5])).to_hoomd_convention()
+            box = lammpsio.Box([-5, -5, -5], [5, 5, 5]).to_hoomd_convention()
 
         This creates an orthorhombic box of dimensions (10, 10, 10) with `low`
         at (-5, -5, -5) and center of the box at (0, 0, 0).
@@ -318,8 +318,10 @@ class Box:
         .. code-block:: python
 
             hoomd_box = numpy.array([10, 10, 10, 0, 0, 0])
-            lammps_box = lammpsio.Box.from_hoomd_convention(box_data=hoomd_box,
-                                                            low=[0, 0, 0])
+            lammps_box = lammpsio.Box.from_hoomd_convention(
+                box_data=hoomd_box,
+                low=[0, 0, 0]
+            )
 
         This creates a orthorhombic box of dimensions  $L_x = 10, L_y = 10$
         and $L_z = 10$ with tilt factors set to (0, 0, 0).
