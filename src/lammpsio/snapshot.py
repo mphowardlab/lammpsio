@@ -86,6 +86,7 @@ class Snapshot:
 
             .. deprecated:: 0.7.0
                 Use `Snapshot.type_label` instead.
+
         Returns
         -------
         `Snapshot`
