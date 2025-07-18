@@ -103,8 +103,9 @@ class Box:
 
             box = lammpsio.Box.cast([-5.0, -5.0, -5.0, 5.0, 5.0, 5.0])
 
-        The array defines an orthorhombic box, with each element being cast
-        to the `low` and `high` lists in the `Box` format.
+        The array defines an orthorhombic box, with (-5.0, -5.0, -5.0) being cast
+        to the `low` and (5.0, 5.0, 5.0) being cast to the `high` lists in the 
+        `Box` format.
 
         """
         if isinstance(value, Box):
@@ -187,21 +188,7 @@ class Box:
 
         Examples
         --------
-        Construct a triclinic simulation box from a low and matrix:
-
-        .. code-block:: python
-
-            box = lammpsio.Box.from_matrix(
-                low=[0, 0, 0],
-                matrix=[
-                    [1, 1.0, -2.0],
-                    [0, 1, 0.5],
-                    [0, 0, 1]
-                ])
-
-        This creates a triclinic box of unit length in each direction with origin
-        at (0, 0, 0) and the tilt factors (1.0, -2.0, 0.5).
-
+        
         Construct an orthorhombic simulation box from a low and matrix:
 
         .. code-block:: python
@@ -219,6 +206,21 @@ class Box:
         the method sets the tilt factors to `None` by default.
         By setting the ``force_triclinic`` to `True`,
         the tilt factors are set to (0, 0, 0).
+        
+        Construct a triclinic simulation box from a low and matrix:
+
+        .. code-block:: python
+
+            box = lammpsio.Box.from_matrix(
+                low=[0, 0, 0],
+                matrix=[
+                    [1, 1.0, -2.0],
+                    [0, 1, 0.5],
+                    [0, 0, 1]
+                ])
+
+        This creates a triclinic box of unit length in each direction with origin
+        at (0, 0, 0) and the tilt factors (1.0, -2.0, 0.5).
 
         """
         low = numpy.array(low, dtype=float)
@@ -323,8 +325,8 @@ class Box:
         This creates a orthorhombic box of dimensions  $L_x = 10, L_y = 10$
         and $L_z = 10$ as the HOOMD-blue box, with `low` set at (0, 0, 0).
         If `low` is `None`, the box is centered at the origin.
-        The tilt factors are multiplied by $L_y$ for $L_{xy}$ and $L_z$ for $L_{xz}$
-        and $L_{yz}$ to convert them to the LAMMPS convention.
+        The tilt factors are multiplied by $L_y$ for $L_{xy}$ and $L_z$
+        for $L_{xz}$ and $L_{yz}$ to convert them to the LAMMPS convention.
 
         .. note::
             $L_z$ is changed to 1.0 if the input $L_z$ is zero,
