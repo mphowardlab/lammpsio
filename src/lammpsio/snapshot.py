@@ -852,7 +852,7 @@ class Snapshot:
         This reorders the particle data with the same ordering as the bonds.
         To ensure only the right unique indexes are used, the ``check_order``
         parameter is set to True. In LAMMPS, all the IDs are 1-indexed, while,
-        python is 0-indexed. Thus the ``bond_id`` is also decreased by 1
+        Python is 0-indexed. Thus the ``bond_id`` is also decreased by 1
         to match the Python convention.
 
         """
