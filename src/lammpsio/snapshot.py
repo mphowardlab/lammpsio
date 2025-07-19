@@ -10,20 +10,48 @@ from .topology import Angles, Bonds, Dihedrals, Impropers, LabelMap
 class Snapshot:
     """Particle configuration.
 
+    A `Snapshot` holds the data for `N` particles, the simulation `Box`, and the
+    timestep.
+
     Parameters
     ----------
     N : int
         Number of particles in configuration.
-    box : :class:`Box`
+    box : `Box`
         Simulation box.
     step : int
-        Simulation time step counter. Default of ``None`` means
-        time step is not specified.
+        Simulation time step. Default of ``None`` means time step is not
+        specified.
+    num_types : int
+        Number of particle types. If ``None``, the number of types is deduced
+        from `typeid`.
 
-    Attributes
-    ----------
-    step : int
-        Simulation time step counter.
+    Example
+    -------
+    Here is a 3-particle configuration in a cubic box centered at the
+    origin at step 10:
+
+    .. code-block:: python
+
+        snapshot = lammpsio.Snapshot(
+            N=3,
+            box=lammpsio.Box([-5, -5, -5], [5, 5, 5]),
+            step=10
+        )
+
+    All values of indexes follow the LAMMPS 1-indexed convention, but the arrays
+    themselves are 0-indexed. `Snapshot` will lazily initialize these
+    per-particle arrays as they are accessed to save memory. Hence, accessing a
+    per-particle property will allocate it to default values. If you want to
+    check if an attribute has been set, use the corresponding ``has_`` method
+    instead (e.g., `has_position` to check if the `position` data is allocated):
+
+    .. code-block:: python
+
+        snapshot.position = [[0, 0, 0], [1, -1, 1], [1.5, 2.5, -3.5]]
+        snapshot.typeid[2] = 2
+        if not snapshot.has_mass():
+            snapshot.mass = [2., 2., 10.]
 
     """
 
@@ -53,15 +81,34 @@ class Snapshot:
 
         Parameters
         ----------
-        frame : :class:`gsd.hoomd.Frame`
+        frame : `gsd.hoomd.Frame`
             HOOMD GSD frame to convert.
 
         Returns
         -------
-        :class:`Snapshot`
+        `Snapshot`
             Snapshot created from HOOMD GSD frame.
         dict
             A map from the :attr:`Snapshot.typeid` to the HOOMD type.
+
+            .. deprecated:: 0.7.0
+                Use `Snapshot.type_label` instead.
+
+        Example
+        -------
+        Create snapshot from a GSD file:
+
+        .. skip: start if(gsd == None, reason="gsd not installed")
+
+        .. code-block:: python
+
+            frame = gsd.hoomd.Frame()
+            frame.configuration.box = [10, 10, 10, 0, 0, 0]
+            frame.particles.N = 3
+            snapshot, type_map = lammpsio.Snapshot.from_hoomd_gsd(frame)
+
+        This creates a `Snapshot` from the provided HOOMD GSD frame as well as
+        the corresponding dictionary of typeids mapped from the HOOMD GSD frame.
 
         """
         # ensures frame is well formed and that we have NumPy arrays
@@ -202,10 +249,27 @@ class Snapshot:
             A map from the :attr:`Snapshot.typeid` to a HOOMD type.
             If not specified, the typeids are used as the types.
 
+            .. deprecated:: 0.7.0
+                Use `Snapshot.type_label` instead.
+
         Returns
         -------
-        :class:`gsd.hoomd.Frame`
+        `gsd.hoomd.Frame`
             Converted HOOMD GSD frame.
+
+        Example
+        -------
+
+        Convert snapshot to a GSD file:
+
+        .. code-block:: python
+
+            frame = snapshot.to_hoomd_gsd()
+
+        This creates a GSD frame for the HOOMD-blue simulation package
+        from the `Snapshot` object.
+
+        .. skip: end
 
         """
         if _compatibility.gsd_version is None:
@@ -329,12 +393,28 @@ class Snapshot:
 
     @property
     def box(self):
-        """:class:`Box`: Simulation box."""
+        """`Box`: Simulation box."""
         return self._box
 
     @property
+    def step(self):
+        """int: Simulation time step."""
+        return self._step
+
+    @step.setter
+    def step(self, value):
+        if value is not None:
+            self._step = int(value)
+        else:
+            self._step = None
+
+    @property
     def id(self):
-        """:class:`numpy.ndarray`: Particle IDs."""
+        """(*N*,) `numpy.ndarray` of `int`: Particle IDs.
+
+        The default value on initialization runs from 1 to *N*.
+
+        """
         if not self.has_id():
             self._id = numpy.arange(1, self.N + 1)
         return self._id
@@ -359,14 +439,17 @@ class Snapshot:
         Returns
         -------
         bool
-            True if particle IDs have been initialized.
-
+            ``True`` if particle IDs have been initialized.
         """
         return self._id is not None
 
     @property
     def position(self):
-        """:class:`numpy.ndarray`: Positions."""
+        """(*N*, 3) `numpy.ndarray` of `float`: Positions.
+
+        The default value on initialization is 0 for all entries.
+
+        """
         if not self.has_position():
             self._position = numpy.zeros((self.N, 3), dtype=float)
         return self._position
@@ -391,14 +474,18 @@ class Snapshot:
         Returns
         -------
         bool
-            True if positions have been initialized.
+            ``True`` if positions have been initialized.
 
         """
         return self._position is not None
 
     @property
     def image(self):
-        """:class:`numpy.ndarray`: Images."""
+        """(*N*, 3) `numpy.ndarray` of `int`: Images.
+
+        The default value on initialization is 0 for all entries.
+
+        """
         if not self.has_image():
             self._image = numpy.zeros((self.N, 3), dtype=int)
         return self._image
@@ -423,14 +510,17 @@ class Snapshot:
         Returns
         -------
         bool
-            True if images have been initialized.
-
+            ``True`` if images have been initialized.
         """
         return self._image is not None
 
     @property
     def velocity(self):
-        """:class:`numpy.ndarray`: Velocities."""
+        """(*N*, 3) `numpy.ndarray` of `float`: Velocities.
+
+        The default value on initialization is 0 for all entries.
+
+        """
         if not self.has_velocity():
             self._velocity = numpy.zeros((self.N, 3), dtype=float)
         return self._velocity
@@ -455,14 +545,17 @@ class Snapshot:
         Returns
         -------
         bool
-            True if velocities have been initialized.
-
+            ``True`` if velocities have been initialized.
         """
         return self._velocity is not None
 
     @property
     def molecule(self):
-        """:class:`numpy.ndarray`: Molecule tags."""
+        """(*N*,) `numpy.ndarray` of `int`: Molecule tags.
+
+        The default value on initialization is 0 for all entries.
+
+        """
         if not self.has_molecule():
             self._molecule = numpy.zeros(self.N, dtype=int)
         return self._molecule
@@ -487,7 +580,7 @@ class Snapshot:
         Returns
         -------
         bool
-            True if molecule tags have been initialized.
+            ``True`` if molecule tags have been initialized.
 
         """
         return self._molecule is not None
@@ -512,7 +605,11 @@ class Snapshot:
 
     @property
     def typeid(self):
-        """:class:`numpy.ndarray`: Types."""
+        """(*N*,) `numpy.ndarray` of `int`: Types.
+
+        The default value on initialization is 1 for all entries.
+
+        """
         if not self.has_typeid():
             self._typeid = numpy.ones(self.N, dtype=int)
         return self._typeid
@@ -537,14 +634,17 @@ class Snapshot:
         Returns
         -------
         bool
-            True if types have been initialized.
-
+            ``True`` if types have been initialized.
         """
         return self._typeid is not None
 
     @property
     def charge(self):
-        """:class:`numpy.ndarray`: Charges."""
+        """(*N*,) `numpy.ndarray` of `float`: Charges.
+
+        The default value on initialization is 0 for all entries.
+
+        """
         if not self.has_charge():
             self._charge = numpy.zeros(self.N, dtype=float)
         return self._charge
@@ -569,14 +669,17 @@ class Snapshot:
         Returns
         -------
         bool
-            True if charges have been initialized.
-
+            ``True`` if charges have been initialized.
         """
         return self._charge is not None
 
     @property
     def mass(self):
-        """:class:`numpy.ndarray`: Masses."""
+        """(*N*,) `numpy.ndarray` of `float`: Masses.
+
+        The default value on initialization is 1 for all entries.
+
+        """
         if not self.has_mass():
             self._mass = numpy.ones(self.N, dtype=float)
         return self._mass
@@ -601,14 +704,13 @@ class Snapshot:
         Returns
         -------
         bool
-            True if masses have been initialized.
-
+            ``True`` if masses have been initialized.
         """
         return self._mass is not None
 
     @property
     def type_label(self):
-        """LabelMap: Labels for particle typeids."""
+        """`LabelMap`: Labels for `typeid`."""
         return self._type_label
 
     @type_label.setter
@@ -622,7 +724,7 @@ class Snapshot:
 
     @property
     def bonds(self):
-        """Bonds: Bond data."""
+        """`Bonds`: Bond data."""
         return self._bonds
 
     @bonds.setter
@@ -640,14 +742,13 @@ class Snapshot:
         Returns
         -------
         bool
-            True if bonds is initialized and there is at least one bond.
-
+            ``True`` if bonds is initialized and there is at least one bond.
         """
         return self._bonds is not None and self._bonds.N > 0
 
     @property
     def angles(self):
-        """Angles: Angle data."""
+        """`Angles`: Angle data."""
         return self._angles
 
     @angles.setter
@@ -665,14 +766,13 @@ class Snapshot:
         Returns
         -------
         bool
-            True if angles is initialized and there is at least one angle.
-
+            ``True`` if angles is initialized and there is at least one angle.
         """
         return self._angles is not None and self._angles.N > 0
 
     @property
     def dihedrals(self):
-        """Dihedrals: Dihedral data."""
+        """`Dihedrals`: Dihedral data."""
         return self._dihedrals
 
     @dihedrals.setter
@@ -690,14 +790,13 @@ class Snapshot:
         Returns
         -------
         bool
-            True if dihedrals is initialized and there is at least one dihedral.
-
+            ``True`` if dihedrals is initialized and there is at least one dihedral.
         """
         return self._dihedrals is not None and self._dihedrals.N > 0
 
     @property
     def impropers(self):
-        """Impropers: Improper data."""
+        """`Impropers`: Improper data."""
         return self._impropers
 
     @impropers.setter
@@ -715,8 +814,7 @@ class Snapshot:
         Returns
         -------
         bool
-            True if impropers is initialized and there is at least one improper.
-
+            ``True`` if impropers is initialized and there is at least one improper.
         """
         return self._impropers is not None and self._impropers.N > 0
 
@@ -728,7 +826,34 @@ class Snapshot:
         order : list
             New order of indexes.
         check_order : bool
-            If true, validate the new ``order`` before applying it.
+            If ``True``, validate the new ``order`` before applying it.
+
+        Example
+        -------
+
+        Reorder the particles in a snapshot
+
+        .. code-block:: python
+
+            snapshot.bonds = lammpsio.Bonds(N=3, num_types=1)
+            bond_id = [1, 3, 2]
+            members = [[1, 2],
+                       [2, 3],
+                       [3, 1]]
+            typeid = [1, 1, 1]
+
+            snapshot.bonds.id = bond_id
+            snapshot.bonds.typeid = typeid
+            snapshot.bonds.members = members
+
+            snapshot.bonds.reorder(numpy.sort(numpy.array(bond_id)) - 1,
+                                   check_order=True)
+
+        This reorders the particle data with the same ordering as the bonds.
+        To ensure only the right unique indexes are used, the ``check_order``
+        parameter is set to True. In LAMMPS, all the IDs are 1-indexed, while,
+        Python is 0-indexed. Thus the ``bond_id`` is also decreased by 1
+        to match the Python convention.
 
         """
         # sanity check the sorting order before applying it
@@ -762,20 +887,19 @@ class Snapshot:
 def _set_type_id(lammps_typeid, gsd_typeid, label_map):
     """Maps LAMMPS typeids to HOOMD GSD typeids using a given label map.
 
-    Parameters:
+    Parameters
     ----------
     lammps_typeid : list
         List of LAMMPS typeids to be mapped (one-indexed).
     gsd_typeid : list
         List of HOOMD GSD typeids to be updated (zero-indexed).
-    label_map : :class:`LabelMap`
+    label_map : `LabelMap`
         LabelMap for connection type mapping LAMMPS typeids to HOOMD GSD types.
 
-    Returns:
+    Returns
     -------
-    :class:`LabelMap`
+    `LabelMap`
         LabelMap mapping LAMMPS typeids to HOOMD GSD types.
-        LabelMap is created mapping typeids to str(typeids) if not provided.
     """
     if label_map is None:
         sorted_typeids = numpy.sort(numpy.unique(lammps_typeid))

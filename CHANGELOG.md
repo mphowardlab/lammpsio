@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] - 2025-07-19
+### Added
+- Complete sphinx documentation is hosted on
+  [Read the Docs](https://lammpsio.readthedocs.io).
+- Unit tests that run against LAMMPS.
+- Convenience methods for working with boxes: to/from a matrix and to/from a
+  HOOMD box definition.
+
+### Fixed
+- Lists of known/unknown headers and bodies for `DataFile` are now current.
+- Particle positions are now correctly recentered when converting a `Snapshot`
+  to a GSD `Frame` if the `Box` is not centered at the origin.
+
 ## [0.7.0] - 2024-12-10
 ### Added
 - Initial support for type labels of particle and topology data through the
@@ -100,8 +113,9 @@ have been updated to include this option.
 ### Changed
 - The package has been renamed `lammpsio` for consistency with PyPI.
 
-[Unreleased]: https://github.com/mphowardlab/lammpsio/compare/v0.7.0...HEAD
-[0.7.0]: https://github.com/mphowardlab/lammpsio/compare/v0.6.0...v0.7.0
+[Unreleased]: https://github.com/mphowardlab/lammpsio/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/mphowardlab/lammpsio/compare/v0.7.0...v0.8.0
+[0.7.0]: https://github.com/mphowardlab/lammpsio/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/mphowardlab/lammpsio/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/mphowardlab/lammpsio/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/mphowardlab/lammpsio/compare/v0.4.1...v0.5.0

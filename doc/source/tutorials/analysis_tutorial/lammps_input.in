@@ -1,0 +1,39 @@
+# Set up the simulation box and units
+units lj
+dimension 3
+boundary p p p
+atom_style atomic
+
+# Create simulation box (cubic box with side length 10)
+region box block 0 10 0 10 0 10
+create_box 1 box
+
+# Create 500 atoms randomly in the box (density ρ = 1.0)
+create_atoms 1 random 500 12345 box
+
+# Set mass for atom type 1
+mass 1 1.0
+
+# Define LJ potential with standard parameters (ε = 1.0, σ = 1.0, rc = 2.5)
+pair_style lj/cut 2.5
+pair_coeff 1 1 1.0 1.0 2.5
+
+# Energy minimization
+minimize 1.0e-4 1.0e-6 100 1000
+
+# Set up NVT ensemble at T = 1.0
+fix 1 all nvt temp 1.0 1.0 0.1
+
+timestep 0.005
+
+# Thermodynamic output
+thermo 1000
+thermo_style custom step temp pe ke etotal press density
+
+# Equilibration run
+run 5000
+unfix 1
+# Production run with trajectory output
+dump 1 all custom 100 analysis-tutorial-traj.lammpstrj.gz id x y z ix iy iz
+fix 2 all nvt temp 1.0 1.0 0.1
+run 5000
