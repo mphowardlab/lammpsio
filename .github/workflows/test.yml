@@ -23,7 +23,7 @@ jobs:
         python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Setup Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
@@ -63,7 +63,7 @@ jobs:
             lammps-version: "2024.08.29"
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Setup Python ${{ matrix.python-version }}
         uses: conda-incubator/setup-miniconda@v3
         with:
