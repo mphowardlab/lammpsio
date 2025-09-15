@@ -1,4 +1,4 @@
-from typing import Optional, Sequence, Tuple, Type, Union
+from typing import Optional, Sequence, Tuple, Type
 
 import numpy
 
@@ -178,7 +178,7 @@ class Box:
     def from_matrix(
         cls: Type["Box"],
         low: Sequence[float],
-        matrix: Union[numpy.ndarray, Sequence[Sequence[float]]],
+        matrix: numpy.ndarray | Sequence[Sequence[float]],
         force_triclinic: bool = False,
     ) -> "Box":
         """Cast from an origin and matrix.
