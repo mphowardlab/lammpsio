@@ -1,3 +1,5 @@
+from typing import Optional, Sequence, Tuple, Type, Union
+
 import numpy
 
 from . import _compatibility
@@ -68,13 +70,18 @@ class Box:
 
     """
 
-    def __init__(self, low, high, tilt=None):
+    def __init__(
+        self,
+        low: Sequence[float],
+        high: Sequence[float],
+        tilt: Optional[Sequence[float]] = None,
+    ) -> None:
         self.low = low
         self.high = high
         self.tilt = tilt
 
     @classmethod
-    def cast(cls, value):
+    def cast(cls: Type["Box"], value: Sequence[float]) -> "Box":
         """Cast from an array.
 
         If ``value`` has 6 elements, it is unpacked as an orthorhombic box::
@@ -120,7 +127,7 @@ class Box:
         else:
             raise TypeError(f"Unable to cast boxlike object with shape {v.shape}")
 
-    def to_matrix(self):
+    def to_matrix(self) -> Tuple[numpy.ndarray, numpy.ndarray]:
         """Convert to an origin and matrix.
 
         Parameters
@@ -168,7 +175,12 @@ class Box:
         )
 
     @classmethod
-    def from_matrix(cls, low, matrix, force_triclinic=False):
+    def from_matrix(
+        cls: Type["Box"],
+        low: Sequence[float],
+        matrix: Union[numpy.ndarray, Sequence[Sequence[float]]],
+        force_triclinic: bool = False,
+    ) -> "Box":
         """Cast from an origin and matrix.
 
         Parameters
@@ -243,7 +255,7 @@ class Box:
 
         return cls(low, high, tilt)
 
-    def to_hoomd_convention(self):
+    def to_hoomd_convention(self) -> numpy.ndarray:
         """Convert to HOOMD-blue convention.
 
         This convention for defining the box is based on
@@ -288,8 +300,12 @@ class Box:
 
     @classmethod
     def from_hoomd_convention(
-        cls, box_data, low=None, force_triclinic=False, dimensions=None
-    ):
+        cls: Type["Box"],
+        box_data: numpy.ndarray,
+        low: Optional[Sequence[float]] = None,
+        force_triclinic: bool = False,
+        dimensions: Optional[int] = None,
+    ) -> "Box":
         """Cast from HOOMD-blue convention.
 
         Parameters
@@ -367,7 +383,7 @@ class Box:
         return cls.from_matrix(low, matrix, force_triclinic)
 
     @property
-    def low(self):
+    def low(self) -> numpy.ndarray:
         """(3,) `numpy.ndarray` of `float`: Low parameter.
 
         The low of the box is the origin.
@@ -375,14 +391,14 @@ class Box:
         return self._low
 
     @low.setter
-    def low(self, value):
+    def low(self, value: Sequence[float]) -> None:
         v = numpy.array(value, ndmin=1, copy=True, dtype=float)
         if v.shape != (3,):
             raise TypeError("Low must be a 3-tuple")
         self._low = v
 
     @property
-    def high(self):
+    def high(self) -> numpy.ndarray:
         """(3,) `numpy.ndarray` of `float`: High parameter.
 
         The high of the box is used to compute the lengths $L_x$, $L_y$, and
@@ -391,14 +407,14 @@ class Box:
         return self._high
 
     @high.setter
-    def high(self, value):
+    def high(self, value: Sequence[float]) -> None:
         v = numpy.array(value, ndmin=1, copy=True, dtype=float)
         if v.shape != (3,):
             raise TypeError("High must be a 3-tuple")
         self._high = v
 
     @property
-    def tilt(self):
+    def tilt(self) -> Optional[numpy.ndarray]:
         """(3,) `numpy.ndarray` of `float`: Tilt parameters.
 
         The 3 tilt factors, $L_{xy}$, $L_{xz}$, and $L_{yz}$ define the
@@ -408,7 +424,7 @@ class Box:
         return self._tilt
 
     @tilt.setter
-    def tilt(self, value):
+    def tilt(self, value: Optional[Sequence[float]]) -> None:
         v = value
         if v is not None:
             v = numpy.array(v, ndmin=1, copy=True, dtype=float)
