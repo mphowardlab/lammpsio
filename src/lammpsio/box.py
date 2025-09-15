@@ -72,16 +72,16 @@ class Box:
 
     def __init__(
         self,
-        low: Sequence[float],
-        high: Sequence[float],
-        tilt: Optional[Sequence[float]] = None,
+        low: Sequence[float] | numpy.ndarray,
+        high: Sequence[float] | numpy.ndarray,
+        tilt: Optional[Sequence[float] | numpy.ndarray] = None,
     ) -> None:
         self.low = low
         self.high = high
         self.tilt = tilt
 
     @classmethod
-    def cast(cls: Type["Box"], value: Sequence[float]) -> "Box":
+    def cast(cls: Type["Box"], value: Sequence[float] | numpy.ndarray) -> "Box":
         """Cast from an array.
 
         If ``value`` has 6 elements, it is unpacked as an orthorhombic box::
@@ -177,7 +177,7 @@ class Box:
     @classmethod
     def from_matrix(
         cls: Type["Box"],
-        low: Sequence[float],
+        low: Sequence[float] | numpy.ndarray,
         matrix: numpy.ndarray | Sequence[Sequence[float]],
         force_triclinic: bool = False,
     ) -> "Box":
@@ -302,7 +302,7 @@ class Box:
     def from_hoomd_convention(
         cls: Type["Box"],
         box_data: numpy.ndarray,
-        low: Optional[Sequence[float]] = None,
+        low: Optional[Sequence[float] | numpy.ndarray] = None,
         force_triclinic: bool = False,
         dimensions: Optional[int] = None,
     ) -> "Box":
@@ -391,7 +391,7 @@ class Box:
         return self._low
 
     @low.setter
-    def low(self, value: Sequence[float]) -> None:
+    def low(self, value: Sequence[float] | numpy.ndarray) -> None:
         v = numpy.array(value, ndmin=1, copy=True, dtype=float)
         if v.shape != (3,):
             raise TypeError("Low must be a 3-tuple")
@@ -407,7 +407,7 @@ class Box:
         return self._high
 
     @high.setter
-    def high(self, value: Sequence[float]) -> None:
+    def high(self, value: Sequence[float] | numpy.ndarray) -> None:
         v = numpy.array(value, ndmin=1, copy=True, dtype=float)
         if v.shape != (3,):
             raise TypeError("High must be a 3-tuple")
@@ -424,7 +424,7 @@ class Box:
         return self._tilt
 
     @tilt.setter
-    def tilt(self, value: Optional[Sequence[float]]) -> None:
+    def tilt(self, value: Optional[Sequence[float] | numpy.ndarray]) -> None:
         v = value
         if v is not None:
             v = numpy.array(v, ndmin=1, copy=True, dtype=float)

@@ -894,8 +894,8 @@ class Snapshot:
 
 
 def _set_type_id(
-    lammps_typeid: Sequence[int],
-    gsd_typeid: Sequence[int],
+    lammps_typeid: Sequence[int] | numpy.ndarray,
+    gsd_typeid: Sequence[int] | numpy.ndarray,
     label_map: Optional["LabelMap"],
 ) -> "LabelMap":
     """Maps LAMMPS typeids to HOOMD GSD typeids using a given label map.
