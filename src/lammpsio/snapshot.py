@@ -1,5 +1,5 @@
 import warnings
-from typing import Any, Dict, Optional, Sequence, Tuple
+from typing import Any, Dict, Optional, Sequence, Tuple, Union
 
 import numpy
 
@@ -894,8 +894,8 @@ class Snapshot:
 
 
 def _set_type_id(
-    lammps_typeid: Sequence[int] | numpy.ndarray,
-    gsd_typeid: Sequence[int] | numpy.ndarray,
+    lammps_typeid: Union[Sequence[int], numpy.ndarray],
+    gsd_typeid: Union[Sequence[int], numpy.ndarray],
     label_map: Optional["LabelMap"],
 ) -> "LabelMap":
     """Maps LAMMPS typeids to HOOMD GSD typeids using a given label map.

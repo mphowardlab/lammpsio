@@ -1,7 +1,7 @@
 import gzip
 import os
 import pathlib
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import numpy
 
@@ -154,7 +154,7 @@ class DumpFile:
         cls: type["DumpFile"],
         filename: str,
         schema: Dict,
-        snapshots: "Snapshot" | List["Snapshot"],
+        snapshots: Union["Snapshot", List["Snapshot"]],
     ) -> "DumpFile":
         """Create a LAMMPS dump file.
 
