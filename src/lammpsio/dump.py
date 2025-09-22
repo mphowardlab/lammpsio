@@ -1,6 +1,7 @@
 import gzip
 import os
 import pathlib
+from typing import Any, Dict, List, Optional, Union
 
 import numpy
 
@@ -135,7 +136,13 @@ class DumpFile:
 
     """
 
-    def __init__(self, filename, schema=None, sort_ids=True, copy_from=None):
+    def __init__(
+        self,
+        filename: str,
+        schema: Optional[Dict] = None,
+        sort_ids: bool = True,
+        copy_from: Optional["Snapshot"] = None,
+    ) -> None:
         self.filename = filename
         self.schema = schema
         self._frames = None
@@ -143,7 +150,12 @@ class DumpFile:
         self.copy_from = copy_from
 
     @classmethod
-    def create(cls, filename, schema, snapshots):
+    def create(
+        cls: type["DumpFile"],
+        filename: str,
+        schema: Dict,
+        snapshots: Union["Snapshot", List["Snapshot"]],
+    ) -> "DumpFile":
         """Create a LAMMPS dump file.
 
         Parameters
@@ -276,7 +288,7 @@ class DumpFile:
         return DumpFile(filename, schema)
 
     @staticmethod
-    def _compression_from_suffix(suffix):
+    def _compression_from_suffix(suffix: str) -> Optional[Any]:
         if suffix == ".gz":
             return gzip
         elif suffix == ".zst":
@@ -287,7 +299,7 @@ class DumpFile:
             return None
 
     @property
-    def copy_from(self):
+    def copy_from(self) -> Optional["Snapshot"]:
         """`Snapshot`: Copy fields that are missing in a dump file.
 
         The fields that can be copied are:
@@ -305,18 +317,18 @@ class DumpFile:
         return self._copy_from
 
     @copy_from.setter
-    def copy_from(self, value):
+    def copy_from(self, value: Optional["Snapshot"]) -> None:
         if value is not None and not isinstance(value, Snapshot):
             raise TypeError("Dump file can only copy from Snapshot")
         self._copy_from = value
 
     @property
-    def filename(self):
+    def filename(self) -> str:
         """str: Path to the file."""
         return self._filename
 
     @filename.setter
-    def filename(self, value):
+    def filename(self, value: str) -> None:
         self._filename = value
         self._compression = self._compression_from_suffix(pathlib.Path(value).suffix)
 
@@ -332,12 +344,12 @@ class DumpFile:
                 self._section[key] = val.encode()
 
     @property
-    def schema(self):
+    def schema(self) -> Optional[Dict]:
         """dict: Data schema."""
         return self._schema
 
     @schema.setter
-    def schema(self, value):
+    def schema(self, value: Optional[Dict]) -> None:
         if value is not None:
             # validate schema
             if "position" in value and len(value["position"]) != 3:

@@ -1,3 +1,5 @@
+from typing import Optional, Type
+
 import numpy
 
 from .box import Box
@@ -5,7 +7,7 @@ from .snapshot import Snapshot
 from .topology import Angles, Bonds, Dihedrals, Impropers
 
 
-def _readline(file_, require=False):
+def _readline(file_: str, require: bool = False) -> str:
     """Read and require a line."""
     line = file_.readline()
     if require and len(line) == 0:
@@ -66,7 +68,7 @@ class DataFile:
 
     """
 
-    def __init__(self, filename, atom_style=None):
+    def __init__(self, filename: str, atom_style: Optional[str] = None) -> None:
         self.filename = filename
         self.atom_style = atom_style
 
@@ -137,7 +139,12 @@ class DataFile:
     )
 
     @classmethod
-    def create(cls, filename, snapshot, atom_style=None):
+    def create(
+        cls: Type["DataFile"],
+        filename: str,
+        snapshot: "Snapshot",
+        atom_style: Optional[str] = None,
+    ) -> "DataFile":
         """Create a LAMMPS data file from a snapshot.
 
         Parameters
@@ -348,7 +355,7 @@ class DataFile:
                     )
         return DataFile(filename)
 
-    def read(self):
+    def read(self) -> "Snapshot":
         """Read a LAMMPS data file into a snapshot.
 
         The `atom_style` will be read from the comment in the Atoms section

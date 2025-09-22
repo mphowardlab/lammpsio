@@ -1,4 +1,5 @@
 import warnings
+from typing import Any, Dict, Optional, Sequence, Tuple, Union
 
 import numpy
 
@@ -55,7 +56,13 @@ class Snapshot:
 
     """
 
-    def __init__(self, N, box, step=None, num_types=None):
+    def __init__(
+        self,
+        N: int,
+        box: "Box",
+        step: Optional[int] = None,
+        num_types: Optional[int] = None,
+    ) -> None:
         self._N = N
         self._box = Box.cast(box)
         self.step = step
@@ -76,7 +83,9 @@ class Snapshot:
         self._impropers = None
 
     @classmethod
-    def from_hoomd_gsd(cls, frame):
+    def from_hoomd_gsd(
+        cls: type["Snapshot"], frame: Any
+    ) -> Tuple["Snapshot", Optional[Dict]]:
         """Create from a HOOMD GSD frame.
 
         Parameters
@@ -240,7 +249,7 @@ class Snapshot:
 
         return snap, label_map_particle
 
-    def to_hoomd_gsd(self, type_map=None):
+    def to_hoomd_gsd(self, type_map: Optional[Dict[int, Any]] = None) -> Any:
         """Create a HOOMD GSD frame.
 
         Parameters
@@ -387,17 +396,17 @@ class Snapshot:
         return frame
 
     @property
-    def N(self):
+    def N(self) -> int:
         """int: Number of particles."""
         return self._N
 
     @property
-    def box(self):
+    def box(self) -> "Box":
         """`Box`: Simulation box."""
         return self._box
 
     @property
-    def step(self):
+    def step(self) -> Optional[int]:
         """int: Simulation time step."""
         return self._step
 
@@ -409,7 +418,7 @@ class Snapshot:
             self._step = None
 
     @property
-    def id(self):
+    def id(self) -> numpy.ndarray:
         """(*N*,) `numpy.ndarray` of `int`: Particle IDs.
 
         The default value on initialization runs from 1 to *N*.
@@ -444,7 +453,7 @@ class Snapshot:
         return self._id is not None
 
     @property
-    def position(self):
+    def position(self) -> numpy.ndarray:
         """(*N*, 3) `numpy.ndarray` of `float`: Positions.
 
         The default value on initialization is 0 for all entries.
@@ -480,7 +489,7 @@ class Snapshot:
         return self._position is not None
 
     @property
-    def image(self):
+    def image(self) -> numpy.ndarray:
         """(*N*, 3) `numpy.ndarray` of `int`: Images.
 
         The default value on initialization is 0 for all entries.
@@ -515,7 +524,7 @@ class Snapshot:
         return self._image is not None
 
     @property
-    def velocity(self):
+    def velocity(self) -> numpy.ndarray:
         """(*N*, 3) `numpy.ndarray` of `float`: Velocities.
 
         The default value on initialization is 0 for all entries.
@@ -550,7 +559,7 @@ class Snapshot:
         return self._velocity is not None
 
     @property
-    def molecule(self):
+    def molecule(self) -> numpy.ndarray:
         """(*N*,) `numpy.ndarray` of `int`: Molecule tags.
 
         The default value on initialization is 0 for all entries.
@@ -586,7 +595,7 @@ class Snapshot:
         return self._molecule is not None
 
     @property
-    def num_types(self):
+    def num_types(self) -> int:
         """int: Number of atom types."""
         if self._num_types is not None:
             return self._num_types
@@ -604,7 +613,7 @@ class Snapshot:
             self._num_types = None
 
     @property
-    def typeid(self):
+    def typeid(self) -> numpy.ndarray:
         """(*N*,) `numpy.ndarray` of `int`: Types.
 
         The default value on initialization is 1 for all entries.
@@ -639,7 +648,7 @@ class Snapshot:
         return self._typeid is not None
 
     @property
-    def charge(self):
+    def charge(self) -> numpy.ndarray:
         """(*N*,) `numpy.ndarray` of `float`: Charges.
 
         The default value on initialization is 0 for all entries.
@@ -674,7 +683,7 @@ class Snapshot:
         return self._charge is not None
 
     @property
-    def mass(self):
+    def mass(self) -> numpy.ndarray:
         """(*N*,) `numpy.ndarray` of `float`: Masses.
 
         The default value on initialization is 1 for all entries.
@@ -709,7 +718,7 @@ class Snapshot:
         return self._mass is not None
 
     @property
-    def type_label(self):
+    def type_label(self) -> Optional["LabelMap"]:
         """`LabelMap`: Labels for `typeid`."""
         return self._type_label
 
@@ -723,7 +732,7 @@ class Snapshot:
             self._type_label = None
 
     @property
-    def bonds(self):
+    def bonds(self) -> Optional["Bonds"]:
         """`Bonds`: Bond data."""
         return self._bonds
 
@@ -747,7 +756,7 @@ class Snapshot:
         return self._bonds is not None and self._bonds.N > 0
 
     @property
-    def angles(self):
+    def angles(self) -> Optional["Angles"]:
         """`Angles`: Angle data."""
         return self._angles
 
@@ -771,7 +780,7 @@ class Snapshot:
         return self._angles is not None and self._angles.N > 0
 
     @property
-    def dihedrals(self):
+    def dihedrals(self) -> Optional["Dihedrals"]:
         """`Dihedrals`: Dihedral data."""
         return self._dihedrals
 
@@ -795,7 +804,7 @@ class Snapshot:
         return self._dihedrals is not None and self._dihedrals.N > 0
 
     @property
-    def impropers(self):
+    def impropers(self) -> Optional["Impropers"]:
         """`Impropers`: Improper data."""
         return self._impropers
 
@@ -818,7 +827,7 @@ class Snapshot:
         """
         return self._impropers is not None and self._impropers.N > 0
 
-    def reorder(self, order, check_order=True):
+    def reorder(self, order: Any, check_order: bool = True) -> None:
         """Reorder the particles in place.
 
         Parameters
@@ -884,7 +893,11 @@ class Snapshot:
             self._mass = self._mass[order]
 
 
-def _set_type_id(lammps_typeid, gsd_typeid, label_map):
+def _set_type_id(
+    lammps_typeid: Union[Sequence[int], numpy.ndarray],
+    gsd_typeid: Union[Sequence[int], numpy.ndarray],
+    label_map: Optional["LabelMap"],
+) -> "LabelMap":
     """Maps LAMMPS typeids to HOOMD GSD typeids using a given label map.
 
     Parameters

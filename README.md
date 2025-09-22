@@ -16,3 +16,6 @@ in a variety of ways that improve workflow efficiency and reproducibility.
 or `conda`:
 
     conda install -c conda-forge lammpsio
+
+Our [documentation](https://lammpsio.readthedocs.io) includes installation,
+examples, and commands.
