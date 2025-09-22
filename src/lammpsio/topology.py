@@ -1,6 +1,7 @@
 """Topology (connection and type) information."""
 
 import collections.abc
+from typing import Any, Optional
 
 import numpy
 
@@ -26,7 +27,9 @@ class Topology:
 
     """
 
-    def __init__(self, N, num_members, num_types=None):
+    def __init__(
+        self, N: int, num_members: int, num_types: Optional[int] = None
+    ) -> None:
         self._N = N
         self._num_members = num_members
         self.num_types = num_types
@@ -37,12 +40,12 @@ class Topology:
         self._members = None
 
     @property
-    def N(self):
+    def N(self) -> int:
         """int: Number of connections."""
         return self._N
 
     @property
-    def id(self):
+    def id(self) -> numpy.ndarray:
         """(*N*,) `numpy.ndarray` of `int`: Unique identifiers (IDs).
 
         The default value on initialization runs from 1 to `N`.
@@ -53,7 +56,7 @@ class Topology:
         return self._id
 
     @id.setter
-    def id(self, value):
+    def id(self, value: Any) -> None:
         if value is not None:
             v = numpy.array(
                 value, ndmin=1, copy=_compatibility.numpy_copy_if_needed, dtype=int
@@ -66,7 +69,7 @@ class Topology:
         else:
             self._id = None
 
-    def has_id(self):
+    def has_id(self) -> bool:
         """Check if configuration has connection IDs.
 
         Returns
@@ -78,7 +81,7 @@ class Topology:
         return self._id is not None
 
     @property
-    def typeid(self):
+    def typeid(self) -> numpy.ndarray:
         """(*N*,) `numpy.ndarray` of `int`: Connection type IDs.
 
         The default value on initialization is 1 for all entries.
@@ -89,7 +92,7 @@ class Topology:
         return self._typeid
 
     @typeid.setter
-    def typeid(self, value):
+    def typeid(self, value: Any) -> None:
         if value is not None:
             v = numpy.array(
                 value, ndmin=1, copy=_compatibility.numpy_copy_if_needed, dtype=int
@@ -102,7 +105,7 @@ class Topology:
         else:
             self._typeid = None
 
-    def has_typeid(self):
+    def has_typeid(self) -> bool:
         """Check if configuration has connection typeids.
 
         Returns
@@ -114,7 +117,7 @@ class Topology:
         return self._typeid is not None
 
     @property
-    def members(self):
+    def members(self) -> numpy.ndarray:
         """(*N*, *M*) `numpy.ndarray` of `int`: Connection members.
 
         The default value on initialization is 1 for all entries. *M* is the
@@ -126,7 +129,7 @@ class Topology:
         return self._members
 
     @members.setter
-    def members(self, value):
+    def members(self, value: Any) -> None:
         if value is not None:
             v = numpy.array(
                 value, ndmin=2, copy=_compatibility.numpy_copy_if_needed, dtype=int
@@ -139,7 +142,7 @@ class Topology:
         else:
             self._members = None
 
-    def has_members(self):
+    def has_members(self) -> bool:
         """Check if configuration has connection members.
 
         Returns
@@ -151,7 +154,7 @@ class Topology:
         return self._members is not None
 
     @property
-    def num_types(self):
+    def num_types(self) -> int:
         """int: Number of connection types."""
         if self._num_types is not None:
             return self._num_types
@@ -162,20 +165,20 @@ class Topology:
                 return 1
 
     @num_types.setter
-    def num_types(self, value):
+    def num_types(self, value: Any) -> None:
         if value is not None:
             self._num_types = int(value)
         else:
             self._num_types = None
 
     @property
-    def type_label(self):
+    def type_label(self) -> Optional["LabelMap"]:
         """LabelMap: Labels of connection type IDs."""
 
         return self._type_label
 
     @type_label.setter
-    def type_label(self, value):
+    def type_label(self, value: Optional["LabelMap"]) -> None:
         if value is not None:
             if not isinstance(value, LabelMap):
                 raise TypeError("type_label must be a LabelMap")
@@ -243,7 +246,7 @@ class Bonds(Topology):
 
     """
 
-    def __init__(self, N, num_types=None):
+    def __init__(self, N: int, num_types: Optional[int] = None) -> None:
         super().__init__(N=N, num_members=2, num_types=num_types)
 
 
@@ -278,7 +281,7 @@ class Angles(Topology):
 
     """
 
-    def __init__(self, N, num_types=None):
+    def __init__(self, N: int, num_types: Optional[int] = None) -> None:
         super().__init__(N=N, num_members=3, num_types=num_types)
 
 
@@ -315,7 +318,7 @@ class Dihedrals(Topology):
 
     """
 
-    def __init__(self, N, num_types=None):
+    def __init__(self, N: int, num_types: Optional[int] = None) -> None:
         super().__init__(N=N, num_members=4, num_types=num_types)
 
 
@@ -352,11 +355,11 @@ class Impropers(Topology):
 
     """
 
-    def __init__(self, N, num_types=None):
+    def __init__(self, N: int, num_types: Optional[int] = None) -> None:
         super().__init__(N=N, num_members=4, num_types=num_types)
 
 
-class LabelMap(collections.abc.MutableMapping):
+class LabelMap(collections.abc.MutableMapping[int, str]):
     """Map between integer type IDs and string type names.
 
     A `LabelMap` is effectively a dictionary associating a label (type) with a
