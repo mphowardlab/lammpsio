@@ -17,5 +17,5 @@ or `conda`:
 
     conda install -c conda-forge lammpsio
 
-Our [Documentation](https://lammpsio.readthedocs.io) includes installation,
+Our [documentation](https://lammpsio.readthedocs.io) includes installation,
 examples, and commands.
