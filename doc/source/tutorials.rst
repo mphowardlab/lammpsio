@@ -24,7 +24,7 @@ Tutorials
         Read and analyze a LAMMPS dump file to study the Lennard-Jones fluid
         using the freud Python package.
 
-    .. grid-item-card:: Analyzing a 10-Bead Polymer with Numba
+    .. grid-item-card:: Analysis speedup using Numba
         :link: ./tutorials/numba_tutorial/numba_tutorial
         :link-type: doc
 
