@@ -220,6 +220,12 @@ class DataFile:
             if snapshot.box.tilt is not None:
                 f.write("{} {} {} xy xz yz\n".format(*snapshot.box.tilt))
 
+            # Masses section
+            if masses is not None:
+                f.write("\nMasses\n\n")
+                for i, mi in enumerate(masses):
+                    f.write("{typeid:4d}{m:12}\n".format(typeid=i + 1, m=mi))
+
             # Atoms section
             # determine style if it is not given
             has_topology = (
@@ -290,12 +296,6 @@ class DataFile:
                             vz=snapshot.velocity[i][2],
                         )
                     )
-
-            # Masses section
-            if masses is not None:
-                f.write("\nMasses\n\n")
-                for i, mi in enumerate(masses):
-                    f.write("{typeid:4d}{m:12}\n".format(typeid=i + 1, m=mi))
 
             # Bonds section
             if snapshot.has_bonds():
