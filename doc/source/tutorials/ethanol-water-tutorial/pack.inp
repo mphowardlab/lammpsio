@@ -10,4 +10,3 @@ structure ethanol.xyz
   number 125
   inside box -12.5 -12.5 -12.5 12.5 12.5 12.5
 end structure
-

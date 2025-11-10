@@ -6,6 +6,7 @@ Tutorials
 
     ./tutorials/dimer_lattice_tutorial
     ./tutorials/analysis_tutorial/analysis_tutorial
+    ./tutorials/ethanol-water-tutorial/ethanol_water_mixture
 
 .. grid:: 2
 
@@ -24,7 +25,7 @@ Tutorials
         using the freud Python package.
 
     .. grid-item-card:: Initializing an Ethanol-Water Mixture
-        :link: ./tutorials/analysis_tutorial/ethanol-water-tutorial
+        :link: ./tutorials/ethanol-water-tutorial/ethanol_water_mixture
         :link-type: doc
 
         Use Snapshot to create a LAMMPS data file for an ethanol-water mixture.
