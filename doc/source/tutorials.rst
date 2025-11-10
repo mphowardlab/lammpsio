@@ -22,3 +22,9 @@ Tutorials
 
         Read and analyze a LAMMPS dump file to study the Lennard-Jones fluid
         using the freud Python package.
+
+    .. grid-item-card:: Initializing an Ethanol-Water Mixture
+        :link: ./tutorials/analysis_tutorial/ethanol-water-tutorial
+        :link-type: doc
+
+        Use Snapshot to create a LAMMPS data file for an ethanol-water mixture.
