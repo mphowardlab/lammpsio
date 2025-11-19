@@ -387,17 +387,20 @@ class LabelMap(collections.abc.MutableMapping[int, str]):
 
     def __init__(self, map=None):
         self._map = {}
+        self._inverse_map = {}
         if map is not None:
-            self.update(map)
+            self.update(map)       
 
     def __getitem__(self, key):
         return self._map[key]
 
     def __setitem__(self, key, value):
         self._map[key] = value
+        self._inverse_map[value] = key
 
     def __delitem__(self, key):
-        del self._map[key]
+        value = self._map.pop(key)
+        del self._inverse_map[value]
 
     def __iter__(self):
         return iter(self._map)
@@ -414,3 +417,8 @@ class LabelMap(collections.abc.MutableMapping[int, str]):
     def typeid(self):
         """tuple of int: Type IDs in map."""
         return tuple(self._map.keys())
+    
+    @property 
+    def inverse(self):
+        """ exposes _inverse_map as a read-only property """
+        return self._inverse_map   
