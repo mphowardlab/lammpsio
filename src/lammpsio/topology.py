@@ -383,6 +383,18 @@ class LabelMap(collections.abc.MutableMapping[int, str]):
     This creates a dictionary mapping numeric type ID labels 1 and 2 used by LAMMPS
     to alphanumeric type labels "A" and "B", such as those used by HOOMD-blue.
 
+    to alphanumeric type labels "A" and "B", such as those used by HOOMD-blue. The
+    map can be accessed directly:
+    
+    .. code-block:: python
+    
+        assert type_label[1] == "A"
+    
+    The `LabelMap` additionally supports inverse mapping from type label to type ID:
+    
+    .. code-block:: python
+    
+        assert type_label.inverse["B"] == 2
     """
 
     def __init__(self, map=None):
