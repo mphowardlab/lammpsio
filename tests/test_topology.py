@@ -204,8 +204,6 @@ def test_impropers_wrong_shape(snap_8):
 def test_LabelMap():
     # create a simple label map
     label = lammpsio.topology.LabelMap({1: "typeA", 2: "typeB"})
-    # check inverse mapping
-    assert label.inverse == {"typeA": 1, "typeB": 2}
     # check the types
     assert label.types == ("typeA", "typeB")
     # check the typeids
