@@ -381,12 +381,23 @@ class LabelMap(collections.abc.MutableMapping[int, str]):
         type_label = lammpsio.topology.LabelMap({1: "A", 2: "B"})
 
     This creates a dictionary mapping numeric type ID labels 1 and 2 used by LAMMPS
-    to alphanumeric type labels "A" and "B", such as those used by HOOMD-blue.
+    to alphanumeric type labels "A" and "B", such as those used by HOOMD-blue. The
+    map can be accessed directly:
 
+    .. code-block:: python
+
+        assert type_label[1] == "A"
+
+    The `LabelMap` additionally supports inverse mapping from type label to type ID:
+
+    .. code-block:: python
+
+        assert type_label.inverse["B"] == 2
     """
 
     def __init__(self, map=None):
         self._map = {}
+        self._inverse_map = {}
         if map is not None:
             self.update(map)
 
@@ -395,9 +406,11 @@ class LabelMap(collections.abc.MutableMapping[int, str]):
 
     def __setitem__(self, key, value):
         self._map[key] = value
+        self._inverse_map[value] = key
 
     def __delitem__(self, key):
-        del self._map[key]
+        value = self._map.pop(key)
+        del self._inverse_map[value]
 
     def __iter__(self):
         return iter(self._map)
@@ -414,3 +427,8 @@ class LabelMap(collections.abc.MutableMapping[int, str]):
     def typeid(self):
         """tuple of int: Type IDs in map."""
         return tuple(self._map.keys())
+
+    @property
+    def inverse(self) -> dict[str, int]:
+        """dict: Inverse map from type label to type id."""
+        return self._inverse_map
