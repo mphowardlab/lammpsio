@@ -121,9 +121,11 @@ class DumpFile:
 
     You can also use multiprocessing to read snapshots in parallel:
 
+    .. code-block:: python
+
         def process_snapshot(snapshot):
             return snapshot.N
-
+            
         if __name__ == '__main__':
             num_workers = max(4, multiprocessing.cpu_count())
             with multiprocessing.Pool(num_workers) as p:
