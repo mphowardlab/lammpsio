@@ -381,8 +381,6 @@ class LabelMap(collections.abc.MutableMapping[int, str]):
         type_label = lammpsio.topology.LabelMap({1: "A", 2: "B"})
 
     This creates a dictionary mapping numeric type ID labels 1 and 2 used by LAMMPS
-    to alphanumeric type labels "A" and "B", such as those used by HOOMD-blue.
-
     to alphanumeric type labels "A" and "B", such as those used by HOOMD-blue. The
     map can be accessed directly:
     

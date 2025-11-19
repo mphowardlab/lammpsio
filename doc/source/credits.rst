@@ -6,3 +6,4 @@ Credits
 * Mayukh Kundu
 * Philipp Leclercq
 * C\. Levi Petix
+* Dimitris Arquin
