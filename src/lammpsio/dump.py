@@ -119,6 +119,17 @@ class DumpFile:
         for snapshot in traj:
             print(snapshot.step)
 
+    You can also use multiprocessing to read snapshots in parallel:
+
+        def process_snapshot(snapshot):
+            return snapshot.N
+
+        if __name__ == '__main__':
+            num_workers = max(4, multiprocessing.cpu_count())
+            with multiprocessing.Pool(num_workers) as p:
+                num_particles = p.map(process_snapshot, traj)
+            print(num_particles)
+
     You can also get the number of snapshots in the `DumpFile`, but this does
     require reading the entire file: use with caution!
 
