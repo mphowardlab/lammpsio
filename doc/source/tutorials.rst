@@ -7,6 +7,7 @@ Tutorials
     ./tutorials/dimer_lattice_tutorial
     ./tutorials/analysis_tutorial/analysis_tutorial
     ./tutorials/numba_tutorial/numba_tutorial
+    ./tutorials/ethanol-water-tutorial/ethanol_water_mixture
 
 .. grid:: 2
 
@@ -24,9 +25,16 @@ Tutorials
         Read and analyze a LAMMPS dump file to study the Lennard-Jones fluid
         using the freud Python package.
 
+    .. grid-item-card:: Initializing an Ethanol-Water Mixture
+        :link: ./tutorials/ethanol-water-tutorial/ethanol_water_mixture
+        :link-type: doc
+
+        Use Snapshot to create a LAMMPS data file for an ethanol-water mixture.
+
     .. grid-item-card:: Analysis speedup using Numba
         :link: ./tutorials/numba_tutorial/numba_tutorial
         :link-type: doc
 
-        Read and analyze a LAMMPS dump file to study a 10-bead polymer
-        using the Numba library for accelerated computation.
+        Read and analyze a LAMMPS dump file to study a 100-mer polymer
+        using the NumPy and Numba library for accelerated computation.
+=======
