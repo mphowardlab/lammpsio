@@ -37,4 +37,3 @@ Tutorials
 
         Read and analyze a LAMMPS dump file to study a 100-mer polymer
         using the NumPy and Numba library for accelerated computation.
-=======
