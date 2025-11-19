@@ -419,6 +419,6 @@ class LabelMap(collections.abc.MutableMapping[int, str]):
         return tuple(self._map.keys())
 
     @property
-    def inverse(self):
-        """exposes _inverse_map as a read-only property"""
+    def inverse(self) -> dict[str, int]:
+        """dict: Inverse map from type label to type id."""
         return self._inverse_map
