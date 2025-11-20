@@ -1,0 +1,29 @@
+# Initialize simulation
+units lj
+atom_style molecular
+boundary p p p
+
+# Read data file
+read_data init.data
+
+# Neighbor list settings
+neighbor        0.4 bin
+
+# Pair potential (LJ with cutoff at 2^(1/6))
+pair_style lj/cut 1.122462048309373
+pair_coeff 1 1 1.0 1.0 1.122462048309373
+
+# Bond potential (FENE)
+bond_style fene
+bond_coeff 1 30.0 1.5 1.0 1.0
+special_bonds fene
+
+# Integrator settings
+timestep 0.005
+fix 1 all nvt temp 1.0 1.0 1.0
+fix 2 all langevin 1.0 1.0 1.0 5
+
+# Run simulation
+run 10000
+dump 2 all custom 1000 traj.lammpstrj id type x y z ix iy iz vx vy vz
+run 100000
