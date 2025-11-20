@@ -1,5 +1,3 @@
-import multiprocessing
-
 import numpy
 
 try:
@@ -32,8 +30,6 @@ def setup_sybil_tests(namespace):
     # Common imports.
     namespace["numpy"] = numpy
     namespace["lammpsio"] = lammpsio
-    namespace["multiprocessing"] = multiprocessing
-    namespace["Pool"] = multiprocessing.Pool
 
     if has_lammps:
         namespace["lammps"] = lammps

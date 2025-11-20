@@ -123,11 +123,13 @@ class DumpFile:
 
     .. code-block:: python
 
+        import multiprocessing
+
         def process_snapshot(snapshot):
             return snapshot.N
 
         if __name__ == '__main__':
-            num_workers = max(4, multiprocessing.cpu_count())
+            num_workers = max(2, multiprocessing.cpu_count())
             with multiprocessing.Pool(num_workers) as p:
                 num_particles = p.map(process_snapshot, traj)
             print(num_particles)
