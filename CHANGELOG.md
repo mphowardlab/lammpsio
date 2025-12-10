@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0] - 2025-12-10
+### Added
+- Inverse map (label to type ID) in `LabelMap`.
+- Type hints.
+- Support for Python 3.14.
+- Tutorial on initializing an atomistic simulation.
+- Tutorial on using NumPy and Numba to accelerate calculations.
+
+### Fixed
+- Jupyter notebooks for tutorials execute as scripts.
+- Mass section of data file is written in the same spot as by LAMMPS.
+
+### Removed
+- Support for Python 3.9.
+
 ## [0.8.0] - 2025-07-19
 ### Added
 - Complete sphinx documentation is hosted on
@@ -113,7 +128,8 @@ have been updated to include this option.
 ### Changed
 - The package has been renamed `lammpsio` for consistency with PyPI.
 
-[Unreleased]: https://github.com/mphowardlab/lammpsio/compare/v0.8.0...HEAD
+[Unreleased]: https://github.com/mphowardlab/lammpsio/compare/v0.9.0...HEAD
+[0.9.0]: https://github.com/mphowardlab/lammpsio/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/mphowardlab/lammpsio/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/mphowardlab/lammpsio/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/mphowardlab/lammpsio/compare/v0.6.0...v0.6.1
