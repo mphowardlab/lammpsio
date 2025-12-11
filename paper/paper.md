@@ -49,7 +49,7 @@ By providing a lightweight and intuitive object-oriented interface, lammpsio str
 
 # Availability
 
-lammpsio is freely available under the BSD 3-Clause License on [GitHub](https://github.com/mphowardlab/lammpsio) and is publicly distributed on PyPI and conda-forge. lammpsio has continuous integration testing using GitHub Actions for all currently supported combinations of Python and stable LAMMPS releases. We test both the core Python functionality of lammpsio and round-trip file compatibility with LAMMPS. For installation instructions and Python API documentation, please visit the publicly hosted [documentation](https://lammpsio.readthedocs.io/en/latest/). For examples of how to use lammpsio, please visit the [tutorials](https://lammpsio.readthedocs.io/en/latest/tutorials.html)
+lammpsio is freely available under the BSD 3-Clause License on [GitHub](https://github.com/mphowardlab/lammpsio) and is publicly distributed on PyPI and conda-forge. lammpsio has continuous integration testing using GitHub Actions for all currently supported combinations of Python and stable LAMMPS releases. We test both the core Python functionality of lammpsio and round-trip file compatibility with LAMMPS. For installation instructions and Python API documentation, please visit the publicly hosted [documentation](https://lammpsio.readthedocs.io/en/latest/). For examples of how to use lammpsio, please visit the [tutorials](https://lammpsio.readthedocs.io/en/latest/tutorials.html).
 
 # Acknowledgements
 
