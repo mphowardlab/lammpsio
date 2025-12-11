@@ -17,7 +17,7 @@ authors:
     orcid: 0000-0002-9561-4165
     affiliation: 1
 affiliations:
-  - name: Department of Chemical Engineering, Auburn University, Auburn, AL 36849
+  - name: Department of Chemical Engineering, Auburn University, Auburn, AL 36849, United States of America
     index: 1
 date: 2025-07-19
 bibliography: paper.bib
