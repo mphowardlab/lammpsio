@@ -26,6 +26,6 @@ in a variety of ways that improve workflow efficiency and reproducibility.
     :maxdepth: 1
     :caption: Additional information
 
+    ./citing
     ./credits
     ./license
-    ./citing
