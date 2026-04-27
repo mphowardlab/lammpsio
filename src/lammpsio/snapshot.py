@@ -121,10 +121,9 @@ class Snapshot:
 
         """
         # ensures frame is well formed and that we have NumPy arrays
-        # in gsd >= 5.0 validate() does not modify contents in place by default
-        try:
+        if _compatibility.gsd_validate_inplace:
             frame.validate(inplace=True)
-        except TypeError:
+        else:
             frame.validate()
 
         # process HOOMD box to LAMMPS box
