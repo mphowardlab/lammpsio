@@ -18,6 +18,13 @@ try:
         gsd_frame_class = gsd.hoomd.Frame
     else:
         gsd_frame_class = gsd.hoomd.Snapshot
+
+    # GSD >= 5.0 validate() does not modify contents in place by default
+    if gsd_version >= packaging.version.Version("5.0.0"):
+        gsd_validate_inplace = True
+    else:
+        gsd_validate_inplace = False
+
 except ModuleNotFoundError:
     gsd_version = None
 

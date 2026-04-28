@@ -121,7 +121,10 @@ class Snapshot:
 
         """
         # ensures frame is well formed and that we have NumPy arrays
-        frame.validate()
+        if _compatibility.gsd_validate_inplace:
+            frame.validate(inplace=True)
+        else:
+            frame.validate()
 
         # process HOOMD box to LAMMPS box
         box = numpy.array(frame.configuration.box, copy=True)
