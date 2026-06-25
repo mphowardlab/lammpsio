@@ -431,3 +431,31 @@ class Box:
             if v.shape != (3,):
                 raise TypeError("Tilt must be a 3-tuple")
         self._tilt = v
+
+    @property
+    def _vectors(self):
+        v = numpy.diag(self.high - self.low)
+        if self.tilt is not None:
+            v[1, 0] = self.tilt[0]
+            v[2, :2] = self.tilt[1:]
+        return v
+
+    def unscale(self, scaled_position):
+        return scaled_position @ self._vectors + self.low
+
+    def scale(self, position):
+        return (position - self.low) @ numpy.linalg.inv(self._vectors)
+
+    def unwrap_scaled(self, scaled_position, image):
+        return scaled_position + image
+
+    def wrap_scaled(self, scaled_position):
+        image = numpy.floor(scaled_position)
+        return scaled_position - image, image
+
+    def unwrap(self, position, image):
+        return position + image @ self._vectors
+
+    def wrap(self, position):
+        position_wrapped_scaled, image = self.wrap_scaled(self.scale(position))
+        return self.unscale(position_wrapped_scaled), image
