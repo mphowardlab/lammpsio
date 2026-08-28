@@ -14,7 +14,7 @@ Developers
 Acknowledgements
 ================
 
-Development of `lammpsio` was supported by a fellowship from The Molecular
+Development of lammpsio was supported by a fellowship from The Molecular
 Software Sciences Software Institute under National Science Foundation Award No.
 2136142 and by the National Science Foundation under Award No. 2310724.
 
