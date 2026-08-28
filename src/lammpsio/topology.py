@@ -5,8 +5,6 @@ from typing import Any, Optional
 
 import numpy
 
-from . import _compatibility
-
 
 class Topology:
     """Particle topology.
@@ -58,9 +56,7 @@ class Topology:
     @id.setter
     def id(self, value: Any) -> None:
         if value is not None:
-            v = numpy.array(
-                value, ndmin=1, copy=_compatibility.numpy_copy_if_needed, dtype=int
-            )
+            v = numpy.array(value, ndmin=1, dtype=int)
             if v.shape != (self.N,):
                 raise TypeError("Ids must be a size N array")
             if not self.has_id():
@@ -94,9 +90,7 @@ class Topology:
     @typeid.setter
     def typeid(self, value: Any) -> None:
         if value is not None:
-            v = numpy.array(
-                value, ndmin=1, copy=_compatibility.numpy_copy_if_needed, dtype=int
-            )
+            v = numpy.array(value, ndmin=1, dtype=int)
             if v.shape != (self.N,):
                 raise TypeError("typeids must be a size N array")
             if not self.has_typeid():
@@ -131,9 +125,7 @@ class Topology:
     @members.setter
     def members(self, value: Any) -> None:
         if value is not None:
-            v = numpy.array(
-                value, ndmin=2, copy=_compatibility.numpy_copy_if_needed, dtype=int
-            )
+            v = numpy.array(value, ndmin=2, dtype=int)
             if v.shape != (self.N, self._num_members):
                 raise TypeError("Members must be a size N x number of members array")
             if not self.has_members():

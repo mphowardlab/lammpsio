@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+        python-version: ["3.12", "3.13", "3.14"]
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
@@ -52,13 +52,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
-        lammps-version: ["2024.08.29"]
-        include:
-          - python-version: "3.10"
-            lammps-version: "2023.08.02"
-          - python-version: "3.11"
-            lammps-version: "2023.08.02"
+        python-version: ["3.12", "3.13", "3.14"]
+        lammps-version: ["2024.08.29", "2025.07.22"]
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
