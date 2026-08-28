@@ -7,8 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.9.0] - 2025-12-10
+## [0.10.0] - 2026-08-28
+
 ### Added
+
+- Support for GSD >= 5.
+- Citation information for lammpsio.
+
+### Removed
+
+- Support for Python 3.10 and 3.11.
+- Support for NumPy < 2.1.
+
+### Changed
+
+- Minimum versions for dependencies will now follow SPEC 0.
+
+
+## [0.9.0] - 2025-12-10
+
+### Added
+
 - Inverse map (label to type ID) in `LabelMap`.
 - Type hints.
 - Support for Python 3.14.
@@ -16,14 +35,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tutorial on using NumPy and Numba to accelerate calculations.
 
 ### Fixed
+
 - Jupyter notebooks for tutorials execute as scripts.
 - Mass section of data file is written in the same spot as by LAMMPS.
 
 ### Removed
+
 - Support for Python 3.9.
 
 ## [0.8.0] - 2025-07-19
+
 ### Added
+
 - Complete sphinx documentation is hosted on
   [Read the Docs](https://lammpsio.readthedocs.io).
 - Unit tests that run against LAMMPS.
@@ -31,12 +54,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   HOOMD box definition.
 
 ### Fixed
+
 - Lists of known/unknown headers and bodies for `DataFile` are now current.
 - Particle positions are now correctly recentered when converting a `Snapshot`
   to a GSD `Frame` if the `Box` is not centered at the origin.
 
 ## [0.7.0] - 2024-12-10
+
 ### Added
+
 - Initial support for type labels of particle and topology data through the
   `LabelMap` object.
 - Interconversion of topology data with GSD `Frame`.
@@ -44,30 +70,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Copying of topology data from an existing `Snapshot` when reading a dump file.
 
 ### Fixed
+
 - Only GSD properties that have been assigned are converted to a `Snapshot`.
 - Issues with writing topology information to data files.
 - Deduction of atom type from information in `Snapshot`.
 
 ### Removed
+
 - Support for Python 3.8.
 
 ## [0.6.1] - 2024-06-24
+
 ### Added
+
 - Backwards compatible support for NumPy 2.0.
 
 ### Fixed
+
 - Test dependencies for Python 3.8.
 
 ## [0.6.0] - 2024-05-28
+
 ### Added
+
 - Support for reading and writing dump files with zstd compression.
 
 ### Fixed
+
 - Reading and writing dump files with triclinic boxes.
 - Validation of image in user-specified dump schema.
 
 ## [0.5.0] - 2024-04-29
+
 ### Added
+
 - Basic support for molecular topology data. These data are exposed as `Bonds`,
 `Angles`, `Dihedrals` and `Impropers` objects that can be included in a
 `Snapshot` and read/written to a `DataFile`. Some features are not yet fully
@@ -76,25 +112,33 @@ for a `DumpFile`.
 - Testing for Python 3.12.
 
 ### Changed
+
 - Bumped license year to 2024.
 
 ## [0.4.1] - 2023-07-20
+
 ### Added
+
 - `lammpsio` is available for download on conda-forge. Installation directions
 have been updated to include this option.
 
 ### Fixed
+
 - Compatibility with GSD 3.
 
 ### Changed
+
 - Bumped license year to 2023.
 
 ## [0.4.0] - 2023-03-31
+
 ### Added
+
 - `Snapshot` can be created from and converted to a GSD HOOMD frame.
 - Package version is embedded in `__version__`.
 
 ### Changed
+
 - Python 3.11 is supported and tested.
 - Code style is enforced using `black` and `flake8`. Developers should install
 `requirements-dev.txt` and configure `pre-commit`.
@@ -102,23 +146,32 @@ have been updated to include this option.
 - NumPy arrays use `float` and `int` as data types instead of specified precision.
 
 ## [0.3.0] - 2022-11-06
+
 ### Added
+
 - Dump file defaults to reading schema from atoms header.
 
 ### Fixed
+
 - Dump file now reads/writes box bounds header correctly.
 
 ## [0.2.0] - 2022-10-26
+
 ### Added
+
 - Snapshots store particle IDs. Files can contain noncompact particle ID ranges.
 - Dump file can copy fields from another snapshot during reading.
 
 ## [0.1.1] - 2022-10-21
+
 ### Fixed
+
 - Typos in the README documentation.
 
 ## [0.1.0] - 2022-10-20
+
 ### Added
+
 - Initial official release of all tools.
 - Packaging support for PyPI.
 - Unit tests for all code.
@@ -126,9 +179,11 @@ have been updated to include this option.
 - Create changelog and code of conduct files.
 
 ### Changed
+
 - The package has been renamed `lammpsio` for consistency with PyPI.
 
-[Unreleased]: https://github.com/mphowardlab/lammpsio/compare/v0.9.0...HEAD
+[Unreleased]: https://github.com/mphowardlab/lammpsio/compare/v0.10.0...HEAD
+[0.10.0]: https://github.com/mphowardlab/lammpsio/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/mphowardlab/lammpsio/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/mphowardlab/lammpsio/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/mphowardlab/lammpsio/compare/v0.6.1...v0.7.0

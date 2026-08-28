@@ -17,8 +17,8 @@ project = "lammpsio"
 year = datetime.date.today().year
 copyright = f"2021-{year}, Auburn University"
 author = "Michael P. Howard"
-version = "0.9.0"
-release = "0.9.0"
+version = "0.10.0"
+release = "0.10.0"
 
 # -- General configuration ---------------------------------------------------
 
