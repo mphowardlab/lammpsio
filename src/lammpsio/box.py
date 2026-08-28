@@ -2,8 +2,6 @@ from typing import Optional, Sequence, Tuple, Type, Union
 
 import numpy
 
-from . import _compatibility
-
 
 class Box:
     r"""Simulation box.
@@ -117,9 +115,7 @@ class Box:
         """
         if isinstance(value, Box):
             return value
-        v = numpy.array(
-            value, ndmin=1, copy=_compatibility.numpy_copy_if_needed, dtype=float
-        )
+        v = numpy.array(value, ndmin=1, dtype=float)
         if v.shape == (9,):
             return Box(v[:3], v[3:6], v[6:])
         elif v.shape == (6,):

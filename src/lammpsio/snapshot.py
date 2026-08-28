@@ -434,9 +434,7 @@ class Snapshot:
     @id.setter
     def id(self, value):
         if value is not None:
-            v = numpy.array(
-                value, ndmin=1, copy=_compatibility.numpy_copy_if_needed, dtype=int
-            )
+            v = numpy.array(value, ndmin=1, dtype=int)
             if v.shape != (self.N,):
                 raise TypeError("Ids must be a size N array")
             if not self.has_id():
@@ -469,9 +467,7 @@ class Snapshot:
     @position.setter
     def position(self, value):
         if value is not None:
-            v = numpy.array(
-                value, ndmin=2, copy=_compatibility.numpy_copy_if_needed, dtype=float
-            )
+            v = numpy.array(value, ndmin=2, dtype=float)
             if v.shape != (self.N, 3):
                 raise TypeError("Positions must be an Nx3 array")
             if not self.has_position():
@@ -505,9 +501,7 @@ class Snapshot:
     @image.setter
     def image(self, value):
         if value is not None:
-            v = numpy.array(
-                value, ndmin=2, copy=_compatibility.numpy_copy_if_needed, dtype=int
-            )
+            v = numpy.array(value, ndmin=2, dtype=int)
             if v.shape != (self.N, 3):
                 raise TypeError("Images must be an Nx3 array")
             if not self.has_image():
@@ -540,9 +534,7 @@ class Snapshot:
     @velocity.setter
     def velocity(self, value):
         if value is not None:
-            v = numpy.array(
-                value, ndmin=2, copy=_compatibility.numpy_copy_if_needed, dtype=float
-            )
+            v = numpy.array(value, ndmin=2, dtype=float)
             if v.shape != (self.N, 3):
                 raise TypeError("Velocities must be an Nx3 array")
             if not self.has_velocity():
@@ -575,9 +567,7 @@ class Snapshot:
     @molecule.setter
     def molecule(self, value):
         if value is not None:
-            v = numpy.array(
-                value, ndmin=1, copy=_compatibility.numpy_copy_if_needed, dtype=int
-            )
+            v = numpy.array(value, ndmin=1, dtype=int)
             if v.shape != (self.N,):
                 raise TypeError("Molecules must be a size N array")
             if not self.has_molecule():
@@ -629,9 +619,7 @@ class Snapshot:
     @typeid.setter
     def typeid(self, value):
         if value is not None:
-            v = numpy.array(
-                value, ndmin=1, copy=_compatibility.numpy_copy_if_needed, dtype=int
-            )
+            v = numpy.array(value, ndmin=1, dtype=int)
             if v.shape != (self.N,):
                 raise TypeError("Type must be a size N array")
             if not self.has_typeid():
@@ -664,9 +652,7 @@ class Snapshot:
     @charge.setter
     def charge(self, value):
         if value is not None:
-            v = numpy.array(
-                value, ndmin=1, copy=_compatibility.numpy_copy_if_needed, dtype=float
-            )
+            v = numpy.array(value, ndmin=1, dtype=float)
             if v.shape != (self.N,):
                 raise TypeError("Charge must be a size N array")
             if not self.has_charge():
@@ -699,9 +685,7 @@ class Snapshot:
     @mass.setter
     def mass(self, value):
         if value is not None:
-            v = numpy.array(
-                value, ndmin=1, copy=_compatibility.numpy_copy_if_needed, dtype=float
-            )
+            v = numpy.array(value, ndmin=1, dtype=float)
             if v.shape != (self.N,):
                 raise TypeError("Mass must be a size N array")
             if not self.has_mass():
